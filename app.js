@@ -15,7 +15,7 @@ const io = socketIo(server)
 const port = process.env.PORT
 
 app.use(express.static('overlay'))
-app.get('/', (req, res) => res.sendFile(__dirname + '/overlay/index.html'))
+app.get('/', (req, res) => res.sendFile(__dirname + '/overlay/overlay.html'))
 server.listen(port, () => console.log(`Your overlay URL: http://localhost:${port}`))
 
 // tmi.js
