@@ -1,0 +1,46 @@
+/* !train command */
+#train-wrap {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+}
+
+.train-list {
+  position: absolute;
+  left: 100%;
+  white-space: nowrap;
+}
+
+.train-list img {
+  width: 48px;
+  height: auto;
+  animation: upDown 4s ease-in-out infinite;
+}
+
+.train-list img:nth-child(1)  {animation-delay: 0s;}
+.train-list img:nth-child(2)  {animation-delay: 0.05s;}
+.train-list img:nth-child(3)  {animation-delay: 0.1s;}
+.train-list img:nth-child(4)  {animation-delay: 0.15s;}
+.train-list img:nth-child(5)  {animation-delay: 0.2s;}
+.train-list img:nth-child(6)  {animation-delay: 0.25s;}
+.train-list img:nth-child(7)  {animation-delay: 0.3s;}
+.train-list img:nth-child(8)  {animation-delay: 0.35s;}
+.train-list img:nth-child(9)  {animation-delay: 0.4s;}
+.train-list img:nth-child(10) {animation-delay: 0.45s;}
+.train-list img:nth-child(11) {animation-delay: 0.5s;}
+.train-list img:nth-child(12) {animation-delay: 0.55s;}
+.train-list img:nth-child(13) {animation-delay: 0.6s;}
+.train-list img:nth-child(14) {animation-delay: 0.65s;}
+.train-list img:nth-child(15) {animation-delay: 0.7s;}
+
+@keyframes upDown {
+  0%, 100% {
+    transform: translateY(-100px);
+  }
+
+  50% {
+    transform: translateY(100px);
+  }
+}
