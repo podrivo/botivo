@@ -1,5 +1,5 @@
 # Botivo
-Botivo is a Twitch chatbot, with an overlay for OBS. Create and personalize your own custom commands, with infinite overlay options using HTML, CSS and JS.
+Botivo is a Twitch chatbot, with an overlay for OBS. Create and personalize your own commands, with infinite overlay options using HTML/CSS/JS.
 
 Usage
 ---
