@@ -1,5 +1,5 @@
 # Botivo
-Botivo is a Twitch chatbot, with an overlay for OBS. Create and personalize your own commands, with infinite overlay options using HTML/CSS/JS.
+Botivo is a Twitch chatbot, with an overlay that can be used as a `Browser Source` in OBS Studio. Create and personalize your own commands, with infinite overlay possibilities using HTML, CSS and JS. It comes with `anime.js` out of the box, so you can start creating day one.
 
 Usage
 ---
@@ -9,7 +9,7 @@ cd botivo
 npm install
 ```
 
-Make sure you create a `.env` file and set your environment variables. For the `TWITCH_PASSWORD`, you'll need a OAuth Access Token, which you won't find in your Twitch profile, but you can get it [here](https://twitchapps.com/tmi/) or [here](https://twitchtokengenerator.com/).
+Make sure you create a `.env` file and set your environment variables. For `TWITCH_PASSWORD`, you'll need a OAuth Access Token, which you won't find in your Twitch profile, but you can get it [here](https://twitchapps.com/tmi/) or [here](https://twitchtokengenerator.com/).
 ```dotenv
 TWITCH_CHANNEL=your-channel-name
 TWITCH_USERNAME=your-bot-name
@@ -23,22 +23,28 @@ npm start
 ```
 ```shell
 Your overlay URL: http://localhost:8080
-[04:20] info: Connecting to irc-ws.chat.twitch.tv on port 443..
-[04:20] info: Sending authentication to server..
-[04:20] info: Connected to server.
-[04:20] info: Executing command: JOIN #podrivo
-[04:20] info: Joined #podrivo
+[16:20] info: Connecting to irc-ws.chat.twitch.tv on port 443..
+[16:20] info: Sending authentication to server..
+[16:20] info: Connected to server.
+[16:20] info: Executing command: JOIN #TWITCH_CHANNEL
+[16:20] info: Joined #TWITCH_CHANNEL
+```
+
+Open the overlay URL in your browser, go to your chat on your Twitch channel page and send a `!train` message. You should see a simple Kappa emote train animation from right to left.
+```shell
+[16:20] info: [#TWITCH_CHANNEL] <user>: !train
+[16:20] info: [#TWITCH_CHANNEL] <TWITCH_USERNAME>: @user, hop on! Train is about to leave!
 ```
 
 How it works
 ---
-Botivo starts with an `app.js` to connect with Twitch chat, via [Express](https://expressjs.com/) and [tmi.js](https://tmijs.com/). Botivo will then listen for every chat message and run your code if detects your personalized command. Each command emits a key to `overlay.html` using [Socket.IO](https://socket.io/). The HTML receives this key, and fires a function that manipulates the DOM, using [anime.js](https://animejs.com/) and CSS to create animations.
+Botivo starts with an `app.js` that connects with Twitch chat (IRC), via [Express](https://expressjs.com/) and [tmi.js](https://tmijs.com/). Botivo will then listen for every chat message and run your code if detects your custom command. Each command emits a key to `overlay.html` using [Socket.IO](https://socket.io/). The HTML receives this key, and fires a function that manipulates the DOM, using [anime.js](https://animejs.com/) and CSS to create animations.
 
-In order to use your overlay as a `Browser Source` in [OBS Studio](https://obsproject.com/), you need to keep the bot running in your computer and set the URL as `http://localhost:8080`. To avoid the hassle of having to turn on the bot before every stream, you can host it in [Heroku](heroku.com) or [Koyeb](https://koyeb.com/), for example.
+In order to use your overlay as a `Browser Source` in [OBS Studio](https://obsproject.com/), you need to keep the bot running in your computer and set the overlay URL that is included in your terminal log. To avoid the hassle of having to turn on the bot before every stream, you can host it in [Heroku](heroku.com) or [Koyeb](https://koyeb.com/), for example.
 
 Example
 ---
-Custom command `!train` is just a simple example of how to use Botivo. Inside `app.js` you can find where it's defined:
+Custom command `!train` is just a simple example of how to use Botivo. Make sure you create your own commands and plug in whatever library you'll need. Inside `app.js` you'll find the command detection:
 ```js
 // Detect !train
 if (message.toLowerCase() === '!train' || message.startsWith('!train')) {
@@ -51,15 +57,12 @@ if (message.toLowerCase() === '!train' || message.startsWith('!train')) {
 }
 ```
 
-Also, there are HTML elements to play around inside `index.html`, and JS and CSS to tweak inside `main.js` and `train.css`
+Also, in this example you'll find HTML elements inside `overlay.html`, JS in `main.js` and CSS in `train.css`.
 ```html
 <div id="train-wrap">
   <div class="train-list">
     <img src="https://static-cdn.jtvnw.net/emoticons/v1/25/3.0">
-    <img src="https://static-cdn.jtvnw.net/emoticons/v1/25/3.0">
-    <img src="https://static-cdn.jtvnw.net/emoticons/v1/25/3.0">
-    <img src="https://static-cdn.jtvnw.net/emoticons/v1/25/3.0">
-    <img src="https://static-cdn.jtvnw.net/emoticons/v1/25/3.0">
+    [...]
   </div>
 </div>
 ```
@@ -103,6 +106,10 @@ socket.on('train', () => {
   }
 }
 ```
+
+What it can't do
+---
+Due to how Twitch API works, this bot can only see chat messages. You won't be able to detect new followers, raids, channel points or any other Twitch functionality other than chat. It relies on [tmi.js](https://tmijs.com/) to connect with Twitch, so make sure you see their [documentation](https://tmijs.com/#guide) for more details.
 
 License
 ---
