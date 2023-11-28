@@ -12,10 +12,11 @@ dotenv.config()
 const app = express()
 const server = http.createServer(app)
 const io = socketIo(server)
+const port = process.env.PORT
 
 app.use(express.static('public'))
 app.get('/', (req, res) => res.sendFile(__dirname + '/public/overlay.html'))
-server.listen(process.env.PORT, () => console.log('Listening on port ' + process.env.PORT))
+server.listen(port, () => console.log(`Your overlay URL: http://localhost:${port}`))
 
 // tmi.js
 const client = new tmi.Client({
