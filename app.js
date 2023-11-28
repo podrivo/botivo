@@ -42,7 +42,7 @@ client.on('message', (channel, tags, message, self) => {
   // Detect !train
   if (message.toLowerCase() === '!train' || message.startsWith('!train')) {
 
-    // Emit train message
+    // Emit train key
     io.emit('train')
 
     // Say in chat
