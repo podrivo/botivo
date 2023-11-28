@@ -14,7 +14,7 @@ const server = http.createServer(app)
 const io = socketIo(server)
 
 app.use(express.static('public'))
-app.get('/', response => response.sendFile(__dirname + '/public/index.html'))
+app.get('/', (req, res) => res.sendFile(__dirname + '/public/overlay.html'))
 server.listen(process.env.PORT, () => console.log('Listening on port ' + process.env.PORT))
 
 // tmi.js
