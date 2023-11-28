@@ -1,4 +1,4 @@
-<img src="https://github.com/podrivo/botivo/assets/546221/bab666a0-d156-4142-96dd-e39504e57a91" alt="Botivo logo">
+<img src="https://github.com/podrivo/botivo/assets/546221/217e12ad-10ab-438a-8828-0ef7bcca89ce" width="400" alt="Botivo logo">
 
 Botivo is a Twitch chatbot, with an overlay that can be used as a `Browser Source` in OBS Studio. Create and personalize your own commands, with infinite overlay possibilities using HTML, CSS and JS. It comes with `anime.js` out of the box, so you can start creating day one.
 
