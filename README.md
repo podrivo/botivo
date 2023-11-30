@@ -43,6 +43,9 @@ Botivo starts with an `app.js` that connects with Twitch chat (IRC), via [Expres
 
 In order to use your overlay as a `Browser Source` in [OBS Studio](https://obsproject.com/), you need to keep the bot running in your computer and set the overlay URL that is included in your terminal log. To avoid the hassle of having to turn on the bot before every stream, you can host it in [Heroku](heroku.com) or [Koyeb](https://koyeb.com/), for example.
 
+[![Deploy to Koyeb](https://www.koyeb.com/static/images/deploy/button.svg)](https://app.koyeb.com/deploy?...)
+[![Deploy to Heroku](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
+
 Example
 ---
 Custom command `!train` is just a simple example of how to use Botivo. Make sure you create your own commands and plug in whatever library you'll need. Inside `app.js` you'll find the command detection:
