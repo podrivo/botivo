@@ -41,7 +41,7 @@ How it works
 ---
 Botivo starts with an `app.js` that connects with Twitch chat (IRC), via [Express](https://expressjs.com/) and [tmi.js](https://tmijs.com/). Botivo will then listen for every chat message and run your code if detects your custom command. Each command emits a key to `overlay.html` using [Socket.IO](https://socket.io/). The HTML receives this key, and fires a function that manipulates the DOM, using [anime.js](https://animejs.com/) and CSS to create animations.
 
-In order to use your overlay as a `Browser Source` in [OBS Studio](https://obsproject.com/), you need to keep the bot running in your computer and set the overlay URL that is included in your terminal log. To avoid the hassle of having to turn on the bot before every stream, you can host it in [Heroku](heroku.com) or [Koyeb](https://koyeb.com/), for example.
+In order to use your overlay as a `Browser Source` in [OBS Studio](https://obsproject.com/), you need to keep the bot running in your computer and set the overlay URL that is included in your terminal log. To avoid the hassle of having to turn on the bot before every stream, you can host it in [Koyeb](https://koyeb.com/) or [Heroku](heroku.com), for example.
 
 [![Deploy to Koyeb](https://www.koyeb.com/static/images/deploy/button.svg)](https://app.koyeb.com/deploy?...)
 [![Deploy to Heroku](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
