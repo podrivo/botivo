@@ -14,6 +14,7 @@ const server = http.createServer(app)
 
 // Static files
 app.use(express.static('overlay'))
+app.use('/commands', express.static('commands'))
 app.get('/', (req, res) => {
   res.sendFile(join(__dirname, 'overlay', 'index.html'))
 })

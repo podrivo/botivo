@@ -1,5 +1,5 @@
 // Imports
-import { validateEnv } from './app/env.js'
+import { validateEnv } from './app/dotenv.js'
 import { startServer } from './app/server.js'
 import { startSocket } from './app/socket.js'
 import { startClient } from './app/client.js'

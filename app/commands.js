@@ -1,5 +1,5 @@
 // Command registry
-import { readdirSync } from 'fs'
+import { readdirSync, statSync } from 'fs'
 import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
 
@@ -16,21 +16,25 @@ export async function loadCommands() {
   
   // Path to the commands folder (one level up from /app)
   const commandsDir = join(__dirname, '..', 'commands')
-  const files = readdirSync(commandsDir)
+  const entries = readdirSync(commandsDir)
   const loadedCommands = []
   
-  for (const file of files) {
-    // Skip non-JS files
-    if (!file.endsWith('.js')) {
+  for (const entry of entries) {
+    const entryPath = join(commandsDir, entry)
+    
+    // Skip if not a directory
+    if (!statSync(entryPath).isDirectory()) {
       continue
     }
     
+    // Check if server.js exists in the command directory
+    const serverJsPath = join(entryPath, 'server.js')
     try {
       // Import the command module
-      const commandModule = await import(`../commands/${file}`)
+      const commandModule = await import(`../commands/${entry}/server.js`)
       
-      // Derive command trigger from filename (e.g., train.js -> !train)
-      const commandName = file.replace('.js', '')
+      // Derive command trigger from directory name (e.g., train -> !train)
+      const commandName = entry
       const trigger = `!${commandName}`
       
       // Find the handler function (look for handle{CommandName} or default export)
@@ -44,7 +48,7 @@ export async function loadCommands() {
         throw new Error(`Function "${handlerName}" is not exported`)
       }
     } catch (err) {
-      console.error(`× Error loading command ${file}:`, err.message)
+      console.error(`× Error loading command ${entry}:`, err.message)
     }
   }
   

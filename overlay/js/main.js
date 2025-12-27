@@ -1,4 +1,4 @@
-import { initTrainCommand } from '../commands/train/train.js'
+import { initTrainCommand } from '../commands/train/client.js'
 
 window.onload = function() {
 
