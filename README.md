@@ -15,7 +15,7 @@ Make sure you create a `.env` file and set your environment variables. For `TWIT
 TWITCH_CHANNEL=your-channel-name
 TWITCH_USERNAME=your-bot-name
 TWITCH_PASSWORD=oauth:your-access-token
-PORT=8080
+SERVER_PORT=8080
 ```
 
 Start the application and you should get logs on your terminal.

@@ -1,3 +1,6 @@
 {
-  "ext": "html,css,js,cjs,mjs,json,pug"
+  "ext": "html,css,js,cjs,mjs,json,pug",
+  "events": {
+    "crash": "echo \"█ Botivo crashed\""
+  }
 }
