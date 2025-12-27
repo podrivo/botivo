@@ -4,7 +4,7 @@ import express from 'express'
 import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
 import { readFile } from 'fs/promises'
-import { getCommandHtmlFiles } from './commands.js'
+import { getCommandHtmlFiles, getCommandCssFiles } from './commands.js'
 
 // Get __dirname for ES modules
 const __filename = fileURLToPath(import.meta.url)
@@ -24,6 +24,15 @@ app.get('/', async (req, res) => {
     const htmlFiles = getCommandHtmlFiles()
     const commandListScript = `<script>window.COMMAND_HTML_FILES = ${JSON.stringify(htmlFiles)};</script>`
     html = html.replace('</head>', `${commandListScript}</head>`)
+    
+    // Inject command CSS files automatically
+    const cssFiles = getCommandCssFiles()
+    const cssLinks = cssFiles.map(css => 
+      `<link rel="stylesheet" href="${css.path}">`
+    ).join('\n    ')
+    if (cssLinks) {
+      html = html.replace('</head>', `    ${cssLinks}\n  </head>`)
+    }
     
     res.send(html)
   } catch (error) {

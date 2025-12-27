@@ -97,6 +97,42 @@ export function getCommandHtmlFiles() {
   return htmlFiles
 }
 
+// Get list of CSS files in command directories
+export function getCommandCssFiles() {
+  const commandsDir = join(__dirname, '..', 'commands')
+  const cssFiles = []
+  
+  try {
+    const entries = readdirSync(commandsDir)
+    
+    for (const entry of entries) {
+      const entryPath = join(commandsDir, entry)
+      
+      // Skip if not a directory
+      if (!statSync(entryPath).isDirectory()) {
+        continue
+      }
+      
+      // Check if CSS file exists (named after the command directory)
+      const cssPath = join(entryPath, `${entry}.css`)
+      try {
+        if (statSync(cssPath).isFile()) {
+          cssFiles.push({
+            command: entry,
+            path: `/commands/${entry}/${entry}.css`
+          })
+        }
+      } catch (err) {
+        // CSS file doesn't exist, skip
+      }
+    }
+  } catch (err) {
+    console.error('× Error scanning for CSS files:', err.message)
+  }
+  
+  return cssFiles
+}
+
 // Check if a message matches a command and execute it
 export function processCommand(client, io, channel, tags, message) {
   const messageLower = message.toLowerCase().trim()
