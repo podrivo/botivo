@@ -1,0 +1,78 @@
+// Command registry
+import { readdirSync } from 'fs'
+import { fileURLToPath } from 'url'
+import { dirname, join } from 'path'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
+
+// Map of command triggers to their handlers
+const commands = {}
+let commandsLoaded = false
+
+// Automatically load all command files from the commands directory
+export async function loadCommands() {
+  if (commandsLoaded) return
+  
+  // Path to the commands folder (one level up from /app)
+  const commandsDir = join(__dirname, '..', 'commands')
+  const files = readdirSync(commandsDir)
+  const loadedCommands = []
+  
+  for (const file of files) {
+    // Skip non-JS files
+    if (!file.endsWith('.js')) {
+      continue
+    }
+    
+    try {
+      // Import the command module
+      const commandModule = await import(`../commands/${file}`)
+      
+      // Derive command trigger from filename (e.g., train.js -> !train)
+      const commandName = file.replace('.js', '')
+      const trigger = `!${commandName}`
+      
+      // Find the handler function (look for handle{CommandName} or default export)
+      const handlerName = `handle${commandName.charAt(0).toUpperCase() + commandName.slice(1)}`
+      const handler = commandModule[handlerName] || commandModule.default || commandModule.handler
+      
+      if (handler && typeof handler === 'function') {
+        commands[trigger] = handler
+        loadedCommands.push(trigger)
+      } else {
+        throw new Error(`Function "${handlerName}" is not exported`)
+      }
+    } catch (err) {
+      console.error(`× Error loading command ${file}:`, err.message)
+    }
+  }
+  
+  // Log all loaded commands in a single message
+  if (loadedCommands.length > 0) {
+    console.log(`▒ Loaded ${loadedCommands.length} commands: ${loadedCommands.join(', ')}`)
+  }
+  
+  commandsLoaded = true
+}
+
+// Check if a message matches a command and execute it
+export function processCommand(client, io, channel, tags, message) {
+  const messageLower = message.toLowerCase().trim()
+  
+  // Check for exact match or command with arguments
+  for (const [trigger, handler] of Object.entries(commands)) {
+    if (messageLower === trigger || messageLower.startsWith(trigger + ' ')) {
+      try {
+        handler(client, io, channel, tags, message)
+        return true // Command was handled
+      } catch (err) {
+        console.error(`× Error executing command ${trigger}:`, err.message)
+        return true // Command was attempted but failed
+      }
+    }
+  }
+  
+  return false // No command matched
+}
+

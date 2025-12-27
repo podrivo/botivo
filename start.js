@@ -3,16 +3,24 @@ import { validateEnv } from './app/env.js'
 import { startServer } from './app/server.js'
 import { startSocket } from './app/socket.js'
 import { startClient } from './app/client.js'
+import { loadCommands } from './app/commands.js'
 
-// Validate environment variables
-const port = validateEnv()
+// Initialize application
+(async () => {
 
-// Initialize server (Express.js)
-const server = startServer(port)
+  // Validate environment variables
+  const port = validateEnv()
 
-// Initialize Socket.IO
-const io = startSocket(server)
+  // Start server (Express.js)
+  const server = startServer(port)
 
-// Initialize Twitch client (tmi.js)
-startClient(io)
+  // Start Socket.IO
+  const io = startSocket(server)
+
+  // Load all commands
+  await loadCommands()
+
+  // Start Twitch client (tmi.js)
+  startClient(io)
+})()
 

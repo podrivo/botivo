@@ -1,7 +1,8 @@
 // Imports
 import tmi from 'tmi.js'
+import { processCommand } from './commands.js'
 
-// Initialize Twitch client
+// Start Twitch client
 export function startClient(io) {
   const client = new tmi.Client({
     options: {
@@ -35,19 +36,8 @@ export function startClient(io) {
   client.on('message', (channel, tags, message, self) => {
     if (self) return
 
-    try {
-      // Detect !train
-      if (message.toLowerCase() === '!train' || message.startsWith('!train')) {
-        // Emit train key
-        io.emit('train')
-
-        // Say in chat with error handling
-        client.say(process.env.TWITCH_CHANNEL, `@${tags.username}, hop on! Train is about to leave!`)
-          .catch(err => console.error('× Error sending message to chat:', err.message))
-      }
-    } catch (err) {
-      console.error('× Error processing message:', err.message)
-    }
+    // Process commands
+    processCommand(client, io, channel, tags, message)
   })
 
   return client
