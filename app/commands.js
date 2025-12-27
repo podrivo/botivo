@@ -60,6 +60,43 @@ export async function loadCommands() {
   commandsLoaded = true
 }
 
+// Get list of HTML files in command directories
+export function getCommandHtmlFiles() {
+  const commandsDir = join(__dirname, '..', 'commands')
+  const htmlFiles = []
+  
+  try {
+    const entries = readdirSync(commandsDir)
+    
+    for (const entry of entries) {
+      const entryPath = join(commandsDir, entry)
+      
+      // Skip if not a directory
+      if (!statSync(entryPath).isDirectory()) {
+        continue
+      }
+      
+      // Check if HTML file exists (named after the command directory)
+      const htmlPath = join(entryPath, `${entry}.html`)
+      try {
+        if (statSync(htmlPath).isFile()) {
+          htmlFiles.push({
+            command: entry,
+            path: `/commands/${entry}/${entry}.html`,
+            containerId: `${entry}-container`
+          })
+        }
+      } catch (err) {
+        // HTML file doesn't exist, skip
+      }
+    }
+  } catch (err) {
+    console.error('× Error scanning for HTML files:', err.message)
+  }
+  
+  return htmlFiles
+}
+
 // Check if a message matches a command and execute it
 export function processCommand(client, io, channel, tags, message) {
   const messageLower = message.toLowerCase().trim()

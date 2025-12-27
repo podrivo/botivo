@@ -3,6 +3,8 @@ import http from 'http'
 import express from 'express'
 import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
+import { readFile } from 'fs/promises'
+import { getCommandHtmlFiles } from './commands.js'
 
 // Get __dirname for ES modules
 const __filename = fileURLToPath(import.meta.url)
@@ -12,12 +14,27 @@ const __dirname = dirname(__filename)
 const app = express()
 const server = http.createServer(app)
 
-// Static files
+// Route handler for index.html (must come before static middleware)
+app.get('/', async (req, res) => {
+  try {
+    const htmlPath = join(__dirname, '..', 'overlay', 'index.html')
+    let html = await readFile(htmlPath, 'utf8')
+    
+    // Inject command HTML files list into the page
+    const htmlFiles = getCommandHtmlFiles()
+    const commandListScript = `<script>window.COMMAND_HTML_FILES = ${JSON.stringify(htmlFiles)};</script>`
+    html = html.replace('</head>', `${commandListScript}</head>`)
+    
+    res.send(html)
+  } catch (error) {
+    console.error('Error serving index.html:', error)
+    res.status(500).send('Internal server error. Check console for details.')
+  }
+})
+
+// Static files (must come after route handlers)
 app.use(express.static('overlay'))
 app.use('/commands', express.static('commands'))
-app.get('/', (req, res) => {
-  res.sendFile(join(__dirname, 'overlay', 'index.html'))
-})
 
 // Server error handling
 server.on('error', (err) => {
