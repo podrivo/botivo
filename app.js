@@ -45,7 +45,7 @@ const io = socketIo(server)
 
 app.use(express.static('overlay'))
 app.get('/', (req, res) => {
-  res.sendFile(join(__dirname, 'overlay', 'overlay.html'))
+  res.sendFile(join(__dirname, 'overlay', 'index.html'))
 })
 
 // Server error handling
