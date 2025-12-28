@@ -39,60 +39,81 @@ Open the overlay URL in your browser, go to your chat on your Twitch channel pag
 
 How it works
 ---
-Botivo starts with an `start.js` that connects with Twitch chat (IRC), via [Express](https://expressjs.com/) and [tmi.js](https://tmijs.com/). Botivo will then listen for every chat message and run your code if detects your custom command. Each command emits a key to `overlay/index.html` using [Socket.IO](https://socket.io/). The HTML receives this key, and fires a function that manipulates the DOM, using [anime.js](https://animejs.com/) and CSS to create animations.
+Botivo starts with `start.js` that connects with Twitch chat (IRC), via [Express](https://expressjs.com/) and [tmi.js](https://tmijs.com/). Botivo automatically discovers and loads commands from the `commands/` directory. Each command consists of server-side and client-side files. When a command is triggered in chat, the server-side handler emits a Socket.IO event, which the client-side handler receives and uses to manipulate the DOM with [anime.js](https://animejs.com/) and CSS to create animations.
 
-In order to use your overlay as a `Browser Source` in [OBS Studio](https://obsproject.com/), you need to keep the bot running in your computer and set the overlay URL that is included in your terminal log. To avoid the hassle of having to turn on the bot before every stream, you can host it in [Koyeb](https://koyeb.com/) or [Heroku](heroku.com), for example.
-
-[![Deploy to Koyeb](https://www.koyeb.com/static/images/deploy/button.svg)](https://app.koyeb.com/deploy?...)
-[![Deploy to Heroku](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
+In order to use your overlay as a `Browser Source` in [OBS Studio](https://obsproject.com/), you need to keep the bot running in your computer and set the overlay URL that is included in your terminal log.
 
 Example
 ---
-Custom command `!train` is just a simple example of how to use Botivo. Make sure you create your own commands and plug in whatever library you'll need. Inside `app.js` you'll find the command detection:
-```js
-// Detect !train
-if (message.toLowerCase() === '!train' || message.startsWith('!train')) {
+Custom command `!train` is just a simple example of how to use Botivo. Commands are organized in the `commands/` directory, with each command having its own folder. To create a new command, create a folder (e.g., `commands/mycommand/`) and add the following files:
 
+**Server-side handler** (`commands/train/train-server.js`):
+```js
+// Train command handler
+export function handleTrain(client, io, channel, tags, message) {
   // Emit train key
   io.emit('train')
 
-  // Say in chat
+  // Say in chat with error handling
   client.say(process.env.TWITCH_CHANNEL, `@${tags.username}, hop on! Train is about to leave!`)
+    .catch(err => console.error('× Error sending message to chat:', err.message))
 }
 ```
 
-Also, in this example you'll find HTML elements inside `index.html`, JS in `main.js` and CSS in `train.css`.
+**Client-side handler** (`commands/train/train-client.js`):
+```js
+// Train command handler
+export function initTrainCommand(socket) {
+  // Get DOM element
+  let trainList = document.querySelector('.train-list')
+
+  if (!trainList) {
+    console.error('Error: .train-list element not found')
+    return
+  }
+
+  // Listen for the 'train' socket event
+  socket.on('train', () => {
+    try { 
+      // Reset style and set new
+      trainList.removeAttribute('style')
+      trainList.style.top = Math.floor(Math.random() * (screen.height * 0.5)) + 'px'
+
+      // Animation using anime.js v4.2
+      let animation = anime.animate(trainList, {
+        translateX: '-6000px',
+        ease: 'linear',
+        duration: 10000,
+        autoplay: false
+      })
+      animation.restart()
+      animation.resume()
+
+      // Play audio with error handling
+      const audio = new Audio('/commands/train/train.wav')
+      audio.play().catch(err => {
+        console.warn('Could not play audio (may require user interaction):', err)
+      })
+    } catch (err) {
+      console.error('Error handling train command:', err)
+    }
+  })
+}
+```
+
+**HTML template** (`commands/train/train.html`):
 ```html
+<!-- !train command -->
 <div id="train-wrap">
   <div class="train-list">
     <img src="https://static-cdn.jtvnw.net/emoticons/v1/25/3.0">
-    [...]
+    <img src="https://static-cdn.jtvnw.net/emoticons/v1/25/3.0">
+    <!-- ... more images ... -->
   </div>
 </div>
 ```
-```js
-socket.on('train', () => {
 
-  // Reset style and set new
-  trainList.removeAttribute('style')
-  trainList.style.top = Math.floor(Math.random() * (screen.height * 0.5)) + 'px'
-
-  // Animation
-  let animation = anime({
-    targets: trainList,
-    translateX: '-6000px',
-    easing: 'linear',
-    duration: 10000,
-    autoplay: false
-  })
-  animation.restart()
-  animation.play()
-
-  // Play audio
-  const audio = new Audio('../audio/train.wav')
-  audio.play()
-})
-```
+**CSS styles** (`commands/train/train.css`):
 ```css
 .train-list img {
   width: 48px;
@@ -110,6 +131,12 @@ socket.on('train', () => {
   }
 }
 ```
+
+**Command structure:**
+- The command name is derived from the folder name (e.g., `train/` → `!train`)
+- Server handler must export `handle{CommandName}` function (e.g., `handleTrain`)
+- Client handler must export `init{CommandName}Command` function (e.g., `initTrainCommand`)
+- HTML, CSS, and optional audio files are automatically discovered and loaded
 
 What it can't do
 ---
