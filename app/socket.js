@@ -1,9 +1,9 @@
 // Imports
-import socketIo from 'socket.io'
+import { Server } from 'socket.io'
 
 // Start Socket.IO
 export function startSocket(server) {
-  const io = socketIo(server)
+  const io = new Server(server)
   return io
 }
 

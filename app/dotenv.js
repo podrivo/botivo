@@ -1,11 +1,20 @@
 // Imports
-import dotenv from 'dotenv'
+import { config } from 'dotenv'
 import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
 import { existsSync } from 'fs'
 
-// Set dotenv
-dotenv.config()
+// Set dotenv (suppress dotenv message)
+const originalLog = console.log
+console.log = (...args) => {
+  // Suppress dotenv messages
+  if (args[0] && typeof args[0] === 'string' && args[0].includes('[dotenv@')) {
+    return
+  }
+  originalLog(...args)
+}
+config()
+console.log = originalLog
 
 // Get __dirname for ES modules
 const __filename = fileURLToPath(import.meta.url)

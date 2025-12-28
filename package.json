@@ -5,14 +5,15 @@
   "author": "Pedro Ivo Hudson @podrivo",
   "repository": "https://github.com/podrivo/botivo",
   "license": "MIT",
+  "type": "module",
   "main": "app.js",
   "scripts": {
-    "start": "nodemon -r esm --exitcrash --quiet start.js"
+    "start": "nodemon --exitcrash --quiet start.js"
   },
   "dependencies": {
-    "dotenv": "^16.6.1",
+    "dotenv": "^17.2.3",
     "esm": "^3.2.25",
-    "express": "^4.22.1",
+    "express": "^5.2.1",
     "nodemon": "^3.1.11",
     "socket.io": "^4.8.3",
     "tmi.js": "^1.8.5"
