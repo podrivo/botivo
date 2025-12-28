@@ -10,31 +10,33 @@ const __dirname = dirname(__filename)
 const commands = {}
 let commandsLoaded = false
 
+// Helper function to scan command directories
+function scanCommandDirectories() {
+  const commandsDir = join(__dirname, '..', 'commands')
+  try {
+    return readdirSync(commandsDir)
+      .map(entry => join(commandsDir, entry))
+      .filter(entryPath => statSync(entryPath).isDirectory())
+      .map(entryPath => entryPath.split(/[/\\]/).pop())
+  } catch (err) {
+    console.error('× Error scanning commands directory:', err.message)
+    return []
+  }
+}
+
 // Automatically load all command files from the commands directory
 export async function loadCommands() {
   if (commandsLoaded) return
   
-  // Path to the commands folder (one level up from /app)
-  const commandsDir = join(__dirname, '..', 'commands')
-  const entries = readdirSync(commandsDir)
+  const commandNames = scanCommandDirectories()
   const loadedCommands = []
   
-  for (const entry of entries) {
-    const entryPath = join(commandsDir, entry)
-    
-    // Skip if not a directory
-    if (!statSync(entryPath).isDirectory()) {
-      continue
-    }
-    
-    // Check if {command}-server.js exists in the command directory
-    const serverJsPath = join(entryPath, `${entry}-server.js`)
+  for (const commandName of commandNames) {
     try {
       // Import the command module
-      const commandModule = await import(`../commands/${entry}/${entry}-server.js`)
+      const commandModule = await import(`../commands/${commandName}/${commandName}-server.js`)
       
       // Derive command trigger from directory name (e.g., train -> !train)
-      const commandName = entry
       const trigger = `!${commandName}`
       
       // Find the handler function (look for handle{CommandName} or default export)
@@ -48,7 +50,7 @@ export async function loadCommands() {
         throw new Error(`Function "${handlerName}" is not exported`)
       }
     } catch (err) {
-      console.error(`× Error loading command ${entry}:`, err.message)
+      console.error(`× Error loading command ${commandName}:`, err.message)
     }
   }
   
@@ -60,77 +62,36 @@ export async function loadCommands() {
   commandsLoaded = true
 }
 
-// Get list of HTML files in command directories
-export function getCommandHtmlFiles() {
-  const commandsDir = join(__dirname, '..', 'commands')
-  const htmlFiles = []
+// Get list of files (HTML or CSS) in command directories
+export function getCommandFiles(extension) {
+  const commandNames = scanCommandDirectories()
+  const files = []
   
   try {
-    const entries = readdirSync(commandsDir)
+    const commandsDir = join(__dirname, '..', 'commands')
     
-    for (const entry of entries) {
-      const entryPath = join(commandsDir, entry)
-      
-      // Skip if not a directory
-      if (!statSync(entryPath).isDirectory()) {
-        continue
-      }
-      
-      // Check if HTML file exists (named after the command directory)
-      const htmlPath = join(entryPath, `${entry}.html`)
+    for (const commandName of commandNames) {
+      const filePath = join(commandsDir, commandName, `${commandName}.${extension}`)
       try {
-        if (statSync(htmlPath).isFile()) {
-          htmlFiles.push({
-            command: entry,
-            path: `/commands/${entry}/${entry}.html`,
-            containerId: `${entry}-container`
-          })
+        if (statSync(filePath).isFile()) {
+          const file = {
+            command: commandName,
+            path: `/commands/${commandName}/${commandName}.${extension}`
+          }
+          if (extension === 'html') {
+            file.containerId = `${commandName}-container`
+          }
+          files.push(file)
         }
       } catch (err) {
-        // HTML file doesn't exist, skip
+        // File doesn't exist, skip
       }
     }
   } catch (err) {
-    console.error('× Error scanning for HTML files:', err.message)
+    console.error(`× Error scanning for ${extension.toUpperCase()} files:`, err.message)
   }
   
-  return htmlFiles
-}
-
-// Get list of CSS files in command directories
-export function getCommandCssFiles() {
-  const commandsDir = join(__dirname, '..', 'commands')
-  const cssFiles = []
-  
-  try {
-    const entries = readdirSync(commandsDir)
-    
-    for (const entry of entries) {
-      const entryPath = join(commandsDir, entry)
-      
-      // Skip if not a directory
-      if (!statSync(entryPath).isDirectory()) {
-        continue
-      }
-      
-      // Check if CSS file exists (named after the command directory)
-      const cssPath = join(entryPath, `${entry}.css`)
-      try {
-        if (statSync(cssPath).isFile()) {
-          cssFiles.push({
-            command: entry,
-            path: `/commands/${entry}/${entry}.css`
-          })
-        }
-      } catch (err) {
-        // CSS file doesn't exist, skip
-      }
-    }
-  } catch (err) {
-    console.error('× Error scanning for CSS files:', err.message)
-  }
-  
-  return cssFiles
+  return files
 }
 
 // Check if a message matches a command and execute it
