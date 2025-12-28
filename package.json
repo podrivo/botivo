@@ -6,7 +6,7 @@
   "repository": "https://github.com/podrivo/botivo",
   "license": "MIT",
   "type": "module",
-  "main": "app.js",
+  "main": "start.js",
   "scripts": {
     "start": "nodemon --exitcrash --quiet start.js"
   },
