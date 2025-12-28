@@ -8,6 +8,12 @@ window.onload = async function() {
   socket.on('disconnect', () => console.log('Overlay disconnected from Botivo'))
   socket.on('connect_error', (err) => console.error('Connection error:', err))
 
+  // Listen for command usage logs
+  socket.on('command-log', (data) => {
+    const logMessage = `Command used: ${data.command} by ${data.username}${data.message.toLowerCase().trim() !== data.command ? ` (${data.message})` : ''}`
+    console.log(logMessage)
+  })
+
   // Auto-discover and inject command HTML files
   try {
     // Get list of available command HTML files (injected by server)

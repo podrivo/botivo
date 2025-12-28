@@ -2,6 +2,7 @@
 import { readdirSync, statSync } from 'fs'
 import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
+import { RATE_LIMIT_CONFIG } from './config.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -9,6 +10,11 @@ const __dirname = dirname(__filename)
 // Map of command triggers to their handlers
 const commands = {}
 let commandsLoaded = false
+
+// Rate limiting tracking
+const userLastCommandTime = new Map() // Map<username, timestamp>
+const userLastCommandPerCommand = new Map() // Map<username_command, timestamp>
+let globalLastCommandTime = 0
 
 // Helper function to scan command directories
 function scanCommandDirectories() {
@@ -101,7 +107,71 @@ export function processCommand(client, io, channel, tags, message) {
   // Check for exact match or command with arguments
   for (const [trigger, handler] of Object.entries(commands)) {
     if (messageLower === trigger || messageLower.startsWith(trigger + ' ')) {
+      const username = tags.username || 'unknown'
+      const now = Date.now()
+      
+      // Rate limiting checks
+      // 1. Check global cooldown
+      const timeSinceGlobalCommand = now - globalLastCommandTime
+      if (timeSinceGlobalCommand < RATE_LIMIT_CONFIG.globalCooldown) {
+        // Silently ignore - don't spam chat with rate limit messages
+        return true // Command was rate limited
+      }
+      
+      // 2. Check per-user cooldown
+      const userLastTime = userLastCommandTime.get(username) || 0
+      const timeSinceUserCommand = now - userLastTime
+      if (timeSinceUserCommand < RATE_LIMIT_CONFIG.perUserCooldown) {
+        // Silently ignore - don't spam chat with rate limit messages
+        return true // Command was rate limited
+      }
+      
+      // 3. Check per-command per-user cooldown
+      const commandKey = `${username}_${trigger}`
+      const userCommandLastTime = userLastCommandPerCommand.get(commandKey) || 0
+      const timeSinceUserCommandSpecific = now - userCommandLastTime
+      if (timeSinceUserCommandSpecific < RATE_LIMIT_CONFIG.perCommandCooldown) {
+        // Silently ignore - don't spam chat with rate limit messages
+        return true // Command was rate limited
+      }
+      
+      // All rate limit checks passed - execute command
       try {
+        // Update rate limiting timestamps
+        globalLastCommandTime = now
+        userLastCommandTime.set(username, now)
+        userLastCommandPerCommand.set(commandKey, now)
+        
+        // Clean up old entries periodically to prevent memory leak
+        if (userLastCommandTime.size > 1000) {
+          // Remove entries older than 1 hour
+          const oneHourAgo = now - 3600000
+          for (const [user, timestamp] of userLastCommandTime.entries()) {
+            if (timestamp < oneHourAgo) {
+              userLastCommandTime.delete(user)
+            }
+          }
+        }
+        if (userLastCommandPerCommand.size > 1000) {
+          const oneHourAgo = now - 3600000
+          for (const [key, timestamp] of userLastCommandPerCommand.entries()) {
+            if (timestamp < oneHourAgo) {
+              userLastCommandPerCommand.delete(key)
+            }
+          }
+        }
+        
+        // Log command usage
+        const logMessage = `▒ Command used: ${trigger} by ${username}${messageLower !== trigger ? ` (${message})` : ''}`
+        console.log(logMessage)
+        
+        // Emit to overlay console
+        io.emit('command-log', {
+          command: trigger,
+          username: username,
+          message: message
+        })
+        
         handler(client, io, channel, tags, message)
         return true // Command was handled
       } catch (err) {

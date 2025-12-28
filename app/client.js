@@ -6,7 +6,7 @@ import { processCommand } from './commands.js'
 export function startClient(io) {
   const client = new tmi.Client({
     options: {
-      debug: true
+      debug: false
     },
     connection: {
       secure: true,
