@@ -16,15 +16,14 @@ export function initTrainCommand(socket) {
       trainList.style.top = Math.floor(Math.random() * (screen.height * 0.5)) + 'px'
 
       // Animation
-      let animation = anime({
-        targets: trainList,
+      let animation = anime.animate(trainList, {
         translateX: '-6000px',
-        easing: 'linear',
+        ease: 'linear',
         duration: 10000,
         autoplay: false
       })
       animation.restart()
-      animation.play()
+      animation.resume()
 
       // Play audio with error handling
       const audio = new Audio('/commands/train/train.wav')

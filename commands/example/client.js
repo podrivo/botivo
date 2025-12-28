@@ -15,21 +15,19 @@ export function initExampleCommand(socket) {
     try {
       
       // Simple fade in and scale animation
-      anime({
-        targets: exampleElement,
+      anime.animate(exampleElement, {
         opacity: [0, 1],
         marginTop: ['50px', '0px'],
         duration: 600,
-        easing: 'easeOutExpo',
-        complete: () => {
+        ease: 'outExpo',
+        onComplete: () => {
           // Fade out after 2.5 seconds
           setTimeout(() => {
-            anime({
-              targets: exampleElement,
+            anime.animate(exampleElement, {
               opacity: [1, 0],
               marginTop: ['0px', '50px'],
               duration: 600,
-              easing: 'easeOutExpo',
+              ease: 'outExpo',
             })
           }, 2500)
         }
