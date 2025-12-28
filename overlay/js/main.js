@@ -36,7 +36,7 @@ window.onload = async function() {
 
         // Try to dynamically import and initialize the client script
         try {
-          const clientModule = await import(`/commands/${htmlFile.command}/client.js`)
+          const clientModule = await import(`/commands/${htmlFile.command}/${htmlFile.command}-client.js`)
           const initFunction = clientModule[`init${htmlFile.command.charAt(0).toUpperCase() + htmlFile.command.slice(1)}Command`] || 
                               clientModule.default || 
                               clientModule.init

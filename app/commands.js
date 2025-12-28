@@ -27,11 +27,11 @@ export async function loadCommands() {
       continue
     }
     
-    // Check if server.js exists in the command directory
-    const serverJsPath = join(entryPath, 'server.js')
+    // Check if {command}-server.js exists in the command directory
+    const serverJsPath = join(entryPath, `${entry}-server.js`)
     try {
       // Import the command module
-      const commandModule = await import(`../commands/${entry}/server.js`)
+      const commandModule = await import(`../commands/${entry}/${entry}-server.js`)
       
       // Derive command trigger from directory name (e.g., train -> !train)
       const commandName = entry
