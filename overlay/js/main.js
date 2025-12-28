@@ -1,7 +1,7 @@
 window.onload = async function() {
 
   // Socket.IO
-  let socket = io.connect()
+  let socket = io()
 
   // Socket.IO error handling
   socket.on('connect', () => console.log('Overlay connected to Botivo'))
