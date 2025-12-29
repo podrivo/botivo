@@ -2,7 +2,7 @@
 import { readdirSync, statSync } from 'fs'
 import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
-import { RATE_LIMIT_CONFIG } from './config.js'
+import { CONFIG } from './config.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -18,7 +18,7 @@ let globalLastCommandTime = 0
 
 // Helper function to scan command directories
 function scanCommandDirectories() {
-  const commandsDir = join(__dirname, '..', 'commands')
+  const commandsDir = join(__dirname, '..', CONFIG.folderCommands)
   try {
     return readdirSync(commandsDir)
       .map(entry => join(commandsDir, entry))
@@ -43,7 +43,7 @@ export async function loadCommands() {
       const commandModule = await import(`../commands/${commandName}/${commandName}-server.js`)
       
       // Derive command trigger from directory name (e.g., train -> !train)
-      const trigger = `!${commandName}`
+      const trigger = `${CONFIG.prefix}${commandName}`
       
       // Find the handler function (look for handle{CommandName} or default export)
       const handlerName = `handle${commandName.charAt(0).toUpperCase() + commandName.slice(1)}`
@@ -74,7 +74,7 @@ export function getCommandFiles(extension) {
   const files = []
   
   try {
-    const commandsDir = join(__dirname, '..', 'commands')
+    const commandsDir = join(__dirname, '..', CONFIG.folderCommands)
     
     for (const commandName of commandNames) {
       const filePath = join(commandsDir, commandName, `${commandName}.${extension}`)
@@ -82,7 +82,7 @@ export function getCommandFiles(extension) {
         if (statSync(filePath).isFile()) {
           const file = {
             command: commandName,
-            path: `/commands/${commandName}/${commandName}.${extension}`
+            path: `/${CONFIG.folderCommands}/${commandName}/${commandName}.${extension}`
           }
           if (extension === 'html') {
             file.containerId = `${commandName}-container`
@@ -113,7 +113,7 @@ export function processCommand(client, io, channel, tags, message) {
       // Rate limiting checks
       // 1. Check global cooldown
       const timeSinceGlobalCommand = now - globalLastCommandTime
-      if (timeSinceGlobalCommand < RATE_LIMIT_CONFIG.globalCooldown) {
+      if (timeSinceGlobalCommand < CONFIG.cooldownGlobal) {
         // Silently ignore - don't spam chat with rate limit messages
         return true // Command was rate limited
       }
@@ -121,7 +121,7 @@ export function processCommand(client, io, channel, tags, message) {
       // 2. Check per-user cooldown
       const userLastTime = userLastCommandTime.get(username) || 0
       const timeSinceUserCommand = now - userLastTime
-      if (timeSinceUserCommand < RATE_LIMIT_CONFIG.perUserCooldown) {
+      if (timeSinceUserCommand < CONFIG.cooldownUser) {
         // Silently ignore - don't spam chat with rate limit messages
         return true // Command was rate limited
       }
@@ -130,7 +130,7 @@ export function processCommand(client, io, channel, tags, message) {
       const commandKey = `${username}_${trigger}`
       const userCommandLastTime = userLastCommandPerCommand.get(commandKey) || 0
       const timeSinceUserCommandSpecific = now - userCommandLastTime
-      if (timeSinceUserCommandSpecific < RATE_LIMIT_CONFIG.perCommandCooldown) {
+      if (timeSinceUserCommandSpecific < CONFIG.cooldownCommand) {
         // Silently ignore - don't spam chat with rate limit messages
         return true // Command was rate limited
       }
@@ -162,15 +162,19 @@ export function processCommand(client, io, channel, tags, message) {
         }
         
         // Log command usage
-        const logMessage = `▒ Command used: ${trigger} by ${username}${messageLower !== trigger ? ` (${message})` : ''}`
-        console.log(logMessage)
+        if (CONFIG.debug) {
+          const logMessage = `▒ Command used: ${trigger} by ${username}${messageLower !== trigger ? ` (${message})` : ''}`
+          console.log(logMessage)
+        }
         
         // Emit to overlay console
-        io.emit('command-log', {
-          command: trigger,
-          username: username,
-          message: message
-        })
+        if (CONFIG.debug) {
+          io.emit('command-log', {
+            command: trigger,
+            username: username,
+            message: message
+          })
+        }
         
         handler(client, io, channel, tags, message)
         return true // Command was handled

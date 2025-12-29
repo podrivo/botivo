@@ -5,6 +5,7 @@ import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
 import { readFile } from 'fs/promises'
 import { getCommandFiles } from './commands.js'
+import { CONFIG } from './config.js'
 
 // Get __dirname for ES modules
 const __filename = fileURLToPath(import.meta.url)
@@ -17,7 +18,7 @@ const server = http.createServer(app)
 // Route handler for index.html (must come before static middleware)
 app.get('/', async (req, res) => {
   try {
-    const htmlPath = join(__dirname, '..', 'overlay', 'index.html')
+    const htmlPath = join(__dirname, '..', CONFIG.folderOverlay, 'index.html')
     let html = await readFile(htmlPath, 'utf8')
     
     // Inject command HTML files list into the page
@@ -42,8 +43,8 @@ app.get('/', async (req, res) => {
 })
 
 // Static files (must come after route handlers)
-app.use(express.static('overlay'))
-app.use('/commands', express.static('commands'))
+app.use(express.static(CONFIG.folderOverlay))
+app.use(`/${CONFIG.folderCommands}`, express.static(CONFIG.folderCommands))
 
 // Server error handling
 server.on('error', (err) => {

@@ -1,16 +1,16 @@
 // Imports
 import tmi from 'tmi.js'
 import { processCommand } from './commands.js'
+import { CONFIG } from './config.js'
 
 // Start Twitch client
 export function startClient(io) {
   const client = new tmi.Client({
     options: {
-      debug: false
+      debug: CONFIG.debug
     },
     connection: {
-      secure: true,
-      reconnect: true
+      reconnect: CONFIG.twitchReconnect
     },
     identity: {
       username: process.env.TWITCH_USERNAME,
