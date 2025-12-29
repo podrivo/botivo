@@ -1,4 +1,10 @@
 // Train command handler
+
+// Command configuration
+export const config = {
+  cooldown: 1000
+}
+
 export function handleTrain(client, io, channel, tags, message) {
   // Emit train key
   io.emit('train')
