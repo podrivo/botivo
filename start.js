@@ -8,19 +8,39 @@ import { loadCommands } from './app/commands.js'
 // Initialize application
 (async () => {
 
+  console.log(`
+*@%%%%%%%%%%@@      @@%%%%%%%%%%@@%%%%%%@       @@%%%%%%@@%%%%%%@@%%%%%%@@%%%%%%%%%@@    
+@@           =@@  @@%          :@@      @@@@@@@@@@     :@@      @@     :@@          .@@  
+@@              @@@            :@@             :@@     :@@      @@     :@@            .@@
+@@      **     :@@      **     :@@             :@@@@@@@@@@      @@     :@@      **     .@
+@@      #@     :@@      @@     :@@      @@@@@@@@@@     :@@      @@     :@@      @@     .@
+@@            @@@@      @@     :@@      @@     :@@     :@@      @@     :@@      @@     .@
+@@             :@@      @@     :@@      @@     :@@     :@@      @@     :@@      @@     .@
+@@      #@     :@@      @@     :@@      @@     :@@     :@@      @@     :@@      @@     .@
+@@      #@     :@@      @@     :@@-     @@     :@@     :@@      @@     :@@      @@     .@
+@@             .@@             .@@@+           :@@     :@@             .@@-            .@
+@@            %@@@            %@@@@@%          :@@     :@@           %@@@@@+           .@
+@@          %@@@@@          %@@@ @@@@@.        :@@     :@@         %@@@@@@@@@%         .@
+@@@@@@@@@@@@@@@ @@@@@@@@@@@@@@@    @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@   @@@@@@@@@@@@@@@
+@@@@@@@@@@@@@   @@@@@@@@@@@@@       @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@      @@@@@@@@@@@@@@
+  `);
+  console.log(`█ BOTIVO is loading...`)
+
   // Validate environment variables
   const port = validateEnv()
 
   // Start server (Express.js)
-  const server = startServer(port)
+  const server = await startServer(port)
 
   // Start Socket.IO
-  const io = startSocket(server)
+  const io = await startSocket(server)
+
+  // Start Twitch client (tmi.js)
+  await startClient(io)
 
   // Load all commands
   await loadCommands()
 
-  // Start Twitch client (tmi.js)
-  startClient(io)
+  console.log(`█ BOTIVO is ready!`)
 })()
 

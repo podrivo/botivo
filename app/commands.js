@@ -62,7 +62,8 @@ export async function loadCommands() {
   
   // Log all loaded commands in a single message
   if (loadedCommands.length > 0) {
-    console.log(`▒ Loaded ${loadedCommands.length} commands: ${loadedCommands.join(', ')}`)
+    console.log(`▒ Commands (${loadedCommands.length}) ✓`)
+    // console.log(`▒ Commands: ${loadedCommands.join(', ')}`)
   }
   
   commandsLoaded = true
