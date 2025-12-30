@@ -37,8 +37,8 @@ app.get('/', async (req, res) => {
     
     res.send(html)
   } catch (error) {
-    console.error('Error serving index.html:', error)
-    res.status(500).send('Internal server error. Check console for details.')
+    console.error('× Error loading overlay:', error)
+    res.status(500).send('Internal server error. Check logs for details.')
   }
 })
 
@@ -76,7 +76,7 @@ export function startServer(port) {
 @@@@@@@@@@@@@   @@@@@@@@@@@@@       @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@      @@@@@@@@@@@@@@
 `);
     
-    console.log(`█ Botivo started`)
+    console.log(`█ BOTIVO STARTED`)
     console.log(`▒ Your overlay URL is: http://localhost:${port}`)
   })
   

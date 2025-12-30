@@ -7,12 +7,14 @@ import { CONFIG } from './config.js'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
-// Map of command triggers to their command info (handler, cooldown)
+// Map of command triggers to their handlers
 const commands = {}
 let commandsLoaded = false
 
-// Cooldown tracking: Map<commandTrigger, lastExecutionTime>
-const commandLastExecution = new Map()
+// Rate limiting tracking
+const userLastCommandTime = new Map() // Map<username, timestamp>
+const userLastCommandPerCommand = new Map() // Map<username_command, timestamp>
+let globalLastCommandTime = 0
 
 // Helper function to scan command directories
 function scanCommandDirectories() {
@@ -48,15 +50,7 @@ export async function loadCommands() {
       const handler = commandModule[handlerName] || commandModule.default || commandModule.handler
       
       if (handler && typeof handler === 'function') {
-        // Get cooldown from command config object (default to 0 if not specified or invalid)
-        const cooldown = typeof commandModule.config?.cooldown === 'number' && commandModule.config.cooldown >= 0
-          ? commandModule.config.cooldown
-          : 0
-        
-        commands[trigger] = {
-          handler,
-          cooldown
-        }
+        commands[trigger] = handler
         loadedCommands.push(trigger)
       } else {
         throw new Error(`Function "${handlerName}" is not exported`)
@@ -111,27 +105,60 @@ export function processCommand(client, io, channel, tags, message) {
   const messageLower = message.toLowerCase().trim()
   
   // Check for exact match or command with arguments
-  for (const [trigger, commandInfo] of Object.entries(commands)) {
+  for (const [trigger, handler] of Object.entries(commands)) {
     if (messageLower === trigger || messageLower.startsWith(trigger + ' ')) {
       const username = tags.username || 'unknown'
       const now = Date.now()
-      const { handler, cooldown } = commandInfo
       
-      // Check command cooldown (if cooldown is set)
-      if (cooldown > 0) {
-        const lastExecution = commandLastExecution.get(trigger) || 0
-        const timeSinceLastExecution = now - lastExecution
-        if (timeSinceLastExecution < cooldown) {
-          // Silently ignore - don't spam chat with rate limit messages
-          return true // Command was rate limited
-        }
+      // Rate limiting checks
+      // 1. Check global cooldown
+      const timeSinceGlobalCommand = now - globalLastCommandTime
+      if (timeSinceGlobalCommand < CONFIG.cooldownGlobal) {
+        // Silently ignore - don't spam chat with rate limit messages
+        return true // Command was rate limited
       }
       
-      // Cooldown check passed - execute command
+      // 2. Check per-user cooldown
+      const userLastTime = userLastCommandTime.get(username) || 0
+      const timeSinceUserCommand = now - userLastTime
+      if (timeSinceUserCommand < CONFIG.cooldownUser) {
+        // Silently ignore - don't spam chat with rate limit messages
+        return true // Command was rate limited
+      }
+      
+      // 3. Check per-command per-user cooldown
+      const commandKey = `${username}_${trigger}`
+      const userCommandLastTime = userLastCommandPerCommand.get(commandKey) || 0
+      const timeSinceUserCommandSpecific = now - userCommandLastTime
+      if (timeSinceUserCommandSpecific < CONFIG.cooldownCommand) {
+        // Silently ignore - don't spam chat with rate limit messages
+        return true // Command was rate limited
+      }
+      
+      // All rate limit checks passed - execute command
       try {
-        // Update last execution time
-        if (cooldown > 0) {
-          commandLastExecution.set(trigger, now)
+        // Update rate limiting timestamps
+        globalLastCommandTime = now
+        userLastCommandTime.set(username, now)
+        userLastCommandPerCommand.set(commandKey, now)
+        
+        // Clean up old entries periodically to prevent memory leak
+        if (userLastCommandTime.size > 1000) {
+          // Remove entries older than 1 hour
+          const oneHourAgo = now - 3600000
+          for (const [user, timestamp] of userLastCommandTime.entries()) {
+            if (timestamp < oneHourAgo) {
+              userLastCommandTime.delete(user)
+            }
+          }
+        }
+        if (userLastCommandPerCommand.size > 1000) {
+          const oneHourAgo = now - 3600000
+          for (const [key, timestamp] of userLastCommandPerCommand.entries()) {
+            if (timestamp < oneHourAgo) {
+              userLastCommandPerCommand.delete(key)
+            }
+          }
         }
         
         // Log command usage

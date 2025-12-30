@@ -19,10 +19,8 @@ export function startClient(io) {
     channels: [process.env.TWITCH_CHANNEL]
   })
 
-  // Twitch connection error handling
-  client.on('disconnected', (reason) => {
-    console.error(`▒ Twitch disconnected`)
-  })
+  client.on('connected', () => {console.log(`▒ Twitch connected`)})
+  client.on('disconnected', () => {console.error(`▒ Twitch disconnected`)})
 
   client.connect().catch((err) => {
     console.error('× Failed to connect to Twitch:', err)
