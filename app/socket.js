@@ -19,9 +19,11 @@ export function startSocket(server) {
         console.log(`▒ Overlay disconnected`)
       })
 
-      socket.on('error', (err) => {
-        console.error('× Overlay error:', err)
-      })
+    socket.on('error', (err) => {
+      console.error('× Overlay error:', err)
     })
   })
+
+  // Resolve immediately - don't wait for browser connection
+  return Promise.resolve(io)
 }
