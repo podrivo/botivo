@@ -40,6 +40,30 @@ import { startCommands } from './app/commands.js'
   // Load all commands
   await startCommands()
 
-  console.log(`\n█ BOTIVO is up and running!`)
+  // Random startup messages
+  const startupMessages = [
+    `█ BOTIVO is up and running!`,
+    `█ BOTIVO is ready to go!`,
+    `█ BOTIVO has been activated!`,
+    `█ BOTIVO is live and operational!`,
+    `█ BOTIVO is online and ready!`,
+    `█ BOTIVO has successfully started!`,
+    `█ BOTIVO is running smoothly!`,
+    `█ BOTIVO is active and waiting!`,
+    `█ BOTIVO has booted up successfully!`,
+    `█ BOTIVO is ready for action!`,
+    `█ BOTIVO is fully operational!`,
+    `█ BOTIVO is now live!`,
+    `█ BOTIVO has launched successfully!`,
+    `█ BOTIVO is ready to serve!`,
+    `█ BOTIVO is powered up and ready!`,
+    `█ BOTIVO is initialized and active!`,
+    `█ BOTIVO is fired up and ready!`,
+    `█ BOTIVO has come online!`,
+    `█ BOTIVO is all systems go!`,
+    `█ BOTIVO is ready to rock!`
+  ]
+  const randomMessage = startupMessages[Math.floor(Math.random() * startupMessages.length)]
+  console.log(`\n${randomMessage}`)
 })()
 
