@@ -5,19 +5,21 @@ import { Server } from 'socket.io'
 export function startEvents(server) {
   const io = new Server(server)
 
-  // Set up connection handlers (but don't wait for connection)
-  io.on('connection', (socket) => {
-    console.log(`▒ Overlay ✓`)
-    
-    socket.on('disconnect', () => {
-      console.log(`▒ Overlay disconnected`)
-    })
+  // Return a promise that resolves when browser connects
+  return new Promise((resolve) => {
+    io.on('connection', (socket) => {
+      console.log(`▒ Overlay ✓`)
+      
+      // Resolve promise on first connection
+      resolve(io)
+      
+      socket.on('disconnect', () => {
+        console.log(`▒ Overlay disconnected`)
+      })
 
-    socket.on('error', (err) => {
-      console.error('× Overlay error:', err)
+      socket.on('error', (err) => {
+        console.error('× Overlay error:', err)
+      })
     })
   })
-
-  // Resolve immediately - don't wait for browser connection
-  return Promise.resolve(io)
 }
