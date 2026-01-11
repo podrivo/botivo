@@ -22,8 +22,7 @@ const __dirname = dirname(__filename)
 const envPath = join(__dirname, '..', '.env')
 
 // Validate environment
-export function validateEnv() {
-
+export function variablesValidate() {
   // Check if .env file exists
   if (!existsSync(envPath)) {
     console.error('× File .env was not found')
@@ -38,14 +37,15 @@ export function validateEnv() {
     console.error(`× Missing required environment variables: ${missingVars.map(v => `${v}`).join(', ')}`)
     process.exit(1)
   }
+}
 
-  // Validate SERVER_PORT
+// Get and validate port
+export function variablesPort() {
   const port = parseInt(process.env.SERVER_PORT, 10)
   if (isNaN(port) || port < 1 || port > 65535) {
     console.error(`× SERVER_PORT must be a valid number between 1 and 65535. Got: ${process.env.SERVER_PORT}`)
     process.exit(1)
   }
-
   return port
 }
 

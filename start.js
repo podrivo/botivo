@@ -1,5 +1,5 @@
 // Imports
-import { validateEnv } from './app/dotenv.js'
+import { variablesValidate, variablesPort } from './app/variables.js'
 import { startServer } from './app/server.js'
 import { startSocket } from './app/socket.js'
 import { startClient } from './app/client.js'
@@ -22,19 +22,20 @@ import { loadCommands } from './app/commands.js'
 @@@@@@@@@  @@@@@@@@     @@@@@@@@@@@@@@@@@@@@    @@@@@@@@@
 `);
 
-  console.log(`█ BOTIVO is loading...`)
+  console.log(`█ BOTIVO is starting...`)
 
   // Validate environment variables
-  const port = validateEnv()
+  variablesValidate()
+  const port = variablesPort()
 
-  // Start server (Express.js)
-  const server = await startServer(port)
+  // Start overlay server (Express.js)
+  const overlay = await startServer(port)
 
-  // Start Socket.IO
-  const io = await startSocket(server)
+  // Start communication channel (Socket.IO)
+  const communication = await startSocket(overlay)
 
   // Start Twitch client (tmi.js)
-  await startClient(io)
+  await startClient(communication)
 
   // Load all commands
   await loadCommands()
