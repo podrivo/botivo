@@ -22,7 +22,7 @@ import { startCommands } from './app/commands.js'
 @@@@@@@@@  @@@@@@@@     @@@@@@@@@@@@@@@@@@@@    @@@@@@@@@
 `);
 
-  console.log(`█ BOTIVO is starting...`)
+  console.log(`█ BOTIVO starting...\n`)
 
   // Validate environment variables
   variablesValidate()
@@ -40,6 +40,6 @@ import { startCommands } from './app/commands.js'
   // Load all commands
   await startCommands()
 
-  console.log(`█ BOTIVO is ready!`)
+  console.log(`\n█ BOTIVO is up and running!`)
 })()
 
