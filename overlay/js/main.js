@@ -4,8 +4,8 @@ window.onload = async function() {
   let socket = io()
 
   // Socket.IO error handling
-  socket.on('connect', () => console.log('Overlay connected to Botivo'))
-  socket.on('disconnect', () => console.log('Overlay disconnected from Botivo'))
+  socket.on('connect', () => console.log('Overlay connected to Events'))
+  socket.on('disconnect', () => console.log('Overlay disconnected from Events'))
   socket.on('connect_error', (err) => console.error('Connection error:', err))
 
   // Listen for command usage logs

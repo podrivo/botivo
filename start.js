@@ -32,7 +32,7 @@ import { startCommands } from './app/commands.js'
   const overlay = await startOverlay(port)
 
   // Start communication channel (Socket.IO)
-  const events = await startEvents(overlay)
+  const events = await startEvents(overlay, port)
 
   // Start Twitch client (tmi.js)
   await startTwitch(events)
@@ -64,6 +64,6 @@ import { startCommands } from './app/commands.js'
     `█ BOTIVO is ready to rock!`
   ]
   const randomMessage = startupMessages[Math.floor(Math.random() * startupMessages.length)]
-  console.log(`\n${randomMessage}`)
+  console.log(`\n${randomMessage}\n`)
 })()
 
