@@ -1,9 +1,9 @@
 // Imports
 import { variablesValidate, variablesPort } from './app/variables.js'
-import { startServer } from './app/server.js'
-import { startSocket } from './app/socket.js'
-import { startClient } from './app/client.js'
-import { loadCommands } from './app/commands.js'
+import { startOverlay } from './app/overlay.js'
+import { startEvents } from './app/events.js'
+import { startTwitch } from './app/twitch.js'
+import { startCommands } from './app/commands.js'
 
 // Initialize application
 (async () => {
@@ -29,16 +29,16 @@ import { loadCommands } from './app/commands.js'
   const port = variablesPort()
 
   // Start overlay server (Express.js)
-  const overlay = await startServer(port)
+  const overlay = await startOverlay(port)
 
   // Start communication channel (Socket.IO)
-  const communication = await startSocket(overlay)
+  const events = await startEvents(overlay)
 
   // Start Twitch client (tmi.js)
-  await startClient(communication)
+  await startTwitch(events)
 
   // Load all commands
-  await loadCommands()
+  await startCommands()
 
   console.log(`█ BOTIVO is ready!`)
 })()

@@ -31,7 +31,7 @@ function scanCommandDirectories() {
 }
 
 // Automatically load all command files from the commands directory
-export async function loadCommands() {
+export async function startCommands() {
   if (commandsLoaded) return
   
   const commandNames = scanCommandDirectories()

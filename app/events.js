@@ -2,7 +2,7 @@
 import { Server } from 'socket.io'
 
 // Start Socket.IO
-export function startSocket(server) {
+export function startEvents(server) {
   const io = new Server(server)
 
   // Set up connection handlers (but don't wait for connection)

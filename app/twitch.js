@@ -4,7 +4,7 @@ import { processCommand } from './commands.js'
 import { CONFIG } from './config.js'
 
 // Start Twitch client
-export function startClient(io) {
+export function startTwitch(io) {
   return new Promise((resolve, reject) => {
     const client = new tmi.Client({
       options: {

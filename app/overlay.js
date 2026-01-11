@@ -57,7 +57,7 @@ server.on('error', (err) => {
 })
 
 // Start server
-export function startServer(port) {
+export function startOverlay(port) {
   return new Promise((resolve) => {
     server.listen(port, () => {
       console.log(`▒ Your overlay URL is: http://localhost:${port}`)
