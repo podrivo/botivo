@@ -37,8 +37,8 @@ app.get('/', async (req, res) => {
     
     res.send(html)
   } catch (error) {
-    console.error('× Error loading overlay:', error)
-    res.status(500).send('Internal server error. Check logs for details.')
+    console.error('\n× Error loading overlay:', error)
+    res.status(500).send('Error loading overlay')
   }
 })
 
@@ -57,10 +57,19 @@ server.on('error', (err) => {
 })
 
 // Start server
-export function startOverlay(port) {
+export async function startOverlay(port) {
+  // Validate that index.html exists before starting the server
+  const htmlPath = join(__dirname, '..', CONFIG.folderOverlay, 'index.html')
+  try {
+    await readFile(htmlPath, 'utf8')
+  } catch (error) {
+    console.error('× Overlay     ERROR ·', error.message)
+    process.exit(1)
+  }
+  
   return new Promise((resolve) => {
     server.listen(port, () => {
-      console.log(`▒ Overlay   http://localhost:${port} (Make sure you have it open)`)
+      console.log(`▒ Overlay     http://localhost:${port} (Make sure you have it open)`)
       resolve(server)
     })
   })

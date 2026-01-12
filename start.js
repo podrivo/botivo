@@ -8,8 +8,8 @@ import { startCommands } from './app/commands.js'
 // Initialize application
 (async () => {
 
-  console.log(`
-@@@@@@@@@@    @@@@@@@%@@@@@    #@@@@%@@@@@@@@@%@@@@@@@  
+  console.log(
+`@@@@@@@@@@    @@@@@@@%@@@@@    #@@@@%@@@@@@@@@%@@@@@@@  
 @@        @@@*       @    *@@@@@    @    @    @       @@ 
 @@         @         @         @@@@@@    @    @         @
 @@    @   .@    @    @    @@@@@@    @    @    @    @    @

@@ -21,7 +21,7 @@ export function startTwitch(io) {
     })
 
     client.on('connected', () => {
-      console.log(`▒ Twitch    Connected to ${process.env.TWITCH_CHANNEL} as ${process.env.TWITCH_USERNAME}`)
+      console.log(`▒ Twitch      Connected to ${process.env.TWITCH_CHANNEL} as ${process.env.TWITCH_USERNAME}`)
       resolve(client)
     })
     client.on('disconnected', () => {console.error(`▒ Twitch disconnected`)})
