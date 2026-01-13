@@ -49,9 +49,9 @@ app.use(`/${CONFIG.folderCommands}`, express.static(CONFIG.folderCommands))
 // Server error handling
 server.on('error', (err) => {
   if (err.code === 'EADDRINUSE') {
-    console.error(`× Port ${process.env.SERVER_PORT} is already in use`)
+    console.error(`▒ Overlay     × ERROR: SERVER_PORT ${process.env.SERVER_PORT} is already in use`)
   } else {
-    console.error('× Server error:', err)
+    console.error('▒ Overlay     × ERROR: ', err)
   }
   process.exit(1)
 })
@@ -63,13 +63,13 @@ export async function startOverlay(port) {
   try {
     await readFile(htmlPath, 'utf8')
   } catch (error) {
-    console.error('× Overlay     ERROR ·', error.message)
+    console.error('▒ Overlay     × ERROR:', error.message)
     process.exit(1)
   }
   
   return new Promise((resolve) => {
     server.listen(port, () => {
-      console.log(`▒ Overlay     http://localhost:${port} (Make sure you have it open)`)
+      console.log(`▒ Overlay     ✓ Server started • http://localhost:${port}`)
       resolve(server)
     })
   })

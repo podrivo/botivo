@@ -25,7 +25,7 @@ const envPath = join(__dirname, '..', '.env')
 export function variablesValidate() {
   // Check if .env file exists
   if (!existsSync(envPath)) {
-    console.error('× Variables   ERROR · File .env was not found')
+    console.error('▒ Variables   × ERROR: File .env was not found')
     process.exit(1)
   }
 
@@ -34,7 +34,7 @@ export function variablesValidate() {
   const missingVars = requiredVars.filter(v => !process.env[v])
 
   if (missingVars.length > 0) {
-    console.error(`× Variables   ERROR · Missing required environment variables: ${missingVars.map(v => `${v}`).join(', ')}`)
+    console.error(`▒ Variables   × ERROR: Missing following environment variables ${missingVars.map(v => `${v}`).join(', ')}`)
     process.exit(1)
   }
 }
@@ -43,11 +43,11 @@ export function variablesValidate() {
 export function variablesPort() {
   const port = parseInt(process.env.SERVER_PORT, 10)
   if (isNaN(port) || port < 1 || port > 65535) {
-    console.error(`× Variables   ERROR · SERVER_PORT must be a valid number between 1 and 65535. Got: ${process.env.SERVER_PORT}`)
+    console.error(`▒ Variables   × ERROR: SERVER_PORT must be a valid number between 1 and 65535. Got: ${process.env.SERVER_PORT}`)
     process.exit(1)
   }
 
-  console.error(`▒ Variables   Environment variables ready`)
+  console.error(`▒ Variables   ✓ Found .env and environment variables`)
   return port
 }
 
