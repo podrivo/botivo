@@ -69,7 +69,7 @@ export async function startOverlay(port) {
   
   return new Promise((resolve) => {
     server.listen(port, () => {
-      console.log(`▒ Overlay     ✓ Server started • http://localhost:${port}`)
+      console.log(`▒ Overlay     ✓ Server started — http://localhost:${port}`)
       resolve(server)
     })
   })

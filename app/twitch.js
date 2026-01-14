@@ -1,11 +1,18 @@
 // Imports
 import tmi from 'tmi.js'
+import ora from 'ora'
 import { processCommand } from './commands.js'
 import { CONFIG } from './config.js'
 
 // Start Twitch client
 export function startTwitch(io) {
-  process.stdout.write(`▒ Twitch      ⊙ Connecting...`)
+  const spinner = ora({
+    spinner: 'dots4',
+    color: 'white',
+    text: 'Connecting...',
+    prefixText: '▒ Twitch     '
+  })
+  spinner.start()
 
   return new Promise((resolve, reject) => {
     // Trim credentials to handle whitespace issues from .env parsing
@@ -47,7 +54,10 @@ export function startTwitch(io) {
       if (connectionTimeout) clearTimeout(connectionTimeout)
       if (isResolved) return
       isResolved = true
+
+      spinner.stop()
       process.stdout.write(`\r\x1b[K▒ Twitch      ✓ Connected to channel '${channel}', with user '${username}'\n`)
+
       resolve(client)
     })
     // client.on('disconnected', () => {console.error(`▒ Twitch disconnected`)})
@@ -56,6 +66,7 @@ export function startTwitch(io) {
     connectionTimeout = setTimeout(() => {
       if (isResolved) return
       isResolved = true
+      spinner.stop()
       const errorMsg = 'Twitch connection timeout. Check your TWITCH_USERNAME and TWITCH_PASSWORD in .env (make sure password has no extra spaces)'
       process.stdout.write(`\r\x1b[K▒ Twitch      × ERROR: ${errorMsg}\n`)
       client.disconnect()
