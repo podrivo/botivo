@@ -25,7 +25,8 @@ function scanCommandDirectories() {
       .filter(entryPath => statSync(entryPath).isDirectory())
       .map(entryPath => entryPath.split(/[/\\]/).pop())
   } catch (err) {
-    console.error('× Error scanning commands directory:', err.message)
+    console.error('▒ Commands    × ERROR: Error scanning commands directory:', err.message)
+    process.exit(1)
     return []
   }
 }
@@ -56,7 +57,8 @@ export async function startCommands() {
         throw new Error(`Function "${handlerName}" is not exported`)
       }
     } catch (err) {
-      console.error(`× Error loading command ${commandName}:`, err.message)
+      console.error(`▒ Commands    × ERROR: Error loading command ${commandName}:`, err.message)
+      process.exit(1)
     }
   }
   
@@ -95,7 +97,8 @@ export function getCommandFiles(extension) {
       }
     }
   } catch (err) {
-    console.error(`× Error scanning for ${extension.toUpperCase()} files:`, err.message)
+    console.error(`▒ Commands    × ERROR: Error scanning for ${extension.toUpperCase()} files:`, err.message)
+    process.exit(1)
   }
   
   return files
@@ -180,7 +183,7 @@ export function processCommand(client, io, channel, tags, message) {
         handler(client, io, channel, tags, message)
         return true // Command was handled
       } catch (err) {
-        console.error(`× Error executing command ${trigger}:`, err.message)
+        console.error(`▒ Commands    × ERROR: Error executing command ${trigger}:`, err.message)
         return true // Command was attempted but failed
       }
     }
