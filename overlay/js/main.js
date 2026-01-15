@@ -42,16 +42,29 @@ window.onload = async function() {
 
         // Try to dynamically import and initialize the client script
         try {
-          const clientModule = await import(`/commands/${htmlFile.command}/${htmlFile.command}-client.js`)
-          const initFunction = clientModule[`init${htmlFile.command.charAt(0).toUpperCase() + htmlFile.command.slice(1)}Command`] || 
-                              clientModule.default || 
-                              clientModule.init
+          const clientModule = await import(`/commands/${htmlFile.command}/client.js`)
           
-          if (initFunction && typeof initFunction === 'function') {
-            initFunction(socket)
+          // Check for old-style init function first (for backward compatibility)
+          const oldStyleInitName = `init${htmlFile.command.charAt(0).toUpperCase() + htmlFile.command.slice(1)}Command`
+          const oldStyleInit = clientModule[oldStyleInitName]
+          
+          if (oldStyleInit && typeof oldStyleInit === 'function') {
+            // Old pattern: call init function once with socket to set up listeners
+            oldStyleInit(socket)
+          } else {
+            // New pattern: find handler function - try default export first, then named exports
+            const handler = clientModule.default || 
+                           clientModule.handler || 
+                           clientModule.init
+            
+            if (handler && typeof handler === 'function') {
+              // New pattern: use handler directly as event handler
+              socket.on(htmlFile.command, handler)
+            }
           }
         } catch (importError) {
-          console.warn(`No client.js found for ${htmlFile.command}, skipping initialization`)
+          // No client file found - that's okay, command might not need client-side logic
+          console.warn(`No client.js found for ${htmlFile.command}, skipping client initialization`)
         }
       } catch (error) {
         console.error(`Error loading ${htmlFile.command} command:`, error)

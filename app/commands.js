@@ -7,7 +7,7 @@ import { CONFIG } from './config.js'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
-// Map of command triggers to their handlers
+// Map of command triggers to their handlers and metadata
 const commands = {}
 let commandsLoaded = false
 
@@ -41,20 +41,22 @@ export async function startCommands() {
   for (const commandName of commandNames) {
     try {
       // Import the command module
-      const commandModule = await import(`../commands/${commandName}/${commandName}-server.js`)
+      const commandModule = await import(`../commands/${commandName}/server.js`)
       
       // Derive command trigger from directory name (e.g., train -> !train)
       const trigger = `${CONFIG.prefix}${commandName}`
       
-      // Find the handler function (look for handle{CommandName} or default export)
-      const handlerName = `handle${commandName.charAt(0).toUpperCase() + commandName.slice(1)}`
-      const handler = commandModule[handlerName] || commandModule.default || commandModule.handler
+      // Find the handler function - try default export first, then named exports
+      const handler = commandModule.default || 
+                      commandModule.handler || 
+                      commandModule[`handle${commandName.charAt(0).toUpperCase() + commandName.slice(1)}`]
       
       if (handler && typeof handler === 'function') {
-        commands[trigger] = handler
+        // Store handler with command name for auto socket emission
+        commands[trigger] = { handler, commandName }
         loadedCommands.push(trigger)
       } else {
-        throw new Error(`Function "${handlerName}" is not exported`)
+        throw new Error(`No handler function found. Export a default function or a handler function.`)
       }
     } catch (err) {
       console.error(`▒ Commands    × ERROR: Error loading command ${commandName}:`, err.message)
@@ -80,20 +82,29 @@ export function getCommandFiles(extension) {
     const commandsDir = join(__dirname, '..', CONFIG.folderCommands)
     
     for (const commandName of commandNames) {
-      const filePath = join(commandsDir, commandName, `${commandName}.${extension}`)
+      const commandDir = join(commandsDir, commandName)
       try {
-        if (statSync(filePath).isFile()) {
-          const file = {
-            command: commandName,
-            path: `/${CONFIG.folderCommands}/${commandName}/${commandName}.${extension}`
+        // Read all files in the command directory
+        const dirEntries = readdirSync(commandDir)
+        
+        // Find all files with the requested extension
+        for (const entry of dirEntries) {
+          if (entry.endsWith(`.${extension}`)) {
+            const filePath = join(commandDir, entry)
+            if (statSync(filePath).isFile()) {
+              const file = {
+                command: commandName,
+                path: `/${CONFIG.folderCommands}/${commandName}/${entry}`
+              }
+              if (extension === 'html') {
+                file.containerId = `${commandName}-container`
+              }
+              files.push(file)
+            }
           }
-          if (extension === 'html') {
-            file.containerId = `${commandName}-container`
-          }
-          files.push(file)
         }
       } catch (err) {
-        // File doesn't exist, skip
+        // Directory doesn't exist or can't be read, skip
       }
     }
   } catch (err) {
@@ -109,8 +120,9 @@ export function processCommand(client, io, channel, tags, message) {
   const messageLower = message.toLowerCase().trim()
   
   // Check for exact match or command with arguments
-  for (const [trigger, handler] of Object.entries(commands)) {
+  for (const [trigger, commandData] of Object.entries(commands)) {
     if (messageLower === trigger || messageLower.startsWith(trigger + ' ')) {
+      const { handler, commandName } = commandData
       const username = tags.username || 'unknown'
       const now = Date.now()
       
@@ -180,7 +192,15 @@ export function processCommand(client, io, channel, tags, message) {
           })
         }
         
-        handler(client, io, channel, tags, message)
+        // Execute handler
+        const result = handler(client, io, channel, tags, message)
+        
+        // Automatically emit socket event using command name (unless handler returns false)
+        // This allows commands to opt-out by returning false if they want to handle emission manually
+        if (result !== false) {
+          io.emit(commandName)
+        }
+        
         return true // Command was handled
       } catch (err) {
         console.error(`▒ Commands    × ERROR: Error executing command ${trigger}:`, err.message)

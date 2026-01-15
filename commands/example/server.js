@@ -6,12 +6,13 @@
 //   - channel: Twitch channel name
 //   - tags: Message tags (includes username, etc.)
 //   - message: The full message text
+//
+// Note: Socket event 'example' is automatically emitted after this function runs.
+//       Return false if you want to handle socket emission manually.
 
-export function handleExample(client, io, channel, tags, message) {
-
-  // Emit an event to trigger the overlay animation
-  io.emit('example')
-
+export default function(client, io, channel, tags, message) {
+  // Socket event 'example' is automatically emitted - no need to call io.emit('example')!
+  
   // Send a message back to chat
   client.say(process.env.TWITCH_CHANNEL, `@${tags.username}, example command executed!`)
 }
