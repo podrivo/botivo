@@ -52,8 +52,18 @@ export async function startCommands() {
                       commandModule[`handle${commandName.charAt(0).toUpperCase() + commandName.slice(1)}`]
       
       if (handler && typeof handler === 'function') {
-        // Get command config if available
-        const commandConfig = commandModule.config || {}
+        // Get command config from config.js, or use defaults if not found
+        let commandConfig = {}
+        try {
+          const configModule = await import(`../commands/${commandName}/config.js`)
+          commandConfig = configModule.config || {}
+        } catch (configErr) {
+          // config.js doesn't exist, use default config (no level restriction, use global cooldown)
+          commandConfig = {
+            // No level restriction - everyone can use (default behavior)
+            // cooldown will use CONFIG.cooldownGlobal if not specified
+          }
+        }
         // Store handler with command name and config for auto socket emission
         commands[trigger] = { handler, commandName, config: commandConfig }
         loadedCommands.push(trigger)
