@@ -73,6 +73,28 @@ export async function startCommands() {
   }
   
   commandsLoaded = true
+  
+  // Register embedded kill command
+  const killTrigger = `${CONFIG.prefix}kill`
+  commands[killTrigger] = {
+    handler: killAllCommands,
+    commandName: 'kill',
+    config: {}
+  }
+}
+
+// Embedded kill command handler - stops all running commands
+function killAllCommands(client, io, channel, tags, message) {
+  // Emit kill-all event to overlay to stop all animations/audio
+  io.emit('kill-all')
+  
+  // Optionally send a message to chat
+  if (CONFIG.debug) {
+    console.log('▒ Kill command: Stopping all running commands')
+  }
+  
+  // Return false to prevent auto-emission of 'kill' event
+  return false
 }
 
 // Get list of files (HTML or CSS) in command directories
