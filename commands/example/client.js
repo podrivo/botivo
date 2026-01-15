@@ -1,10 +1,3 @@
-// Example command client-side handler
-// This function is automatically called when the 'example' socket event fires.
-// No need to manually set up socket.on('example', ...) - it's done automatically!
-//
-// Note: You can also export a function named 'init' or use the old naming pattern
-//       (initExampleCommand) if you prefer, but default export is simplest.
-
 export default function() {
 
   // Get DOM element
@@ -29,4 +22,3 @@ export default function() {
     }
   })
 }
-
