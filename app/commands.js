@@ -139,6 +139,55 @@ export function getCommandFiles(extension) {
   return files
 }
 
+// Helper function to check if user has required permission level
+function hasPermission(tags, requiredLevel) {
+  // If no level is required, everyone can use it
+  if (!requiredLevel || requiredLevel === 'viewer') {
+    return true
+  }
+  
+  // Check if user is broadcaster
+  const isBroadcaster = tags.badges?.broadcaster === '1' || 
+                        tags.badges?.broadcaster === 1 ||
+                        tags['user-id'] === tags['room-id'] // Alternative check
+  
+  // Check if user is moderator
+  const isModerator = tags.mod === true || 
+                      tags.badges?.moderator === '1' || 
+                      tags.badges?.moderator === 1 ||
+                      isBroadcaster // Broadcaster is also considered a moderator
+  
+  // Check if user is VIP
+  const isVIP = tags.badges?.vip === '1' || 
+                tags.badges?.vip === 1 ||
+                isModerator // Moderators and above are also considered VIP
+  
+  // Check if user is subscriber
+  const isSubscriber = tags.subscriber === true ||
+                       tags.badges?.subscriber !== undefined ||
+                       isVIP // VIP and above are also considered subscribers
+  
+  // Permission checks (hierarchical: broadcaster > moderator > vip > subscriber > viewer)
+  if (requiredLevel === 'broadcaster') {
+    return isBroadcaster
+  }
+  
+  if (requiredLevel === 'moderator') {
+    return isModerator
+  }
+  
+  if (requiredLevel === 'vip') {
+    return isVIP
+  }
+  
+  if (requiredLevel === 'subscriber') {
+    return isSubscriber
+  }
+  
+  // Unknown level, default to allowing (viewer level)
+  return true
+}
+
 // Check if a message matches a command and execute it
 export function processCommand(client, io, channel, tags, message) {
   const messageLower = message.toLowerCase().trim()
@@ -146,9 +195,16 @@ export function processCommand(client, io, channel, tags, message) {
   // Check for exact match or command with arguments
   for (const [trigger, commandData] of Object.entries(commands)) {
     if (messageLower === trigger || messageLower.startsWith(trigger + ' ')) {
-      const { handler, commandName } = commandData
+      const { handler, commandName, config } = commandData
       const username = tags.username || 'unknown'
       const now = Date.now()
+      
+      // Permission check - must come before rate limiting
+      const requiredLevel = config?.level
+      if (!hasPermission(tags, requiredLevel)) {
+        // Silently ignore - don't spam chat with permission denied messages
+        return true // Command was blocked due to permissions
+      }
       
       // Rate limiting checks
       // 1. Check global cooldown
