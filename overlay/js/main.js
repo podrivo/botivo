@@ -42,7 +42,7 @@ window.onload = async function() {
 
         // Try to dynamically import and initialize the client script
         try {
-          const clientModule = await import(`/commands/${htmlFile.command}/client.js`)
+          const clientModule = await import(`/commands/${htmlFile.command}/overlay.js`)
           
           // Find handler function - try default export first, then named exports
           const handler = clientModule.default || 
@@ -55,7 +55,7 @@ window.onload = async function() {
           }
         } catch (importError) {
           // No client file found - that's okay, command might not need client-side logic
-          console.warn(`No client.js found for ${htmlFile.command}, skipping client initialization`)
+          console.warn(`No overlay.js found for ${htmlFile.command}, skipping client initialization`)
         }
       } catch (error) {
         console.error(`Error loading ${htmlFile.command} command:`, error)

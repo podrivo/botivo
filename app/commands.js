@@ -41,7 +41,7 @@ export async function startCommands() {
   for (const commandName of commandNames) {
     try {
       // Import the command module
-      const commandModule = await import(`../commands/${commandName}/server.js`)
+      const commandModule = await import(`../commands/${commandName}/twitch.js`)
       
       // Derive command trigger from directory name (e.g., train -> !train)
       const trigger = `${CONFIG.prefix}${commandName}`
