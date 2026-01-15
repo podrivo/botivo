@@ -44,23 +44,14 @@ window.onload = async function() {
         try {
           const clientModule = await import(`/commands/${htmlFile.command}/client.js`)
           
-          // Check for old-style init function first (for backward compatibility)
-          const oldStyleInitName = `init${htmlFile.command.charAt(0).toUpperCase() + htmlFile.command.slice(1)}Command`
-          const oldStyleInit = clientModule[oldStyleInitName]
+          // Find handler function - try default export first, then named exports
+          const handler = clientModule.default || 
+                         clientModule.handler || 
+                         clientModule.init
           
-          if (oldStyleInit && typeof oldStyleInit === 'function') {
-            // Old pattern: call init function once with socket to set up listeners
-            oldStyleInit(socket)
-          } else {
-            // New pattern: find handler function - try default export first, then named exports
-            const handler = clientModule.default || 
-                           clientModule.handler || 
-                           clientModule.init
-            
-            if (handler && typeof handler === 'function') {
-              // New pattern: use handler directly as event handler
-              socket.on(htmlFile.command, handler)
-            }
+          if (handler && typeof handler === 'function') {
+            // Use handler directly as event handler
+            socket.on(htmlFile.command, handler)
           }
         } catch (importError) {
           // No client file found - that's okay, command might not need client-side logic
