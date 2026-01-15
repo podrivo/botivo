@@ -52,8 +52,10 @@ export async function startCommands() {
                       commandModule[`handle${commandName.charAt(0).toUpperCase() + commandName.slice(1)}`]
       
       if (handler && typeof handler === 'function') {
-        // Store handler with command name for auto socket emission
-        commands[trigger] = { handler, commandName }
+        // Get command config if available
+        const commandConfig = commandModule.config || {}
+        // Store handler with command name and config for auto socket emission
+        commands[trigger] = { handler, commandName, config: commandConfig }
         loadedCommands.push(trigger)
       } else {
         throw new Error(`No handler function found. Export a default function or a handler function.`)
@@ -146,7 +148,9 @@ export function processCommand(client, io, channel, tags, message) {
       const commandKey = `${username}_${trigger}`
       const userCommandLastTime = userLastCommandPerCommand.get(commandKey) || 0
       const timeSinceUserCommandSpecific = now - userCommandLastTime
-      if (timeSinceUserCommandSpecific < CONFIG.cooldownCommand) {
+      // Use command's cooldown if set, otherwise use global cooldown
+      const commandCooldown = commandData.config?.cooldown ?? CONFIG.cooldownGlobal
+      if (timeSinceUserCommandSpecific < commandCooldown) {
         // Silently ignore - don't spam chat with rate limit messages
         return true // Command was rate limited
       }
