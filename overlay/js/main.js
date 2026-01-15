@@ -38,9 +38,9 @@ window.onload = async function() {
     console.log(logMessage)
   })
 
-  // Listen for kill-all event to stop all running commands
-  socket.on('kill-all', () => {
-    console.log('Kill-all event received: Stopping all commands')
+  // Function to stop all running commands
+  function stopAllCommands() {
+    console.log('Kill event received: Stopping all commands')
     
     // Stop all tracked Audio instances (created with new Audio())
     activeAudioInstances.forEach(audio => {
@@ -75,7 +75,10 @@ window.onload = async function() {
         container.removeAttribute('style')
       })
     }
-  })
+  }
+
+  // Listen for kill event (auto-emitted by command system)
+  socket.on('kill', stopAllCommands)
 
   // Helper function to restore HTML for a command if it was cleared
   function restoreCommandHtml(commandName) {
