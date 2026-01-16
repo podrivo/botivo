@@ -57,9 +57,9 @@ export async function startCommands() {
           const configModule = await import(`../commands/${commandName}/config.js`)
           commandConfig = configModule.config || {}
         } catch (configErr) {
-          // config.js doesn't exist, use default config (no level restriction, use global cooldown)
+          // config.js doesn't exist, use default config (no permission restriction, use global cooldown)
           commandConfig = {
-            // No level restriction - everyone can use (default behavior)
+            // No permission restriction - everyone can use (default behavior)
             // cooldown will use CONFIG.cooldownGlobal if not specified
           }
         }
@@ -144,10 +144,10 @@ export function getCommandFiles(extension) {
   return files
 }
 
-// Helper function to check if user has required permission level
-function hasPermission(tags, requiredLevel) {
-  // If no level is required, everyone can use it
-  if (!requiredLevel || requiredLevel === 'viewer') {
+// Helper function to check if user has required permission
+function hasPermission(tags, requiredPermission) {
+  // If no permission is required, everyone can use it
+  if (!requiredPermission || requiredPermission === 'viewer') {
     return true
   }
   
@@ -173,23 +173,23 @@ function hasPermission(tags, requiredLevel) {
                        isVIP // VIP and above are also considered subscribers
   
   // Permission checks (hierarchical: broadcaster > moderator > vip > subscriber > viewer)
-  if (requiredLevel === 'broadcaster') {
+  if (requiredPermission === 'broadcaster') {
     return isBroadcaster
   }
   
-  if (requiredLevel === 'moderator') {
+  if (requiredPermission === 'moderator') {
     return isModerator
   }
   
-  if (requiredLevel === 'vip') {
+  if (requiredPermission === 'vip') {
     return isVIP
   }
   
-  if (requiredLevel === 'subscriber') {
+  if (requiredPermission === 'subscriber') {
     return isSubscriber
   }
   
-  // Unknown level, default to allowing (viewer level)
+  // Unknown permission, default to allowing (viewer permission)
   return true
 }
 
@@ -205,8 +205,8 @@ export function processCommand(client, io, channel, tags, message) {
       const now = Date.now()
       
       // Permission check - must come before rate limiting
-      const requiredLevel = config?.level
-      if (!hasPermission(tags, requiredLevel)) {
+      const requiredPermission = config?.permission
+      if (!hasPermission(tags, requiredPermission)) {
         // Silently ignore - don't spam chat with permission denied messages
         return true // Command was blocked due to permissions
       }

@@ -1,5 +1,5 @@
 export const config = {
   cooldown: 0,
-  level: 'broadcaster',
+  permission: 'broadcaster',
   alias: ['killall', 'kill-all']
 }
