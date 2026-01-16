@@ -12,7 +12,6 @@ const commands = {}
 let commandsLoaded = false
 
 // Rate limiting tracking
-const userLastCommandTime = new Map() // Map<username, timestamp>
 const userLastCommandPerCommand = new Map() // Map<username_command, timestamp>
 let globalLastCommandTime = 0
 
@@ -67,6 +66,24 @@ export async function startCommands() {
         // Store handler with command name and config for auto socket emission
         commands[trigger] = { handler, commandName, config: commandConfig }
         loadedCommands.push(trigger)
+        
+        // Register aliases if configured
+        if (commandConfig.alias) {
+          // Normalize alias to array (handle both string and array)
+          const aliases = Array.isArray(commandConfig.alias) 
+            ? commandConfig.alias 
+            : [commandConfig.alias]
+          
+          // Register each alias as an additional trigger
+          for (const alias of aliases) {
+            if (alias && typeof alias === 'string') {
+              const aliasTrigger = `${CONFIG.prefix}${alias.toLowerCase()}`
+              // Register alias with same handler and config
+              commands[aliasTrigger] = { handler, commandName, config: commandConfig }
+              loadedCommands.push(aliasTrigger)
+            }
+          }
+        }
       } else {
         throw new Error(`No handler function found. Export a default function or a handler function.`)
       }
@@ -195,49 +212,41 @@ export function processCommand(client, io, channel, tags, message) {
       }
       
       // Rate limiting checks
-      // 1. Check global cooldown
-      const timeSinceGlobalCommand = now - globalLastCommandTime
-      if (timeSinceGlobalCommand < CONFIG.cooldownGlobal) {
-        // Silently ignore - don't spam chat with rate limit messages
-        return true // Command was rate limited
-      }
-      
-      // 2. Check per-user cooldown
-      const userLastTime = userLastCommandTime.get(username) || 0
-      const timeSinceUserCommand = now - userLastTime
-      if (timeSinceUserCommand < CONFIG.cooldownUser) {
-        // Silently ignore - don't spam chat with rate limit messages
-        return true // Command was rate limited
-      }
-      
-      // 3. Check per-command per-user cooldown
+      // Determine command's cooldown setting
+      const commandCooldown = commandData.config?.cooldown !== undefined 
+        ? commandData.config.cooldown 
+        : CONFIG.cooldownGlobal
       const commandKey = `${username}_${trigger}`
-      const userCommandLastTime = userLastCommandPerCommand.get(commandKey) || 0
-      const timeSinceUserCommandSpecific = now - userCommandLastTime
-      // Use command's cooldown if set, otherwise use global cooldown
-      const commandCooldown = commandData.config?.cooldown ?? CONFIG.cooldownGlobal
-      if (timeSinceUserCommandSpecific < commandCooldown) {
-        // Silently ignore - don't spam chat with rate limit messages
-        return true // Command was rate limited
+      
+      // If command has cooldown: 0, bypass all cooldown checks
+      if (commandCooldown === 0) {
+        // No cooldown for this command - skip all rate limiting checks
+      } else {
+        // 1. Check global cooldown (only if command doesn't have cooldown: 0)
+        const timeSinceGlobalCommand = now - globalLastCommandTime
+        if (timeSinceGlobalCommand < CONFIG.cooldownGlobal) {
+          // Silently ignore - don't spam chat with rate limit messages
+          return true // Command was rate limited
+        }
+        
+        // 2. Check per-command per-user cooldown
+        const userCommandLastTime = userLastCommandPerCommand.get(commandKey) || 0
+        const timeSinceUserCommandSpecific = now - userCommandLastTime
+        if (timeSinceUserCommandSpecific < commandCooldown) {
+          // Silently ignore - don't spam chat with rate limit messages
+          return true // Command was rate limited
+        }
       }
       
       // All rate limit checks passed - execute command
       try {
-        // Update rate limiting timestamps
-        globalLastCommandTime = now
-        userLastCommandTime.set(username, now)
-        userLastCommandPerCommand.set(commandKey, now)
+        // Update rate limiting timestamps (only if command has a cooldown)
+        if (commandCooldown > 0) {
+          globalLastCommandTime = now
+          userLastCommandPerCommand.set(commandKey, now)
+        }
         
         // Clean up old entries periodically to prevent memory leak
-        if (userLastCommandTime.size > 1000) {
-          // Remove entries older than 1 hour
-          const oneHourAgo = now - 3600000
-          for (const [user, timestamp] of userLastCommandTime.entries()) {
-            if (timestamp < oneHourAgo) {
-              userLastCommandTime.delete(user)
-            }
-          }
-        }
         if (userLastCommandPerCommand.size > 1000) {
           const oneHourAgo = now - 3600000
           for (const [key, timestamp] of userLastCommandPerCommand.entries()) {
