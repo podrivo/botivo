@@ -41,8 +41,13 @@
  */
 
 export default function(client, io, channel, tags, message) {
+
+  // You can emit additional events to the overlay
+  // This is optional
+  io.emit('new-event-first')
+  io.emit('new-event-second')
   
-  // Send a message chat
-  client.say(process.env.TWITCH_CHANNEL, `@${tags.username}, example command executed!`)
+  // Send a message to chat
+  client.say(channel, `@${tags.username} used ${message}. The is the Twitch chat example message!`)
   
 }

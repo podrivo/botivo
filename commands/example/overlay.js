@@ -1,4 +1,9 @@
-export default function() {
+export default function (socket) {
+
+  // You can grab additional events from twitch.js
+  // This is optional
+  socket.on('new-event-first',  () => {console.log(`'new-event-first' received`)})
+  socket.on('new-event-second', () => {console.log(`'new-event-second' received`)})
 
   // Get DOM element
   let element = document.querySelector('.example-element')
@@ -10,6 +15,7 @@ export default function() {
     duration: 600,
     ease: 'outExpo',
     onComplete: () => {
+
       // Fade out after 2.5 seconds
       setTimeout(() => {
         anime.animate(element, {
@@ -21,4 +27,5 @@ export default function() {
       }, 2500)
     }
   })
+
 }

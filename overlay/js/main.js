@@ -110,6 +110,7 @@ window.onload = async function() {
         // Create container for this command
         const container = document.createElement('div')
         container.id = htmlFile.containerId
+        container.setAttribute('data-initializing', 'true')
         commandsContainer.appendChild(container)
 
         // Fetch and inject HTML
@@ -130,12 +131,93 @@ window.onload = async function() {
                          clientModule.init
           
           if (handler && typeof handler === 'function') {
-            // Wrap handler to restore HTML if it was cleared by kill-all
+            // Track which socket events have been set up to prevent duplicate listeners
+            const initializedEvents = new Set()
+            
+            // Check if handler accepts parameters (indicates it wants socket for listener setup)
+            const handlerLength = handler.length
+            
+            if (handlerLength > 0) {
+              // Wrap socket.on to prevent duplicate event listeners
+              const originalSocketOn = socket.on.bind(socket)
+              socket.on = function(eventName, callback) {
+                const eventKey = `${eventName}`
+                if (!initializedEvents.has(eventKey)) {
+                  initializedEvents.add(eventKey)
+                  originalSocketOn(eventName, callback)
+                }
+              }
+              
+              // Temporarily disable animations and audio during initialization
+              const originalAnimeAnimate = window.anime?.animate
+              if (window.anime && originalAnimeAnimate) {
+                window.anime.animate = function() {
+                  // Return a no-op animation object during initialization
+                  return {
+                    onComplete: function(fn) { return this },
+                    restart: function() { return this },
+                    resume: function() { return this },
+                    pause: function() { return this },
+                    seek: function() { return this }
+                  }
+                }
+              }
+              
+              // Temporarily disable Audio playback during initialization
+              // Save the current Audio (which may already be overridden for tracking)
+              const currentAudio = window.Audio
+              if (currentAudio) {
+                window.Audio = function(...args) {
+                  const audio = new currentAudio(...args)
+                  // Override play() to be a no-op during initialization
+                  const originalPlay = audio.play.bind(audio)
+                  audio.play = function() {
+                    // Return a resolved promise to prevent errors
+                    return Promise.resolve()
+                  }
+                  return audio
+                }
+              }
+              
+              // Call handler during initialization to set up event listeners
+              // Animation and audio won't run because they're disabled
+              handler(socket)
+              
+              // Restore original functions
+              socket.on = originalSocketOn
+              if (window.anime && originalAnimeAnimate) {
+                window.anime.animate = originalAnimeAnimate
+              }
+              if (currentAudio) {
+                window.Audio = currentAudio
+              }
+            }
+            
+            // Wrap handler to restore HTML if it was cleared by kill-all and prevent duplicate listeners
             const wrappedHandler = function() {
               // Restore HTML if container was cleared
               restoreCommandHtml(htmlFile.command)
-              // Execute the original handler
-              handler.apply(this, arguments)
+              
+              if (handlerLength > 0) {
+                // For handlers with socket parameter, wrap socket.on to prevent duplicate listeners
+                const originalSocketOn = socket.on.bind(socket)
+                socket.on = function(eventName, callback) {
+                  const eventKey = `${eventName}`
+                  if (!initializedEvents.has(eventKey)) {
+                    initializedEvents.add(eventKey)
+                    originalSocketOn(eventName, callback)
+                  }
+                }
+                
+                // Execute the handler (listeners already set up, command logic will run)
+                handler(socket, ...arguments)
+                
+                // Restore original socket.on after handler execution
+                socket.on = originalSocketOn
+              } else {
+                // For handlers without parameters, just call normally
+                handler(...arguments)
+              }
             }
             // Use wrapped handler as event handler
             socket.on(htmlFile.command, wrappedHandler)
