@@ -36,6 +36,8 @@ export async function startCommands() {
   
   const commandNames = scanCommandDirectories()
   const loadedCommands = []
+  const originalCommands = []
+  let originalCommandCount = 0
   
   for (const commandName of commandNames) {
     try {
@@ -66,6 +68,10 @@ export async function startCommands() {
         // Store handler with command name and config for auto socket emission
         commands[trigger] = { handler, commandName, config: commandConfig }
         loadedCommands.push(trigger)
+        originalCommandCount++
+        
+        // Track aliases for display
+        const aliasTriggers = []
         
         // Register aliases if configured
         if (commandConfig.alias) {
@@ -81,9 +87,17 @@ export async function startCommands() {
               // Register alias with same handler and config
               commands[aliasTrigger] = { handler, commandName, config: commandConfig }
               loadedCommands.push(aliasTrigger)
+              aliasTriggers.push(aliasTrigger)
             }
           }
         }
+        
+        // Format command display with aliases
+        let commandDisplay = trigger
+        if (aliasTriggers.length > 0) {
+          commandDisplay = `${trigger} (${aliasTriggers.join(', ')})`
+        }
+        originalCommands.push(commandDisplay)
       } else {
         throw new Error(`No handler function found. Export a default function or a handler function.`)
       }
@@ -94,9 +108,8 @@ export async function startCommands() {
   }
   
   // Log all loaded commands in a single message
-  if (loadedCommands.length > 0) {
-    console.log(`▒ Commands    ✓ Successfully loaded ${loadedCommands.length} commands`)
-    // console.log(`▒ Commands: ${loadedCommands.join(', ')}`)
+  if (originalCommandCount > 0) {
+    console.log(`▒ Commands    ✓ Successfully loaded ${originalCommandCount} commands: ${originalCommands.join(', ')}`)
   }
   
   commandsLoaded = true
