@@ -17,7 +17,7 @@ export function startEvents(server, port) {
   return new Promise((resolve) => {
     io.on('connection', (socket) => {
       spinner.stop()
-      process.stdout.write(`\r\x1b[K▒ Events      ✓ Connected with overlay\n`)
+      process.stdout.write(`\r\x1b[K▒ Events      ✓ Communication with overlay started\n`)
       
       // Resolve promise on first connection
       resolve(io)
