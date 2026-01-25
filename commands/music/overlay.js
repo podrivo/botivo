@@ -1,7 +1,7 @@
 export default function (socket) {
   // Initialize playlist in localStorage if it doesn't exist
-  if (!localStorage.getItem('ccsPlaylist')) {
-    localStorage.setItem('ccsPlaylist', JSON.stringify([]))
+  if (!localStorage.getItem('playlist')) {
+    localStorage.setItem('playlist', JSON.stringify([]))
   }
 
   // Load YouTube IFrame API
@@ -62,11 +62,11 @@ export default function (socket) {
   }
 
   function nextVideo() {
-    const ccsPlaylist = JSON.parse(localStorage.getItem('ccsPlaylist') || '[]')
+    const playlist = JSON.parse(localStorage.getItem('playlist') || '[]')
 
-    if (ccsPlaylist.length > 0 && window.player) {
-      const nextVideoId = ccsPlaylist.shift()
-      localStorage.setItem('ccsPlaylist', JSON.stringify(ccsPlaylist))
+    if (playlist.length > 0 && window.player) {
+      const nextVideoId = playlist.shift()
+      localStorage.setItem('playlist', JSON.stringify(playlist))
       window.player.loadVideoById(nextVideoId)
       window.player.playVideo()
     }
@@ -74,17 +74,6 @@ export default function (socket) {
 
   // Make nextVideo globally accessible
   window.nextVideo = nextVideo
-
-  // Helper function for border command effect
-  function borderCommand() {
-    const borderEl = document.querySelector('.border')
-    if (borderEl) {
-      borderEl.classList.add('on')
-      setTimeout(() => {
-        borderEl.classList.remove('on')
-      }, 250)
-    }
-  }
 
   // Helper function to play audio (gracefully handles missing files)
   function playAudio(path) {
@@ -121,13 +110,11 @@ export default function (socket) {
   socket.on('music', (musicCommand, extra) => {
     if (!musicEl) return
 
-    const ccsPlaylist = JSON.parse(localStorage.getItem('ccsPlaylist') || '[]')
+    const playlist = JSON.parse(localStorage.getItem('playlist') || '[]')
 
     switch (musicCommand) {
       // !music play
       case 'play':
-        borderCommand()
-        playAudio('/audio/border.wav')
         if (window.player) {
           window.player.playVideo()
         }
@@ -135,8 +122,6 @@ export default function (socket) {
 
       // !music pause
       case 'pause':
-        borderCommand()
-        playAudio('/audio/border.wav')
         if (window.player) {
           window.player.pauseVideo()
         }
@@ -144,8 +129,6 @@ export default function (socket) {
 
       // !music next
       case 'next':
-        borderCommand()
-        playAudio('/audio/border.wav')
         if (window.nextVideo) {
           window.nextVideo()
         }
@@ -154,8 +137,6 @@ export default function (socket) {
       // !music zoom
       case 'zoom':
         musicEl.classList.toggle('zoom')
-        borderCommand()
-        playAudio('/audio/border.wav')
 
         const roomElementZoom = document.querySelector('.room')
         if (roomElementZoom && roomElementZoom.classList.contains('on')) {
@@ -170,8 +151,6 @@ export default function (socket) {
 
       // !music vol 100
       case 'vol':
-        playAudio('/audio/border.wav')
-
         if (!isNaN(extra) && extra >= 0 && extra <= 100) {
           if (window.player) {
             window.player.setVolume(extra)
@@ -181,16 +160,14 @@ export default function (socket) {
 
       // !music queue
       case 'queue':
-        borderCommand()
-        playAudio('/audio/border.wav')
-        socket.emit('queue', ccsPlaylist)
+        socket.emit('queue', playlist)
         break
 
       // !music default (YouTube URL)
       default:
         if (extra) {
-          ccsPlaylist.push(extra)
-          localStorage.setItem('ccsPlaylist', JSON.stringify(ccsPlaylist))
+          playlist.push(extra)
+          localStorage.setItem('playlist', JSON.stringify(playlist))
 
           const transitionEl = document.querySelector('.transition')
           if (transitionEl) {

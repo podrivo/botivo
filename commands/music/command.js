@@ -25,9 +25,9 @@ function setupQueueListener(io, client, channel) {
     if (twitchClient && twitchChannel && Array.isArray(data)) {
       const queueSize = data.length
       if (queueSize === 1) {
-        twitchClient.say(twitchChannel, `[1] SONG IN QUEUE`)
+        twitchClient.say(twitchChannel, `[1] song in queue`)
       } else {
-        twitchClient.say(twitchChannel, `[${queueSize}] SONGS IN QUEUE`)
+        twitchClient.say(twitchChannel, `[${queueSize}] songs in queue`)
       }
     }
   }
@@ -67,7 +67,7 @@ export default function(client, io, channel, tags, message) {
   const musicCommand = args[1] ? args[1].toLowerCase() : null
 
   if (args.length === 1) {
-    client.say(channel, 'USE \'!MUSIC YOUTUBE_LINK\'')
+    client.say(channel, 'Use \'!music youtube-link\'')
   } else {
     switch (musicCommand) {
       case 'play':
@@ -83,9 +83,9 @@ export default function(client, io, channel, tags, message) {
 
         if (!isNaN(volume) && volume >= 0 && volume <= 100) {
           io.emit('music', musicCommand, volume)
-          client.say(channel, `VOLUME SET TO ${volume}`)
+          client.say(channel, `Volume set to ${volume}`)
         } else {
-          client.say(channel, 'USE \'!MUSIC VOL 0-100\'')
+          client.say(channel, 'Use \'!music vol 0-100\'')
         }
         break
 
@@ -96,7 +96,7 @@ export default function(client, io, channel, tags, message) {
           io.emit('music', musicCommand, musicId)
           // Optionally announce in chat: client.say(channel, `[${musicId}] ADDED TO QUEUE`)
         } else {
-          client.say(channel, 'USE \'!MUSIC YOUTUBE_LINK\'')
+          client.say(channel, 'Use \'!music youtube-link\'')
         }
         break
     }
