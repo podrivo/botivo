@@ -1,7 +1,7 @@
 {
   "name": "botivo",
   "version": "0.1.0",
-  "description": "Botivo is a Twitch chatbot, with an overlay for OBS.",
+  "description": "Botivo combines a Twitch chatbot with a powerful OBS overlay",
   "author": "Pedro Ivo Hudson @podrivo",
   "repository": "https://github.com/podrivo/botivo",
   "license": "MIT",
@@ -12,7 +12,6 @@
   },
   "dependencies": {
     "dotenv": "^17.2.3",
-    "esm": "^3.2.25",
     "express": "^5.2.1",
     "nodemon": "^3.1.11",
     "ora": "^5.4.1",
