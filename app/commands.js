@@ -270,19 +270,15 @@ export function processCommand(client, io, channel, tags, message) {
         }
         
         // Log command usage
-        if (CONFIG.debug) {
-          const logMessage = `▒ Command used: ${trigger} by ${username}${messageLower !== trigger ? ` (${message})` : ''}`
-          console.log(logMessage)
-        }
+        const logMessage = `▒ Command used: ${trigger} by ${username}${messageLower !== trigger ? ` (${message})` : ''}`
+        console.log(logMessage)
         
         // Emit to overlay console
-        if (CONFIG.debug) {
-          io.emit('command-log', {
-            command: trigger,
-            username: username,
-            message: message
-          })
-        }
+        io.emit('command-log', {
+          command: trigger,
+          username: username,
+          message: message
+        })
         
         // Execute handler
         const result = handler(client, io, channel, tags, message)

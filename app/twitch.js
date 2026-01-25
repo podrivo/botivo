@@ -34,7 +34,7 @@ export function startTwitch(io) {
 
     const client = new tmi.Client({
       options: {
-        debug: CONFIG.debug
+        debug: true
       },
       connection: {
         reconnect: CONFIG.twitchReconnect
