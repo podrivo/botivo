@@ -25,6 +25,11 @@ const VOLUME_MIN = 0
 const VOLUME_MAX = 100
 const COMMAND_NAME = 'music'
 const SOCKET_EVENT_QUEUE = 'queue'
+const MESSAGE_USAGE = 'Use !music youtube-link, !music pause, !music next, !music vol 0-100, !music queue'
+const MESSAGE_VOLUME = 'Volume set to {volume}'
+const MESSAGE_VOLUME_USAGE = 'Use \'!music vol 0-100\''
+const MESSAGE_QUEUE_SIZE_SINGULAR = '[1] song in queue'
+const MESSAGE_QUEUE_SIZE_PLURAL = '[{size}] songs in queue'
 
 // ============================================================================
 // Queue Listener Setup (for responding to queue size requests)
@@ -56,8 +61,8 @@ function setupQueueListener(io, client, channel) {
     
     const queueSize = queueData.length
     const message = queueSize === 1 
-      ? `[1] song in queue`
-      : `[${queueSize}] songs in queue`
+      ? MESSAGE_QUEUE_SIZE_SINGULAR
+      : MESSAGE_QUEUE_SIZE_PLURAL.replace('{size}', queueSize)
     
     twitchClient.say(twitchChannel, message)
   }
@@ -159,7 +164,7 @@ const SIMPLE_COMMANDS = ['play', 'pause', 'next', 'zoom', 'queue']
  */
 function handleVolumeCommand(io, client, channel, volume) {
   io.emit(COMMAND_NAME, 'vol', volume)
-  client.say(channel, `Volume set to ${volume}`)
+  client.say(channel, MESSAGE_VOLUME.replace('{volume}', volume))
 }
 
 /**
@@ -169,7 +174,7 @@ function handleQueueAddCommand(io, client, channel, videoUrl) {
   const videoId = extractYouTubeVideoId(videoUrl)
   
   if (!videoId) {
-    client.say(channel, 'Use \'!music youtube-link\'')
+    client.say(channel, MESSAGE_USAGE)
     return
   }
   
@@ -195,7 +200,7 @@ export default function(client, io, channel, tags, message) {
   
   // No arguments provided - show usage
   if (rawArgs.length === 1) {
-    client.say(channel, 'Use \'!music youtube-link\'')
+    client.say(channel, MESSAGE_USAGE)
     return false
   }
   
@@ -204,7 +209,7 @@ export default function(client, io, channel, tags, message) {
     if (isValidVolume(volume)) {
       handleVolumeCommand(io, client, channel, volume)
     } else {
-      client.say(channel, 'Use \'!music vol 0-100\'')
+      client.say(channel, MESSAGE_VOLUME_USAGE)
     }
     return false
   }
