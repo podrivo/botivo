@@ -13,10 +13,18 @@ npm install
 
 Rename file `.env.example` to `.env` and set your environment variables. For `TWITCH_PASSWORD`, you'll need a OAuth Access Token, which you can get [here](https://twitchtokengenerator.com/).
 ```dotenv
-TWITCH_CHANNEL=your-channel-name
-TWITCH_USERNAME=your-bot-name
-TWITCH_PASSWORD=oauth:your-access-token
-SERVER_PORT=8080
+TWITCH_USERNAME="your-bot-username"
+# Your bot's Twitch username (the account that will send messages)
+
+TWITCH_PASSWORD="oauth:your-oauth-token-here"
+# Get your authorization token from: https://twitchtokengenerator.com/
+# The token should start with "oauth:" (e.g., oauth:abc123xyz...)
+
+TWITCH_CHANNEL="your-channel-name"
+# The channel name where the bot will listen for commands (without the #)
+
+SERVER_PORT="8080"
+# The port number where the overlay will be served (default: 8080)
 ```
 
 Start the application:
@@ -26,12 +34,27 @@ npm start
 
 You should see logs on your terminal:
 ```shell
-Your overlay URL: http://localhost:8080
-[16:20] info: Connecting to irc-ws.chat.twitch.tv on port 443..
-[16:20] info: Sending authentication to server..
-[16:20] info: Connected to server.
-[16:20] info: Executing command: JOIN #TWITCH_CHANNEL
-[16:20] info: Joined #TWITCH_CHANNEL
+@@@@@@@@@@    @@@@@@@%@@@@@    #@@@@%@@@@@@@@@%@@@@@@@  
+@@        @@@*       @    *@@@@@    @    @    @       @@ 
+@@         @         @         @@@@@@    @    @         @
+@@    @   .@    @    @    @@@@@@    @    @    @    @    @
+@@       @@@    @    @    @    @    @    @    @    @    @
+@@    @    @    @    @    @    @    @    @    @    @    @
+@@    @    @    @    @    @    @    @    @    @.   @    @
+@@        .@         @@        @    @         @@        @
+@@       @@@       @@@@@.      @    @       @@@@@#      @
+@@@@@@@@@@@@@@@@@@@@@  @@@@@@@@@@@@@@@@@@@@@@@ @@@@@@@@@@
+@@@@@@@@@  @@@@@@@@     @@@@@@@@@@@@@@@@@@@@    @@@@@@@@@
+
+█ BOTIVO starting...
+
+▒ Variables   ✓ Found .env and environment variables
+▒ Overlay     ✓ Server is running on http://localhost:8080
+▒ Events      ✓ Communication with overlay started
+▒ Twitch      ✓ Connected to channel 'podrivo', with user 'lemosthebot'
+▒ Commands    ✓ Successfully loaded 3 commands: !example (!demo), !kill (!stop, !killall, !kill-all), !train
+
+█ BOTIVO is ready to go!
 ```
 
 Open the overlay URL in your browser, go to your chat on your Twitch channel page and send a `!train` message. You should see a simple Kappa emote train animation from right to left. Detail: Make sure you click on the browser window before, so that it plays the audio. (This is not needed in OBS)
