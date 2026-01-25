@@ -38,11 +38,9 @@ const ANIMATION_TIMINGS = {
 
 // DOM selectors
 const SELECTORS = {
-  MUSIC: '.music',
+  MUSIC: '.music-wrapper',
   PLAYER: '#player',
-  TRANSITION: '.transition',
-  ROOM: '.room',
-  ROOM_FURNITURE: '.room-furniture'
+  TRANSITION: '.transition'
 }
 
 // ============================================================================
@@ -243,21 +241,6 @@ function getTransitionElement() {
 }
 
 /**
- * Removes the 'on' class from room elements (used when zooming)
- */
-function hideRoomElements() {
-  const roomElement = document.querySelector(SELECTORS.ROOM)
-  if (roomElement?.classList.contains('on')) {
-    roomElement.classList.remove('on')
-  }
-  
-  const roomFurnitureElement = document.querySelector(SELECTORS.ROOM_FURNITURE)
-  if (roomFurnitureElement?.classList.contains('on')) {
-    roomFurnitureElement.classList.remove('on')
-  }
-}
-
-/**
  * Hides the music element after animation
  */
 function hideMusicElement() {
@@ -314,7 +297,6 @@ function handleZoomCommand() {
   if (!musicEl) return
   
   musicEl.classList.toggle('zoom')
-  hideRoomElements()
 }
 
 /**
