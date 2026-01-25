@@ -1,6 +1,6 @@
 export default function (socket) {
 
-  // You can grab additional events from twitch.js
+  // You can grab additional events from command.js
   // This is optional
   socket.on('new-event-first',  () => {console.log(`'new-event-first' received`)})
   socket.on('new-event-second', () => {console.log(`'new-event-second' received`)})
