@@ -191,36 +191,6 @@ function playNextVideo() {
 window.nextVideo = playNextVideo
 
 // ============================================================================
-// Audio Effects
-// ============================================================================
-
-/**
- * Plays an audio file with error handling
- * Gracefully handles missing files or autoplay restrictions
- * @param {string} audioPath - Path to audio file
- */
-function playAudioEffect(audioPath) {
-  try {
-    const audio = new Audio(audioPath)
-    
-    // Handle loading errors silently (file may not exist)
-    audio.addEventListener('error', () => {
-      // Silently ignore - file may not exist
-    }, { once: true })
-    
-    // Attempt to play, catch any errors
-    const playPromise = audio.play()
-    if (playPromise !== undefined) {
-      playPromise.catch(() => {
-        // Silently ignore - autoplay may be blocked or file missing
-      })
-    }
-  } catch (error) {
-    // Silently ignore any audio creation errors
-  }
-}
-
-// ============================================================================
 // UI Effects
 // ============================================================================
 
