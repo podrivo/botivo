@@ -34,25 +34,13 @@ npm start
 
 You should see logs on your terminal:
 ```shell
-@@@@@@@@@@    @@@@@@@%@@@@@    #@@@@%@@@@@@@@@%@@@@@@@  
-@@        @@@*       @    *@@@@@    @    @    @       @@ 
-@@         @         @         @@@@@@    @    @         @
-@@    @   .@    @    @    @@@@@@    @    @    @    @    @
-@@       @@@    @    @    @    @    @    @    @    @    @
-@@    @    @    @    @    @    @    @    @    @    @    @
-@@    @    @    @    @    @    @    @    @    @.   @    @
-@@        .@         @@        @    @         @@        @
-@@       @@@       @@@@@.      @    @       @@@@@#      @
-@@@@@@@@@@@@@@@@@@@@@  @@@@@@@@@@@@@@@@@@@@@@@ @@@@@@@@@@
-@@@@@@@@@  @@@@@@@@     @@@@@@@@@@@@@@@@@@@@    @@@@@@@@@
-
 █ BOTIVO starting...
 
 ▒ Variables   ✓ Found .env and environment variables
 ▒ Overlay     ✓ Server is running on http://localhost:8080
 ▒ Events      ✓ Communication with overlay started
-▒ Twitch      ✓ Connected to channel 'podrivo', with user 'lemosthebot'
-▒ Commands    ✓ Successfully loaded 3 commands: !example (!demo), !kill (!stop, !killall, !kill-all), !train
+▒ Twitch      ✓ Connected to channel 'channel', with user 'user'
+▒ Commands    ✓ Successfully loaded 3 commands
 
 █ BOTIVO is ready to go!
 ```
