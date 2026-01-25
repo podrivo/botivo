@@ -30,17 +30,10 @@ const PLAYER_CONFIG = {
   }
 }
 
-// Animation timings (in milliseconds)
-const ANIMATION_TIMINGS = {
-  MUSIC_ELEMENT_HIDE: 250,
-  TRANSITION_HIDE: 1000
-}
-
 // DOM selectors
 const SELECTORS = {
   MUSIC: '.music-wrapper',
-  PLAYER: '#player',
-  TRANSITION: '.transition'
+  PLAYER: '#player'
 }
 
 // ============================================================================
@@ -202,33 +195,6 @@ function getMusicElement() {
   return document.querySelector(SELECTORS.MUSIC)
 }
 
-/**
- * Gets the transition element from DOM
- * @returns {HTMLElement|null}
- */
-function getTransitionElement() {
-  return document.querySelector(SELECTORS.TRANSITION)
-}
-
-/**
- * Hides the music element after animation
- */
-function hideMusicElement() {
-  const musicEl = getMusicElement()
-  if (musicEl) {
-    musicEl.classList.remove('on')
-  }
-}
-
-/**
- * Hides the transition element after animation
- */
-function hideTransitionElement() {
-  const transitionEl = getTransitionElement()
-  if (transitionEl) {
-    transitionEl.classList.remove('on')
-  }
-}
 
 // ============================================================================
 // Command Handlers
@@ -297,12 +263,6 @@ function handleQueueAddCommand(videoId) {
   const playlist = getPlaylist()
   playlist.push(videoId)
   savePlaylist(playlist)
-  
-  // Show transition effect
-  const transitionEl = getTransitionElement()
-  if (transitionEl) {
-    transitionEl.classList.add('on')
-  }
 }
 
 // ============================================================================
@@ -351,16 +311,6 @@ function handleMusicCommand(socket, command, extra) {
       }
       break
   }
-  
-  // Hide music element after animation
-  setTimeout(() => {
-    hideMusicElement()
-  }, ANIMATION_TIMINGS.MUSIC_ELEMENT_HIDE)
-  
-  // Hide transition element after animation
-  setTimeout(() => {
-    hideTransitionElement()
-  }, ANIMATION_TIMINGS.TRANSITION_HIDE)
 }
 
 // ============================================================================

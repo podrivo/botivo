@@ -1,49 +1,27 @@
 /* !music */
-
 .music-wrapper {
   z-index: 50;
+  width: 100%;
   height: 100%;
-  left: 0;
   pointer-events: none;
   position: absolute;
   top: 0;
-  width: 100%;
+  left: 0;
 }
 
-.music-wrapper .window {
+.music-wrapper #player {
   overflow: hidden;
   pointer-events: all;
   position: absolute;
   right: 0;
   top: 0;
-  /* transform-origin: center center; */
-  /* transform: translateX(1160px) translateY(-600px); */
-  transition: width 0.3s ease, height 0.3s ease, transform 0.3s ease;
-  width: 960px;
-  height: 570px;
+  transition: all 0.6s cubic-bezier(0.83, 0, 0.17, 1);
+  width: 480px;
+  height: 280px;
 }
 
-.music-wrapper .window-body {
-  background: none;
-  background-color: #000;
-  height: 100%;
-  position: relative;
-}
-
-.music-wrapper #player {
-  bottom: 0;
-  height: 100%;
-  left: 0;
-  position: absolute;
-  right: 0;
-  top: 0;
+/* !music zoom */
+.music-wrapper.zoom #player {
   width: 100%;
-}
-
-/* !music - zoom */
-
-.music-wrapper.zoom .window {
-  height: 1440px;
-  transform: translateX(50%) translateY(-50%);
-  width: 2560px;
+  height: 100%;
 }
