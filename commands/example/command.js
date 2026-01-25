@@ -9,15 +9,15 @@
 
 export default function(client, io, channel, tags, message) {
 
-  // You can emit additional events to the overlay
-  // This is optional
-  io.emit('new-event-first')
-  io.emit('new-event-second')
-  
   // Send a message to chat
   client.say(channel, `@${tags.username} used ${message}. The is the Twitch chat example message!`)
 
   // Print log to server
   console.log('▒ !example was used. This is a test message.')
+
+  // You can also emit additional events to the overlay
+  // This is optional
+  io.emit('additional-a')
+  io.emit('additional-b')
   
 }

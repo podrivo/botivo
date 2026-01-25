@@ -1,10 +1,5 @@
 export default function (socket) {
 
-  // You can grab additional events from command.js
-  // This is optional
-  socket.on('new-event-first',  () => {console.log(`'new-event-first' received`)})
-  socket.on('new-event-second', () => {console.log(`'new-event-second' received`)})
-
   // Get DOM element
   let element = document.querySelector('.example-element')
 
@@ -28,4 +23,8 @@ export default function (socket) {
     }
   })
 
+  // Grab additional events from command.js
+  // This is optional
+  socket.on('additional-a',  () => {console.log(`'additional-a' received`)})
+  socket.on('additional-b', () => {console.log(`'additional-b' received`)})
 }

@@ -1,16 +1,17 @@
 <img src="https://github.com/podrivo/botivo/assets/546221/217e12ad-10ab-438a-8828-0ef7bcca89ce" width="400" alt="Botivo logo">
 
-Botivo is a Twitch chatbot, with an overlay that can be used as a `Browser Source` in OBS Studio. Create and personalize your own commands, with infinite overlay possibilities using HTML, CSS and JS. It comes with `anime.js` out of the box, so you can start creating day one.
+Botivo combines a Twitch chatbot with a powerful OBS overlay, enabling custom commands and fully customizable overlays built with HTML, CSS, and JavaScript. Built-in Anime.js makes creating animations simple and fast.
+
 
 Usage
 ---
-Download or clone this repository, and install dependencies.
+Download or clone this repository, and install dependencies. You'll need [Node.js](https://nodejs.org/) installed.
 ```shell
 cd botivo
 npm install
 ```
 
-Make sure you create a `.env` file and set your environment variables. For `TWITCH_PASSWORD`, you'll need a OAuth Access Token, which you won't find in your Twitch profile, but you can get it [here](https://twitchapps.com/tmi/) or [here](https://twitchtokengenerator.com/).
+Rename file `.env.example` to `.env` and set your environment variables. For `TWITCH_PASSWORD`, you'll need a OAuth Access Token, which you can get [here](https://twitchtokengenerator.com/).
 ```dotenv
 TWITCH_CHANNEL=your-channel-name
 TWITCH_USERNAME=your-bot-name
@@ -18,10 +19,12 @@ TWITCH_PASSWORD=oauth:your-access-token
 SERVER_PORT=8080
 ```
 
-Start the application and you should get logs on your terminal.
+Start the application:
 ```shell
 npm start
 ```
+
+You should see logs on your terminal:
 ```shell
 Your overlay URL: http://localhost:8080
 [16:20] info: Connecting to irc-ws.chat.twitch.tv on port 443..
@@ -31,116 +34,173 @@ Your overlay URL: http://localhost:8080
 [16:20] info: Joined #TWITCH_CHANNEL
 ```
 
-Open the overlay URL in your browser, go to your chat on your Twitch channel page and send a `!train` message. You should see a simple Kappa emote train animation from right to left.
-```shell
-[16:20] info: [#TWITCH_CHANNEL] <user>: !train
-[16:20] info: [#TWITCH_CHANNEL] <TWITCH_USERNAME>: @user, hop on! Train is about to leave!
-```
+Open the overlay URL in your browser, go to your chat on your Twitch channel page and send a `!train` message. You should see a simple Kappa emote train animation from right to left. Detail: Make sure you click on the browser window before, so that it plays the audio. (This is not needed in OBS)
+
 
 How it works
 ---
-Botivo starts with `start.js` that connects with Twitch chat (IRC), via [Express](https://expressjs.com/) and [tmi.js](https://tmijs.com/). Botivo automatically discovers and loads commands from the `commands/` directory. Each command consists of server-side and client-side files. When a command is triggered in chat, the server-side handler emits a Socket.IO event, which the client-side handler receives and uses to manipulate the DOM with [anime.js](https://animejs.com/) and CSS to create animations.
+Botivo is initiated in `start.js`. It connects to Twitch IRC using [tmi.js](https://tmijs.com/), via an [Express](https://expressjs.com/) server.
 
-In order to use your overlay as a `Browser Source` in [OBS Studio](https://obsproject.com/), you need to keep the bot running in your computer and set the overlay URL that is included in your terminal log.
+Botivo automatically discovers and loads commands from the `/commands` directory. When a command is triggered in chat, the `command.js` emits an event via [Socket.IO](https://socket.io/) to overlay, then `overlay.js` grabs the event and triggers the DOM manipulation with [Anime.js](https://animejs.com/). Use can also use CSS to create animations and HTML5 to play audios.
 
-Example
----
-Custom command `!train` is just a simple example of how to use Botivo. Commands are organized in the `commands/` directory, with each command having its own folder. To create a new command, create a folder (e.g., `commands/mycommand/`) and add the following files:
+In order to use your overlay as a `Browser Source` in [OBS Studio](https://obsproject.com/), you need to keep the bot running in your computer and set the overlay URL that is included in your terminal log, usually `http://localhost:8080`.
 
-**Server-side handler** (`commands/train/train-server.js`):
-```js
-// Train command handler
-export function handleTrain(client, io, channel, tags, message) {
-  // Emit train key
-  io.emit('train')
-
-  // Say in chat with error handling
-  client.say(process.env.TWITCH_CHANNEL, `@${tags.username}, hop on! Train is about to leave!`)
-    .catch(err => console.error('× Error sending message to chat:', err.message))
-}
-```
-
-**Client-side handler** (`commands/train/train-client.js`):
-```js
-// Train command handler
-export function initTrainCommand(socket) {
-  // Get DOM element
-  let trainList = document.querySelector('.train-list')
-
-  if (!trainList) {
-    console.error('Error: .train-list element not found')
-    return
-  }
-
-  // Listen for the 'train' socket event
-  socket.on('train', () => {
-    try { 
-      // Reset style and set new
-      trainList.removeAttribute('style')
-      trainList.style.top = Math.floor(Math.random() * (screen.height * 0.5)) + 'px'
-
-      // Animation using anime.js v4.2
-      let animation = anime.animate(trainList, {
-        translateX: '-6000px',
-        ease: 'linear',
-        duration: 10000,
-        autoplay: false
-      })
-      animation.restart()
-      animation.resume()
-
-      // Play audio with error handling
-      const audio = new Audio('/commands/train/train.wav')
-      audio.play().catch(err => {
-        console.warn('Could not play audio (may require user interaction):', err)
-      })
-    } catch (err) {
-      console.error('Error handling train command:', err)
-    }
-  })
-}
-```
-
-**HTML template** (`commands/train/train.html`):
-```html
-<!-- !train command -->
-<div id="train-wrap">
-  <div class="train-list">
-    <img src="https://static-cdn.jtvnw.net/emoticons/v1/25/3.0">
-    <img src="https://static-cdn.jtvnw.net/emoticons/v1/25/3.0">
-    <!-- ... more images ... -->
-  </div>
-</div>
-```
-
-**CSS styles** (`commands/train/train.css`):
-```css
-.train-list img {
-  width: 48px;
-  height: auto;
-  animation: upDown 4s ease-in-out infinite;
-}
-
-@keyframes upDown {
-  0%, 100% {
-    transform: translateY(-100px);
-  }
-
-  50% {
-    transform: translateY(100px);
-  }
-}
-```
-
-**Command structure:**
-- The command name is derived from the folder name (e.g., `train/` → `!train`)
-- Server handler must export `handle{CommandName}` function (e.g., `handleTrain`)
-- Client handler must export `init{CommandName}Command` function (e.g., `initTrainCommand`)
-- HTML, CSS, and optional audio files are automatically discovered and loaded
 
 What it can't do
 ---
-Due to how Twitch API works, this bot can only see chat messages. You won't be able to detect new followers, raids, channel points or any other Twitch functionality other than chat. It relies on [tmi.js](https://tmijs.com/) to connect with Twitch, so make sure you see their [documentation](https://tmijs.com/#guide) for more details.
+Due to how Twitch API works, this bot can only see chat messages. You won't be able to detect new followers, raids, channel points or any other Twitch functionality other than chat. It relies on [tmi.js](https://tmijs.com/) to connect with Twitch IRC, so make sure you see their [documentation](https://tmijs.com/#guide) for more details.
+
+
+Commands
+---
+Each command consists of:
+```js
+command.js  // Server side of things
+overlay.js  // Overlay side of things
+config.js   // Set custom configurations
+index.html  // HTML is injected into the overlay
+style.css   // CSS is loaded into the /overlay/index.html
+```
+
+Commands `!example` and `!train` are just examples of how to use Botivo. To create a new command, duplicate the `/commands/example` and rename the folder `/commands/mycommand/`.
+
+`command.js` — **Sends Twitch chat messages via [tmi.js](https://tmijs.com/)**
+```js
+/**
+ * Command handler function
+ * @param {Object} client - Twitch client instance (tmi.js Client)
+ * @param {Object} io - Socket.IO server instance for emitting events to overlay
+ * @param {string} channel - Twitch channel name where the command was triggered
+ * @param {Object} tags - Message tags with user info (username, display-name, mod, subscriber, badges, etc.)
+ * @param {string} message - The full message text that triggered the command
+ */
+
+export default function(client, io, channel, tags, message) {
+  
+  // Send a message to chat
+  client.say(channel, `@${tags.username} used ${message}. The is the Twitch chat example message!`)
+
+  // Print log to server
+  console.log('▒ !example was used. This is a test message.')
+
+  // You can also emit additional events to the overlay
+  // This is optional
+  io.emit('extra-event-a')
+  io.emit('extra-event-b')
+}
+```
+
+`overlay.js` — **Animate DOM elements via [Anime.js](https://animejs.com/)**
+```js
+export default function (socket) {
+
+  // Get DOM element
+  let element = document.querySelector('.example-element')
+
+  // Simple fade in and scale animation
+  anime.animate(element, {
+    opacity: [0, 1],
+    marginTop: ['50px', '0px'],
+    duration: 600,
+    ease: 'outExpo',
+    onComplete: () => {
+
+      // Fade out after 2.5 seconds
+      setTimeout(() => {
+        anime.animate(element, {
+          opacity: [1, 0],
+          marginTop: ['0px', '50px'],
+          duration: 600,
+          ease: 'outExpo',
+        })
+      }, 2500)
+    }
+  })
+
+  // Grab additional events from command.js
+  // This is optional
+  socket.on('additional-a',  () => {console.log(`'additional-a' received`)})
+  socket.on('additional-b', () => {console.log(`'additional-b' received`)})
+}
+```
+
+`config.js` — **Custom configurations for the command**
+```js
+/**
+ * Command Configuration
+ * 
+ * Permissions:
+ * - permission: 'broadcaster'  // Only broadcaster
+ * - permission: 'moderator'    // Broadcaster and moderators
+ * - permission: 'vip'          // Broadcaster, moderators, and VIPs
+ * - permission: 'subscriber'   // Broadcaster, moderators, VIPs, and subscribers
+ * - permission: 'viewer'       // Everyone (default if not set)
+ * 
+ * Cooldown:
+ * - cooldown: number           // Time in milliseconds (defaults to cooldownGlobal if not set)
+ * 
+ * Aliases:
+ * - alias: string | string[]   // Alternative command names that trigger the same command
+ *   Examples:
+ *   - alias: 'demo'            // Single alias: !example and !demo both work
+ *   - alias: ['demo', 'test']  // Multiple aliases: !demo and !test all work
+ */
+
+export const config = {
+  cooldown: 5000,
+  alias: 'demo',
+  permission: 'viewer'
+}
+
+```
+
+`index.html` — **HTML will be injected into the overlay**
+```html
+<!-- !example command HTML -->
+<div class="example-element">
+  Example command!
+</div>
+```
+
+`style.css` — **CSS will be loaded into the overlay**
+```css
+.example-element {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 24px 32px;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  border-radius: 20px;
+  font-family: sans-serif;
+  font-size: 24px;
+  font-weight: 400;
+  opacity: 0;
+  z-index: 1000;
+  pointer-events: none;
+}
+```
+
+Stop all running commands
+---
+In case commands are too much and you can reset the overlay. `!kill` will stop all animations and audios, and reset DOM elements. This works great in case many commands are running at the same time and are creating chaos.
+
+
+Global configuration
+---
+If you need to customize Botivo, you can edit `/app/config.js`.
+```js
+// Botivo configuration
+export const CONFIG = {
+  prefix: '!',                 // Command prefix ("!" for !train, !example)
+  twitchReconnect: true,       // Automatically reconnect to Twitch on disconnect
+  folderCommands: 'commands',  // Directory name where commands are stored
+  folderOverlay: 'overlay',    // Directory name where overlay files are stored
+  cooldownGlobal: 5000         // Global cooldown if a command doesn't specify its own
+}
+```
+
 
 License
 ---
