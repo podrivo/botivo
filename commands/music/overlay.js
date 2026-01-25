@@ -15,8 +15,6 @@ const DEFAULT_VIDEO_ID = 'su2ZN0qCM6Y' // Placeholder video
 
 // Player configuration
 const PLAYER_CONFIG = {
-  height: '537',
-  width: '954',
   playerVars: {
     autoplay: 0,
     cc_load_policy: 0,

@@ -16,6 +16,6 @@
  */
 
 export const config = {
-  cooldown: 0,  // No cooldown for music commands
+  cooldown: 0,
   permission: 'viewer'
 }
