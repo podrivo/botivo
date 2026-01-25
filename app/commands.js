@@ -15,6 +15,42 @@ let commandsLoaded = false
 const userLastCommandPerCommand = new Map() // Map<username_command, timestamp>
 let globalLastCommandTime = 0
 
+// Helper function to find handler in a module
+function findHandler(module, commandName) {
+  return module.default || 
+         module.handler || 
+         module[`handle${commandName.charAt(0).toUpperCase() + commandName.slice(1)}`]
+}
+
+// Helper function to load command config
+async function loadCommandConfig(commandName) {
+  try {
+    const configModule = await import(`../commands/${commandName}/config.js`)
+    return configModule.config || {}
+  } catch {
+    // config.js doesn't exist, use default config (no permission restriction, use global cooldown)
+    return {}
+  }
+}
+
+// Helper function to register aliases
+function registerAliases(trigger, commandData, config) {
+  if (!config.alias) return []
+  
+  const aliases = Array.isArray(config.alias) ? config.alias : [config.alias]
+  const aliasTriggers = []
+  
+  for (const alias of aliases) {
+    if (alias && typeof alias === 'string') {
+      const aliasTrigger = `${CONFIG.prefix}${alias.toLowerCase()}`
+      commands[aliasTrigger] = commandData
+      aliasTriggers.push(aliasTrigger)
+    }
+  }
+  
+  return aliasTriggers
+}
+
 // Helper function to scan command directories
 function scanCommandDirectories() {
   const commandsDir = join(__dirname, '..', CONFIG.folderCommands)
@@ -47,56 +83,27 @@ export async function startCommands() {
       // Derive command trigger from directory name (e.g., train -> !train)
       const trigger = `${CONFIG.prefix}${commandName}`
       
-      // Find the handler function - try default export first, then named exports
-      const handler = commandModule.default || 
-                      commandModule.handler || 
-                      commandModule[`handle${commandName.charAt(0).toUpperCase() + commandName.slice(1)}`]
+      // Find the handler function
+      const handler = findHandler(commandModule, commandName)
       
       if (handler && typeof handler === 'function') {
         // Get command config from config.js, or use defaults if not found
-        let commandConfig = {}
-        try {
-          const configModule = await import(`../commands/${commandName}/config.js`)
-          commandConfig = configModule.config || {}
-        } catch (configErr) {
-          // config.js doesn't exist, use default config (no permission restriction, use global cooldown)
-          commandConfig = {
-            // No permission restriction - everyone can use (default behavior)
-            // cooldown will use CONFIG.cooldownGlobal if not specified
-          }
-        }
+        const commandConfig = await loadCommandConfig(commandName)
+        
         // Store handler with command name and config for auto socket emission
-        commands[trigger] = { handler, commandName, config: commandConfig }
+        const commandData = { handler, commandName, config: commandConfig }
+        commands[trigger] = commandData
         loadedCommands.push(trigger)
         originalCommandCount++
         
-        // Track aliases for display
-        const aliasTriggers = []
-        
-        // Register aliases if configured
-        if (commandConfig.alias) {
-          // Normalize alias to array (handle both string and array)
-          const aliases = Array.isArray(commandConfig.alias) 
-            ? commandConfig.alias 
-            : [commandConfig.alias]
-          
-          // Register each alias as an additional trigger
-          for (const alias of aliases) {
-            if (alias && typeof alias === 'string') {
-              const aliasTrigger = `${CONFIG.prefix}${alias.toLowerCase()}`
-              // Register alias with same handler and config
-              commands[aliasTrigger] = { handler, commandName, config: commandConfig }
-              loadedCommands.push(aliasTrigger)
-              aliasTriggers.push(aliasTrigger)
-            }
-          }
-        }
+        // Register aliases and get their triggers
+        const aliasTriggers = registerAliases(trigger, commandData, commandConfig)
+        loadedCommands.push(...aliasTriggers)
         
         // Format command display with aliases
-        let commandDisplay = trigger
-        if (aliasTriggers.length > 0) {
-          commandDisplay = `${trigger} (${aliasTriggers.join(', ')})`
-        }
+        const commandDisplay = aliasTriggers.length > 0
+          ? `${trigger} (${aliasTriggers.join(', ')})`
+          : trigger
         originalCommands.push(commandDisplay)
       } else {
         throw new Error(`No handler function found. Export a default function or a handler function.`)
@@ -157,6 +164,35 @@ export function getCommandFiles(extension) {
   return files
 }
 
+// Permission hierarchy (from highest to lowest)
+const PERMISSION_HIERARCHY = ['broadcaster', 'moderator', 'vip', 'subscriber', 'viewer']
+
+// Helper function to get user's permission level
+function getUserPermissionLevel(tags) {
+  // Check if user is broadcaster
+  const isBroadcaster = tags.badges?.broadcaster === '1' || 
+                        tags.badges?.broadcaster === 1 ||
+                        tags['user-id'] === tags['room-id']
+  if (isBroadcaster) return 'broadcaster'
+  
+  // Check if user is moderator
+  const isModerator = tags.mod === true || 
+                      tags.badges?.moderator === '1' || 
+                      tags.badges?.moderator === 1
+  if (isModerator) return 'moderator'
+  
+  // Check if user is VIP
+  const isVIP = tags.badges?.vip === '1' || tags.badges?.vip === 1
+  if (isVIP) return 'vip'
+  
+  // Check if user is subscriber
+  const isSubscriber = tags.subscriber === true || tags.badges?.subscriber !== undefined
+  if (isSubscriber) return 'subscriber'
+  
+  // Default to viewer
+  return 'viewer'
+}
+
 // Helper function to check if user has required permission
 function hasPermission(tags, requiredPermission) {
   // If no permission is required, everyone can use it
@@ -164,46 +200,17 @@ function hasPermission(tags, requiredPermission) {
     return true
   }
   
-  // Check if user is broadcaster
-  const isBroadcaster = tags.badges?.broadcaster === '1' || 
-                        tags.badges?.broadcaster === 1 ||
-                        tags['user-id'] === tags['room-id'] // Alternative check
+  const userLevel = getUserPermissionLevel(tags)
+  const requiredIndex = PERMISSION_HIERARCHY.indexOf(requiredPermission)
+  const userIndex = PERMISSION_HIERARCHY.indexOf(userLevel)
   
-  // Check if user is moderator
-  const isModerator = tags.mod === true || 
-                      tags.badges?.moderator === '1' || 
-                      tags.badges?.moderator === 1 ||
-                      isBroadcaster // Broadcaster is also considered a moderator
-  
-  // Check if user is VIP
-  const isVIP = tags.badges?.vip === '1' || 
-                tags.badges?.vip === 1 ||
-                isModerator // Moderators and above are also considered VIP
-  
-  // Check if user is subscriber
-  const isSubscriber = tags.subscriber === true ||
-                       tags.badges?.subscriber !== undefined ||
-                       isVIP // VIP and above are also considered subscribers
-  
-  // Permission checks (hierarchical: broadcaster > moderator > vip > subscriber > viewer)
-  if (requiredPermission === 'broadcaster') {
-    return isBroadcaster
+  // User has permission if their level is equal or higher (lower index = higher permission)
+  if (requiredIndex === -1) {
+    // Unknown permission, default to allowing (viewer permission)
+    return true
   }
   
-  if (requiredPermission === 'moderator') {
-    return isModerator
-  }
-  
-  if (requiredPermission === 'vip') {
-    return isVIP
-  }
-  
-  if (requiredPermission === 'subscriber') {
-    return isSubscriber
-  }
-  
-  // Unknown permission, default to allowing (viewer permission)
-  return true
+  return userIndex <= requiredIndex
 }
 
 // Check if a message matches a command and execute it
@@ -232,20 +239,16 @@ export function processCommand(client, io, channel, tags, message) {
       const commandKey = `${username}_${trigger}`
       
       // If command has cooldown: 0, bypass all cooldown checks
-      if (commandCooldown === 0) {
-        // No cooldown for this command - skip all rate limiting checks
-      } else {
-        // 1. Check global cooldown (only if command doesn't have cooldown: 0)
-        const timeSinceGlobalCommand = now - globalLastCommandTime
-        if (timeSinceGlobalCommand < CONFIG.cooldownGlobal) {
+      if (commandCooldown > 0) {
+        // Check global cooldown
+        if (now - globalLastCommandTime < CONFIG.cooldownGlobal) {
           // Silently ignore - don't spam chat with rate limit messages
           return true // Command was rate limited
         }
         
-        // 2. Check per-command per-user cooldown
+        // Check per-command per-user cooldown
         const userCommandLastTime = userLastCommandPerCommand.get(commandKey) || 0
-        const timeSinceUserCommandSpecific = now - userCommandLastTime
-        if (timeSinceUserCommandSpecific < commandCooldown) {
+        if (now - userCommandLastTime < commandCooldown) {
           // Silently ignore - don't spam chat with rate limit messages
           return true // Command was rate limited
         }

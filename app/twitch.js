@@ -4,6 +4,12 @@ import ora from 'ora'
 import { processCommand } from './commands.js'
 import { CONFIG } from './config.js'
 
+// Helper function to get environment variable with trimming
+function getEnvVar(name, transform = null) {
+  const value = process.env[name]?.trim() || process.env[name]
+  return transform ? transform(value) : value
+}
+
 // Start Twitch client
 export function startTwitch(io) {
   const spinner = ora({
@@ -16,13 +22,12 @@ export function startTwitch(io) {
 
   return new Promise((resolve, reject) => {
     // Trim credentials to handle whitespace issues from .env parsing
-    const username = process.env.TWITCH_USERNAME?.trim() || process.env.TWITCH_USERNAME
-    let password = process.env.TWITCH_PASSWORD?.trim() || process.env.TWITCH_PASSWORD
-    // Automatically add 'oauth:' prefix if missing (makes it optional)
-    if (password && !password.startsWith('oauth:')) {
-      password = `oauth:${password}`
-    }
-    const channel = process.env.TWITCH_CHANNEL?.trim() || process.env.TWITCH_CHANNEL
+    const username = getEnvVar('TWITCH_USERNAME')
+    const password = getEnvVar('TWITCH_PASSWORD', (pwd) => {
+      // Automatically add 'oauth:' prefix if missing (makes it optional)
+      return pwd && !pwd.startsWith('oauth:') ? `oauth:${pwd}` : pwd
+    })
+    const channel = getEnvVar('TWITCH_CHANNEL')
 
     const silentLogger = {
       info: () => {},     // ← ignore info messages (most spam comes from here)

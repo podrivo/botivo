@@ -11,6 +11,11 @@ import { CONFIG } from './config.js'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
+// Helper function to build project paths
+function getProjectPath(...segments) {
+  return join(__dirname, '..', ...segments)
+}
+
 // Express.js
 const app = express()
 const server = http.createServer(app)
@@ -18,7 +23,7 @@ const server = http.createServer(app)
 // Route handler for index.html (must come before static middleware)
 app.get('/', async (req, res) => {
   try {
-    const htmlPath = join(__dirname, '..', CONFIG.folderOverlay, 'index.html')
+    const htmlPath = getProjectPath(CONFIG.folderOverlay, 'index.html')
     let html = await readFile(htmlPath, 'utf8')
     
     // Inject command HTML files list into the page
@@ -59,7 +64,7 @@ server.on('error', (err) => {
 // Start server
 export async function startOverlay(port) {
   // Validate that index.html exists before starting the server
-  const htmlPath = join(__dirname, '..', CONFIG.folderOverlay, 'index.html')
+  const htmlPath = getProjectPath(CONFIG.folderOverlay, 'index.html')
   try {
     await readFile(htmlPath, 'utf8')
   } catch (error) {

@@ -91,6 +91,22 @@ window.onload = async function() {
     return false
   }
 
+  // Helper function to find handler in a module
+  function findHandler(module) {
+    return module.default || module.handler || module.init
+  }
+
+  // Helper function to create socket wrapper that prevents duplicate listeners
+  function createSocketWrapper(originalSocketOn, initializedEvents) {
+    return function(eventName, callback) {
+      const eventKey = eventName
+      if (!initializedEvents.has(eventKey)) {
+        initializedEvents.add(eventKey)
+        originalSocketOn(eventName, callback)
+      }
+    }
+  }
+
   // Auto-discover and inject command HTML files
   try {
     // Get list of available command HTML files (injected by server)
@@ -125,10 +141,8 @@ window.onload = async function() {
         try {
           const clientModule = await import(`/commands/${htmlFile.command}/overlay.js`)
           
-          // Find handler function - try default export first, then named exports
-          const handler = clientModule.default || 
-                         clientModule.handler || 
-                         clientModule.init
+          // Find handler function
+          const handler = findHandler(clientModule)
           
           if (handler && typeof handler === 'function') {
             // Track which socket events have been set up to prevent duplicate listeners
@@ -140,13 +154,7 @@ window.onload = async function() {
             if (handlerLength > 0) {
               // Wrap socket.on to prevent duplicate event listeners
               const originalSocketOn = socket.on.bind(socket)
-              socket.on = function(eventName, callback) {
-                const eventKey = `${eventName}`
-                if (!initializedEvents.has(eventKey)) {
-                  initializedEvents.add(eventKey)
-                  originalSocketOn(eventName, callback)
-                }
-              }
+              socket.on = createSocketWrapper(originalSocketOn, initializedEvents)
               
               // Temporarily disable animations and audio during initialization
               const originalAnimeAnimate = window.anime?.animate
@@ -201,13 +209,7 @@ window.onload = async function() {
               if (handlerLength > 0) {
                 // For handlers with socket parameter, wrap socket.on to prevent duplicate listeners
                 const originalSocketOn = socket.on.bind(socket)
-                socket.on = function(eventName, callback) {
-                  const eventKey = `${eventName}`
-                  if (!initializedEvents.has(eventKey)) {
-                    initializedEvents.add(eventKey)
-                    originalSocketOn(eventName, callback)
-                  }
-                }
+                socket.on = createSocketWrapper(originalSocketOn, initializedEvents)
                 
                 // Execute the handler (listeners already set up, command logic will run)
                 handler(socket, ...arguments)
