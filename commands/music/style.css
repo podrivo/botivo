@@ -1,0 +1,52 @@
+/* !music */
+
+.music {
+  z-index: 50;
+}
+
+.wrapper {
+  height: 100%;
+  left: 0;
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+.music .window {
+  overflow: hidden;
+  pointer-events: all;
+  position: absolute;
+  right: 50%;
+  top: 50%;
+  transform-origin: center center;
+  transform: translateX(1160px) translateY(-600px);
+  transition: width 0.3s ease, height 0.3s ease, transform 0.3s ease;
+  width: 960px;
+  height: 570px;
+}
+
+.music .window-body {
+  background: none;
+  background-color: #000;
+  height: 100%;
+  position: relative;
+}
+
+.music #player {
+  bottom: 0;
+  height: 100%;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 100%;
+}
+
+/* !music - zoom */
+
+.music.zoom .window {
+  height: 1440px;
+  transform: translateX(50%) translateY(-50%);
+  width: 2560px;
+}
