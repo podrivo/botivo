@@ -18,6 +18,6 @@ export default function(client, io, channel, tags, message) {
   client.say(channel, `@${tags.username} used ${message}. The is the Twitch chat example message!`)
 
   // Print log to server
-  console.log('▒ !command used: Example message')
+  console.log('▒ !example was used. This is a test message.')
   
 }
