@@ -27,8 +27,7 @@ export default function(client, io, channel, tags, message) {
     brbActive = true
     client.say(channel, 'Be right back...')
     
-    // Let automatic emission handle io.emit('brb')
-    return // Return undefined to allow automatic emission
+    return
   }
   
   // Handle internal !back command (only works if brb is active)
@@ -51,6 +50,5 @@ export default function(client, io, channel, tags, message) {
   }
   
   // If message doesn't match !brb or !back, return false
-  // This shouldn't happen since this handler is only called for !brb or !back (via alias)
   return false
 }
