@@ -25,7 +25,7 @@ export default function(client, io, channel, tags, message) {
     }
     
     brbActive = true
-    client.say(channel, 'podrivo will be right back')
+    client.say(channel, 'Be right back...')
     
     // Let automatic emission handle io.emit('brb')
     return // Return undefined to allow automatic emission
@@ -41,7 +41,7 @@ export default function(client, io, channel, tags, message) {
     }
     
     brbActive = false
-    client.say(channel, 'podrivo is back to action')
+    client.say(channel, 'Back to action!')
     
     // Emit back event to overlay
     io.emit('back')
