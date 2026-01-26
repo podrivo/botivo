@@ -66,11 +66,11 @@ Commands
 ---
 Each command consists of:
 ```js
-command.js  // Server side of things
-overlay.js  // Overlay side of things
-config.js   // Set custom configurations
-index.html  // HTML is injected into the overlay
-style.css   // CSS is loaded into the /overlay/index.html
+command.js  // Server side of things (required)
+overlay.js  // Overlay side of things (optional)
+config.js   // Set custom configurations (optional)
+index.html  // HTML is injected into the overlay (optional)
+style.css   // CSS is loaded into the overlay (optional)
 ```
 
 Commands `!example` and `!train` are just examples of how to use Botivo. To create a new command, duplicate the `/commands/example` and rename the folder `/commands/mycommand/`.
