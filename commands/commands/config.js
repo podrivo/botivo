@@ -16,6 +16,9 @@
  * 
  * Aliases:
  * - alias: string | string[]   // Alternative command names that trigger the same command
+ *   Examples:
+ *   - alias: 'demo'            // Single alias: !example and !demo both work
+ *   - alias: ['demo', 'test']  // Multiple aliases: !demo and !test all work
  */
 
 export const config = {

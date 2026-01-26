@@ -140,6 +140,9 @@ export default function (socket) {
 /**
  * Command Configuration
  * 
+ * Active:
+ * - active: boolean            // Whether the command is available (defaults to true if not set)
+ * 
  * Permissions:
  * - permission: 'broadcaster'  // Only broadcaster
  * - permission: 'moderator'    // Broadcaster and moderators
@@ -160,7 +163,8 @@ export default function (socket) {
 export const config = {
   cooldown: 5000,
   alias: 'demo',
-  permission: 'viewer'
+  permission: 'viewer',
+  active: true
 }
 
 ```
