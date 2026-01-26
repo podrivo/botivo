@@ -11,7 +11,7 @@
 
 const STORAGE_KEY_PLAYLIST = 'playlist'
 const YOUTUBE_API_URL = 'https://www.youtube.com/iframe_api'
-const DEFAULT_VIDEO_ID = 'su2ZN0qCM6Y' // Placeholder video
+const DEFAULT_VIDEO_ID = 'su2ZN0qCM6Y'
 
 // Player configuration
 const PLAYER_CONFIG = {
@@ -23,7 +23,6 @@ const PLAYER_CONFIG = {
     enablejsapi: 1,
     fs: 0,
     iv_load_policy: 3,
-    origin: location.href,
     rel: 0
   }
 }
@@ -109,7 +108,7 @@ function initializePlayer() {
     ...PLAYER_CONFIG,
     videoId: DEFAULT_VIDEO_ID,
     events: {
-      onReady: onPlayerReady,
+      onReady: null,
       onStateChange: onPlayerStateChange
     }
   })
@@ -125,13 +124,6 @@ function initializePlayer() {
  */
 window.onYouTubeIframeAPIReady = function() {
   initializePlayer()
-}
-
-/**
- * Called when the player is ready
- */
-function onPlayerReady(event) {
-  event.target.playVideo()
 }
 
 /**

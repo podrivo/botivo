@@ -25,11 +25,11 @@ const VOLUME_MIN = 0
 const VOLUME_MAX = 100
 const COMMAND_NAME = 'music'
 const SOCKET_EVENT_QUEUE = 'queue'
-const MESSAGE_USAGE = 'Use !music youtube-link, !music pause, !music next, !music vol 0-100, !music queue'
+const MESSAGE_USAGE = 'Use !music youtube-link | play | pause | next | vol 0-100 | queue | zoom'
 const MESSAGE_VOLUME = 'Volume set to {volume}'
-const MESSAGE_VOLUME_USAGE = 'Use \'!music vol 0-100\''
-const MESSAGE_QUEUE_SIZE_SINGULAR = '[1] song in queue'
-const MESSAGE_QUEUE_SIZE_PLURAL = '[{size}] songs in queue'
+const MESSAGE_VOLUME_USAGE = 'Use !music vol 0-100'
+const MESSAGE_QUEUE_SIZE_SINGULAR = '1 song in queue'
+const MESSAGE_QUEUE_SIZE_PLURAL = '{size} songs in queue'
 
 // ============================================================================
 // Queue Listener Setup (for responding to queue size requests)
