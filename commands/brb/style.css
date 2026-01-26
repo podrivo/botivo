@@ -1,0 +1,67 @@
+/* !brb command - Border */
+.border {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  border: 2px solid transparent;
+  animation: rainbow 120s linear infinite;
+  transition: all 1s cubic-bezier(0.22, 1, 0.36, 1);
+  color: white;
+  z-index: 1300;
+  pointer-events: none;
+  box-sizing: border-box;
+}
+
+.border.on {
+  border-width: 160px;
+}
+
+@keyframes rainbow {
+  0% { border-color: red; }
+  7% { border-color: orange; }
+  14% { border-color: yellow; }
+  21% { border-color: lime; }
+  28% { border-color: green; }
+  35% { border-color: aqua; }
+  42% { border-color: blue; }
+  49% { border-color: navy; }
+  56% { border-color: indigo; }
+  63% { border-color: purple; }
+  70% { border-color: magenta; }
+  77% { border-color: pink; }
+  84% { border-color: lightcoral; }
+  91% { border-color: tomato; }
+  100% { border-color: red; }
+}
+
+/* !brb command - Text */
+.brb {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  z-index: 1200;
+  pointer-events: none;
+}
+
+.brb span {
+  opacity: 0;
+  font-family: sans-serif;
+  font-size: 384px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  transition: all 1s cubic-bezier(0.22, 1, 0.36, 1);
+  filter: invert(1);
+}
+
+.brb span.on {
+  opacity: 1;
+}
