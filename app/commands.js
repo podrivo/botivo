@@ -303,3 +303,32 @@ export function processCommand(client, io, channel, tags, message) {
   return false // No command matched
 }
 
+// Get list of all loaded commands with their aliases
+export function getCommandsList() {
+  const commandNames = scanCommandDirectories()
+  const commandsWithAliases = []
+  
+  for (const commandName of commandNames) {
+    const trigger = `${CONFIG.prefix}${commandName}`
+    const commandData = commands[trigger]
+    
+    if (commandData) {
+      const config = commandData.config || {}
+      const aliases = config.alias || []
+      
+      // Format aliases with prefix
+      const aliasTriggers = Array.isArray(aliases) 
+        ? aliases.map(alias => `${CONFIG.prefix}${alias.toLowerCase()}`)
+        : aliases ? [`${CONFIG.prefix}${aliases.toLowerCase()}`] : []
+      
+      commandsWithAliases.push({
+        trigger,
+        aliases: aliasTriggers
+      })
+    }
+  }
+  
+  // Sort by trigger
+  return commandsWithAliases.sort((a, b) => a.trigger.localeCompare(b.trigger))
+}
+
