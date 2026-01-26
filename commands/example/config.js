@@ -1,6 +1,9 @@
 /**
  * Command Configuration
  * 
+ * Active:
+ * - active: boolean            // Whether the command is available (defaults to true if not set)
+ * 
  * Permissions:
  * - permission: 'broadcaster'  // Only broadcaster
  * - permission: 'moderator'    // Broadcaster and moderators
@@ -21,5 +24,4 @@
 export const config = {
   cooldown: 5000,
   alias: 'demo',
-  permission: 'viewer'
 }

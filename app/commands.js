@@ -90,6 +90,12 @@ export async function startCommands() {
         // Get command config from config.js, or use defaults if not found
         const commandConfig = await loadCommandConfig(commandName)
         
+        // Check if command is active (defaults to true if not set)
+        if (commandConfig.active === false) {
+          // Skip inactive commands - don't register them
+          continue
+        }
+        
         // Store handler with command name and config for auto socket emission
         const commandData = { handler, commandName, config: commandConfig }
         commands[trigger] = commandData
@@ -223,6 +229,12 @@ export function processCommand(client, io, channel, tags, message) {
       const { handler, commandName, config } = commandData
       const username = tags.username || 'unknown'
       const now = Date.now()
+      
+      // Check if command is active (defaults to true if not set)
+      if (config?.active === false) {
+        // Silently ignore - command is inactive
+        return true // Command was blocked because it's inactive
+      }
       
       // Permission check - must come before rate limiting
       const requiredPermission = config?.permission
