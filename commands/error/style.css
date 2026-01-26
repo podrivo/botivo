@@ -1,0 +1,23 @@
+/* !error command */
+.error {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #000080;
+  background-image: url('/commands/error/error.svg');
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: auto 80%;
+  z-index: 1400;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* !error - active */
+.error.on {
+  opacity: 1;
+  visibility: visible;
+}
