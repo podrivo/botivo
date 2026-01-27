@@ -1,10 +1,3 @@
-/**
- * Music Command Overlay Handler
- * 
- * Manages YouTube player and playlist functionality in the overlay.
- * Handles socket events from the command handler to control playback.
- */
-
 // ============================================================================
 // Constants
 // ============================================================================

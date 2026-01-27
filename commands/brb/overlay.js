@@ -1,11 +1,3 @@
-/**
- * BRB Command Overlay Handler
- * 
- * Handles the brb command overlay animation.
- * When !brb is triggered, shows a rainbow border and "BRB" text.
- * When !back is triggered, hides the border and text.
- */
-
 // Track if listeners are set up (module-level to persist across calls)
 let listenersSetup = false
 

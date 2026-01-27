@@ -1,10 +1,3 @@
-/**
- * Nice Command Overlay Handler
- * 
- * Handles the nice command overlay animation.
- * When !nice is triggered, animates the "NICE" text characters and plays audio.
- */
-
 export default function () {
 
   // Get DOM elements - all character elements

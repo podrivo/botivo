@@ -1,4 +1,3 @@
-/* !music */
 .music-wrapper {
   z-index: 50;
   width: 100%;
@@ -20,7 +19,7 @@
   height: 225px;
 }
 
-/* !music zoom */
+/* zoom */
 .music-wrapper.zoom #player {
   width: 100%;
   height: 100%;

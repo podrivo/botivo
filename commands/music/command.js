@@ -9,12 +9,6 @@
  * - !music vol <0-100> - Set volume
  * - !music zoom - Toggle zoom mode
  * - !music queue - Show queue size in chat
- * 
- * @param {Object} client - Twitch client instance (tmi.js Client)
- * @param {Object} io - Socket.IO server instance for emitting events to overlay
- * @param {string} channel - Twitch channel name where the command was triggered
- * @param {Object} tags - Message tags with user info (username, display-name, mod, subscriber, badges, etc.)
- * @param {string} message - The full message text that triggered the command
  */
 
 // ============================================================================

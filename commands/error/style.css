@@ -1,4 +1,3 @@
-/* !error command */
 .error {
   position: absolute;
   top: 0;
@@ -16,7 +15,7 @@
   pointer-events: none;
 }
 
-/* !error - active */
+/* Active */
 .error.on {
   opacity: 1;
   visibility: visible;

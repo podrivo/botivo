@@ -19,5 +19,4 @@ export default function(client, io, channel, tags, message) {
   // This is optional
   io.emit('additional-a')
   io.emit('additional-b')
-  
 }

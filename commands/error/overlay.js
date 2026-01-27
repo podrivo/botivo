@@ -1,11 +1,5 @@
-/**
- * Error Command Overlay Handler
- * 
- * Handles the error command overlay animation and audio.
- * When triggered, flashes an error screen overlay.
- */
-
 export default function () {
+
   // Get DOM element
   const errorElement = document.querySelector('.error')
   

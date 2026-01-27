@@ -1,16 +1,3 @@
-/**
- * BRB Command Handler
- * 
- * Handles !brb command and internal !back command.
- * !back can only be used after !brb has been triggered.
- * 
- * @param {Object} client - Twitch client instance (tmi.js Client)
- * @param {Object} io - Socket.IO server instance for emitting events to overlay
- * @param {string} channel - Twitch channel name where the command was triggered
- * @param {Object} tags - Message tags with user info (username, display-name, mod, subscriber, badges, etc.)
- * @param {string} message - The full message text that triggered the command
- */
-
 // Track if brb is currently active
 let brbActive = false
 
