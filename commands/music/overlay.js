@@ -10,30 +10,17 @@ const ELEMENT_PLAYER = '#player'
 // Playlist Management
 // ============================================================================
 
-/**
- * Gets the current playlist from localStorage
- * @returns {string[]} - Array of video IDs
- */
+// Gets the current playlist from localStorage
 function getPlaylist() {
   const stored = localStorage.getItem(STORAGE_PLAYLIST)
+
+  // Return Array of video IDs
   return stored ? JSON.parse(stored) : []
 }
 
-/**
- * Saves the playlist to localStorage
- * @param {string[]} playlist - Array of video IDs
- */
+// Saves the playlist to localStorage
 function savePlaylist(playlist) {
   localStorage.setItem(STORAGE_PLAYLIST, JSON.stringify(playlist))
-}
-
-/**
- * Initializes playlist in localStorage if it doesn't exist
- */
-function initializePlaylist() {
-  if (!localStorage.getItem(STORAGE_PLAYLIST)) {
-    savePlaylist([])
-  }
 }
 
 // ============================================================================
@@ -44,38 +31,11 @@ let youtubePlayer = null
 let isPlayerInitialized = false
 
 /**
- * Loads the YouTube IFrame API script
- */
-function loadYouTubeAPI() {
-  // Check if API is already loaded
-  if (window.YT && window.YT.Player) {
-    initializePlayer()
-    return
-  }
-  
-  // Check if script is already being loaded
-  if (document.querySelector(`script[src="${YOUTUBE_API_URL}"]`)) {
-    return
-  }
-  
-  const script = document.createElement('script')
-  script.src = YOUTUBE_API_URL
-  const firstScript = document.getElementsByTagName('script')[0]
-  firstScript.parentNode.insertBefore(script, firstScript)
-}
-
-/**
  * Initializes the YouTube player
  * Must be called after YouTube API is loaded
  */
 function initializePlayer() {
   if (isPlayerInitialized) return
-  
-  const playerElement = document.querySelector(ELEMENT_PLAYER)
-  if (!playerElement) {
-    console.warn('Music player: Player element not found')
-    return
-  }
   
   youtubePlayer = new YT.Player(ELEMENT_PLAYER.slice(1), {
     playerVars: {
@@ -104,9 +64,9 @@ function initializePlayer() {
  * YouTube API callback (must be global)
  * Called automatically when YouTube API loads
  */
-window.onYouTubeIframeAPIReady = function() {
-  initializePlayer()
-}
+// window.onYouTubeIframeAPIReady = function() {
+//   initializePlayer()
+// }
 
 // Handles player state changes
 function onPlayerStateChange(event) {
@@ -159,9 +119,9 @@ window.nextVideo = playNextVideo
  * Gets the music element from DOM
  * @returns {HTMLElement|null}
  */
-function getMusicElement() {
-  return document.querySelector(ELEMENT_MUSIC)
-}
+// function getMusicElement() {
+//   return document.querySelector(ELEMENT_MUSIC)
+// }
 
 
 // ============================================================================
@@ -188,10 +148,7 @@ function handleNextCommand() {
 }
 
 // Handles zoom command
-function handleZoomCommand() {
-  const musicEl = getMusicElement()
-  if (!musicEl) return
-  
+function handleZoomCommand(musicEl) {
   musicEl.classList.toggle('zoom')
 }
 
@@ -223,45 +180,38 @@ function handleQueueAddCommand(videoId) {
   savePlaylist(playlist)
 }
 
-// ============================================================================
-// Socket Event Handler
-// ============================================================================
 
-/**
- * Main socket event handler for music commands
- * @param {string} command - Command name (play, pause, next, zoom, vol, queue, or null for queue add)
- * @param {string|number} extra - Additional parameter (video ID for queue add, volume for vol)
- */
-function handleMusicCommand(events, command, extra) {
-  const musicEl = getMusicElement()
-  if (!musicEl) return
-  
+export default function (events, command, extra) {
+
+  // Get DOM element
+  const musicEl = document.querySelector(ELEMENT_MUSIC)
+
   // Route to appropriate handler
   switch (command) {
     case 'play':
       handlePlayCommand()
       break
-      
+
     case 'pause':
       handlePauseCommand()
       break
-      
+
     case 'next':
       handleNextCommand()
       break
-      
+
     case 'zoom':
-      handleZoomCommand()
+      handleZoomCommand(musicEl)
       break
-      
+
     case 'vol':
       handleVolumeCommand(extra)
       break
-      
+
     case 'queue':
       handleQueueCommand(events)
       break
-      
+
     // Default: treat as queue add (command is null, extra is video ID)
     default:
       if (extra) {
@@ -269,23 +219,26 @@ function handleMusicCommand(events, command, extra) {
       }
       break
   }
+
+  // Initializes playlist in localStorage if it doesn't exist
+  if (!localStorage.getItem(STORAGE_PLAYLIST)) {
+    savePlaylist([])
+  }
+
+  // Check if YouTube API is already loaded
+  if (window.YT && window.YT.Player) {
+    initializePlayer()
+    // return
+  }
+
+  // Check if script is already being loaded
+  if (document.querySelector(`script[src="${YOUTUBE_API_URL}"]`)) {
+    return
+  }
+
+  // Load YouTube API script
+  const script = document.createElement('script')
+  script.src = YOUTUBE_API_URL
+  const firstScript = document.getElementsByTagName('script')[0]
+  firstScript.parentNode.insertBefore(script, firstScript)
 }
-
-// ============================================================================
-// Initialization
-// ============================================================================
-
-export function init(events) {
-  // Initialize playlist storage
-  initializePlaylist()
-
-  // Load YouTube API
-  loadYouTubeAPI()
-
-  // Set up socket listener for music subcommands
-  events.on('music', (command, extra) => {
-    handleMusicCommand(events, command, extra)
-  })
-}
-
-export default function (events) {}
