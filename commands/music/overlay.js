@@ -30,10 +30,8 @@ function savePlaylist(playlist) {
 let youtubePlayer = null
 let isPlayerInitialized = false
 
-/**
- * Initializes the YouTube player
- * Must be called after YouTube API is loaded
- */
+// Initializes the YouTube player
+// Must be called after YouTube API is loaded
 function initializePlayer() {
   if (isPlayerInitialized) return
   
@@ -111,18 +109,6 @@ function playNextVideo() {
 // Make playNextVideo globally accessible (used by command handler)
 window.nextVideo = playNextVideo
 
-// ============================================================================
-// UI Effects
-// ============================================================================
-
-/**
- * Gets the music element from DOM
- * @returns {HTMLElement|null}
- */
-// function getMusicElement() {
-//   return document.querySelector(ELEMENT_MUSIC)
-// }
-
 
 // ============================================================================
 // Command Handlers
@@ -152,10 +138,7 @@ function handleZoomCommand(musicEl) {
   musicEl.classList.toggle('zoom')
 }
 
-/**
- * Handles volume command
- * @param {number} volume - Volume level (0-100)
- */
+// Handles volume command
 function handleVolumeCommand(volume) {
   if (!isNaN(volume) && volume >= 0 && volume <= 100 && youtubePlayer) {
     youtubePlayer.setVolume(volume)
@@ -168,10 +151,7 @@ function handleQueueCommand(events) {
   events.emit('queue', playlist)
 }
 
-/**
- * Handles adding a video to the queue
- * @param {string} videoId - YouTube video ID
- */
+// Handles adding a video to the queue
 function handleQueueAddCommand(videoId) {
   if (!videoId) return
   
