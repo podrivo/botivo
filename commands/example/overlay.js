@@ -27,11 +27,9 @@ export default function (events) {
       }, 2500)
     }
   })
-}
 
-// Grab additional events from command.js
-// This is optional
-export function init(events) {
+  // Grab additional events from command.js
+  // This is optional
   events.on('example-additional-a', () => { console.log(`'example-additional-a' received`) })
   events.on('example-additional-b', () => { console.log(`'example-additional-b' received`) })
 }

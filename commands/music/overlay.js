@@ -1,30 +1,10 @@
-// ============================================================================
-// Constants
-// ============================================================================
 
-const STORAGE_KEY_PLAYLIST = 'playlist'
+// Constants
+const STORAGE_PLAYLIST = 'playlist'
 const YOUTUBE_API_URL = 'https://www.youtube.com/iframe_api'
 const DEFAULT_VIDEO_ID = 'su2ZN0qCM6Y'
-
-// Player configuration
-const PLAYER_CONFIG = {
-  playerVars: {
-    autoplay: 0,
-    cc_load_policy: 0,
-    controls: 0,
-    disablekb: 1,
-    enablejsapi: 1,
-    fs: 0,
-    iv_load_policy: 3,
-    rel: 0
-  }
-}
-
-// DOM selectors
-const SELECTORS = {
-  MUSIC: '.music-wrapper',
-  PLAYER: '#player'
-}
+const ELEMENT_MUSIC = '.music-wrapper'
+const ELEMENT_PLAYER = '#player'
 
 // ============================================================================
 // Playlist Management
@@ -35,7 +15,7 @@ const SELECTORS = {
  * @returns {string[]} - Array of video IDs
  */
 function getPlaylist() {
-  const stored = localStorage.getItem(STORAGE_KEY_PLAYLIST)
+  const stored = localStorage.getItem(STORAGE_PLAYLIST)
   return stored ? JSON.parse(stored) : []
 }
 
@@ -44,14 +24,14 @@ function getPlaylist() {
  * @param {string[]} playlist - Array of video IDs
  */
 function savePlaylist(playlist) {
-  localStorage.setItem(STORAGE_KEY_PLAYLIST, JSON.stringify(playlist))
+  localStorage.setItem(STORAGE_PLAYLIST, JSON.stringify(playlist))
 }
 
 /**
  * Initializes playlist in localStorage if it doesn't exist
  */
 function initializePlaylist() {
-  if (!localStorage.getItem(STORAGE_KEY_PLAYLIST)) {
+  if (!localStorage.getItem(STORAGE_PLAYLIST)) {
     savePlaylist([])
   }
 }
@@ -91,14 +71,23 @@ function loadYouTubeAPI() {
 function initializePlayer() {
   if (isPlayerInitialized) return
   
-  const playerElement = document.querySelector(SELECTORS.PLAYER)
+  const playerElement = document.querySelector(ELEMENT_PLAYER)
   if (!playerElement) {
     console.warn('Music player: Player element not found')
     return
   }
   
-  youtubePlayer = new YT.Player(SELECTORS.PLAYER.slice(1), {
-    ...PLAYER_CONFIG,
+  youtubePlayer = new YT.Player(ELEMENT_PLAYER.slice(1), {
+    playerVars: {
+      autoplay: 0,
+      cc_load_policy: 0,
+      controls: 0,
+      disablekb: 1,
+      enablejsapi: 1,
+      fs: 0,
+      iv_load_policy: 3,
+      rel: 0
+    },
     videoId: DEFAULT_VIDEO_ID,
     events: {
       onReady: null,
@@ -119,9 +108,7 @@ window.onYouTubeIframeAPIReady = function() {
   initializePlayer()
 }
 
-/**
- * Handles player state changes
- */
+// Handles player state changes
 function onPlayerStateChange(event) {
   switch (event.data) {
     case YT.PlayerState.PLAYING:
@@ -146,9 +133,7 @@ function onPlayerStateChange(event) {
 // Playlist Playback
 // ============================================================================
 
-/**
- * Plays the next video in the queue
- */
+// Plays the next video in the queue
 function playNextVideo() {
   const playlist = getPlaylist()
   
@@ -175,7 +160,7 @@ window.nextVideo = playNextVideo
  * @returns {HTMLElement|null}
  */
 function getMusicElement() {
-  return document.querySelector(SELECTORS.MUSIC)
+  return document.querySelector(ELEMENT_MUSIC)
 }
 
 
@@ -183,34 +168,26 @@ function getMusicElement() {
 // Command Handlers
 // ============================================================================
 
-/**
- * Handles play command
- */
+// Handles play command
 function handlePlayCommand() {
   if (youtubePlayer) {
     youtubePlayer.playVideo()
   }
 }
 
-/**
- * Handles pause command
- */
+// Handles pause command
 function handlePauseCommand() {
   if (youtubePlayer) {
     youtubePlayer.pauseVideo()
   }
 }
 
-/**
- * Handles next command
- */
+// Handles next command
 function handleNextCommand() {
   playNextVideo()
 }
 
-/**
- * Handles zoom command
- */
+// Handles zoom command
 function handleZoomCommand() {
   const musicEl = getMusicElement()
   if (!musicEl) return
@@ -228,9 +205,7 @@ function handleVolumeCommand(volume) {
   }
 }
 
-/**
- * Handles queue command - sends current queue size back to server
- */
+// Handles queue command - sends current queue size back to server
 function handleQueueCommand(events) {
   const playlist = getPlaylist()
   events.emit('queue', playlist)
@@ -313,9 +288,4 @@ export function init(events) {
   })
 }
 
-// Default handler is kept for consistency with the rest of the commands,
-// but all per-command logic is driven by the 'music' event listener above.
-export default function(events) {
-  // No-op: music overlay reacts via the 'music' socket event and
-  // handleMusicCommand, not via direct command invocations.
-}
+export default function (events) {}
