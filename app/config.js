@@ -6,14 +6,13 @@ export const CONFIG = {
   folderOverlay: 'overlay',    // Directory name where overlay files are stored
   cooldownGlobal: 5000,        // Global cooldown if a command doesn't specify its own
 
-  // Built-in (default) commands live in app/commands.js
-  // These configs follow the same shape as ../commands/<name>/config.js
+  // Built-in default commands
   defaultCommands: {
     commands: {
       active: true,
       cooldown: 0,
       alias: ['command'],
-      showAliases: false         // Show aliases in !commands output: "!example [!demo]" vs "!example"
+      showAliases: false // Show aliases in !commands output: "!example [!demo]" vs "!example"
     },
     kill: {
       active: true,

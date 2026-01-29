@@ -17,7 +17,7 @@ function getEnvVar(name, transform = null) {
 }
 
 // Start Twitch client
-export function startTwitch(io) {
+export function startTwitch(events) {
   const spinner = ora({
     spinner: 'dots4',
     color: 'white',
@@ -43,7 +43,7 @@ export function startTwitch(io) {
       log:   () => {}
     };
 
-    const client = new tmi.Client({
+    const twitch = new tmi.Client({
       options: {
         debug: true
       },
@@ -61,7 +61,7 @@ export function startTwitch(io) {
     let connectionTimeout
     let isResolved = false
 
-    client.on('connected', () => {
+    twitch.on('connected', () => {
       if (connectionTimeout) clearTimeout(connectionTimeout)
       if (isResolved) return
       isResolved = true
@@ -69,7 +69,7 @@ export function startTwitch(io) {
       spinner.stop()
       process.stdout.write(`\r\x1b[K${MESSAGE_SUCCESS_CONNECTED.replace('{channel}', channel).replace('{username}', username)}\n`)
 
-      resolve(client)
+      resolve(twitch)
     })
     // client.on('disconnected', () => {console.error(`▒ Twitch disconnected`)})
 
@@ -80,12 +80,12 @@ export function startTwitch(io) {
       spinner.stop()
       const errorMsg = 'Twitch connection timeout. Check your TWITCH_USERNAME and TWITCH_PASSWORD in .env (make sure password has no extra spaces)'
       process.stdout.write(`\r\x1b[K${MESSAGE_ERROR_CONNECTION_TIMEOUT.replace('{error}', errorMsg)}\n`)
-      client.disconnect()
+      twitch.disconnect()
       reject(new Error(errorMsg))
       process.exit(1)
     }, 10000)
 
-    client.connect().catch((err) => {
+    twitch.connect().catch((err) => {
       if (connectionTimeout) clearTimeout(connectionTimeout)
       if (isResolved) return
       isResolved = true
@@ -100,11 +100,11 @@ export function startTwitch(io) {
     })
 
     // Message received
-    client.on('message', (channel, tags, message, self) => {
+    twitch.on('message', (channel, tags, message, self) => {
       if (self) return
 
       // Process commands
-      processCommand(client, io, channel, tags, message)
+      processCommand(twitch, events, channel, tags, message)
     })
   })
 }

@@ -1,7 +1,7 @@
 // Track if brb is currently active
 let brbActive = false
 
-export default function(client, io, channel, tags, message) {
+export default function(twitch, events, channel, tags, message) {
   const messageLower = message.toLowerCase().trim()
   
   // Handle !brb command
@@ -12,7 +12,7 @@ export default function(client, io, channel, tags, message) {
     }
     
     brbActive = true
-    client.say(channel, 'Be right back...')
+    twitch.say(channel, 'Be right back...')
     
     return
   }
@@ -27,10 +27,10 @@ export default function(client, io, channel, tags, message) {
     }
     
     brbActive = false
-    client.say(channel, 'Back to action!')
+    twitch.say(channel, 'Back to action!')
     
     // Emit back event to overlay
-    io.emit('back')
+    events.emit('back')
     
     // Return false to prevent auto-emission (we're handling it manually)
     return false

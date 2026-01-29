@@ -7,7 +7,7 @@ import { CONFIG } from './config.js'
 // Messages
 const MESSAGE_ERROR_SCANNING_DIRECTORY = '▒ Commands    × ERROR: Error scanning commands directory: {error}'
 const MESSAGE_ERROR_LOADING_COMMAND    = '▒ Commands    × ERROR: Error loading command {commandName}: {error}'
-const MESSAGE_SUCCESS_LOADED_COMMANDS  = '▒ Commands    ✓ Successfully loaded {count} commands'
+const MESSAGE_SUCCESS_LOADED_COMMANDS  = '▒ Commands    ✓ Successfully loaded {countCustom} custom and {countDefault} built-in commands'
 const MESSAGE_ERROR_SCANNING_FILES     = '▒ Commands    × ERROR: Error scanning for {extension} files: {error}'
 const MESSAGE_COMMAND_USED             = '▒ Commands    ✓ {trigger} by {username}{message}'
 const MESSAGE_ERROR_EXECUTING_COMMAND  = '▒ Commands    × ERROR: Error executing command {trigger}: {error}'
@@ -103,7 +103,7 @@ export async function startCommands() {
   // Register built-in (default) commands first
   registerDefaultCommand(
     'commands',
-    function handleCommands(client, io, channel) {
+    function handleCommands(twitch, events, channel) {
       const commandsList = getCommandsList()
       const showAliases = CONFIG.defaultCommands?.commands?.showAliases === true
 
@@ -119,7 +119,7 @@ export async function startCommands() {
       })
 
       const commandsString = formattedCommands.map(s => s.trim()).filter(Boolean).join(', ')
-      client.say(channel, `Available commands: ${commandsString}`)
+      twitch.say(channel, `Available commands: ${commandsString}`)
     },
     CONFIG.defaultCommands?.commands || {}
   )
@@ -187,8 +187,11 @@ export async function startCommands() {
   }
   
   // Log all loaded commands in a single message
-  if (originalCommandCount > 0) {
-    console.log(MESSAGE_SUCCESS_LOADED_COMMANDS.replace('{count}', originalCommandCount))
+  const countDefault = defaultCommands.length
+  if (originalCommandCount > 0 || countDefault > 0) {
+    console.log(MESSAGE_SUCCESS_LOADED_COMMANDS
+      .replace('{countCustom}', originalCommandCount)
+      .replace('{countDefault}', countDefault))
   }
   
   commandsLoaded = true
@@ -286,7 +289,7 @@ function hasPermission(tags, requiredPermission) {
 }
 
 // Check if a message matches a command and execute it
-export function processCommand(client, io, channel, tags, message) {
+export function processCommand(twitch, events, channel, tags, message) {
   const messageLower = message.toLowerCase().trim()
   
   // Check for exact match or command with arguments
@@ -356,19 +359,19 @@ export function processCommand(client, io, channel, tags, message) {
         console.log(logMessage)
         
         // Emit to overlay console
-        io.emit('command-log', {
+        events.emit('command-log', {
           command: trigger,
           username: username,
           message: message
         })
         
         // Execute handler
-        const result = handler(client, io, channel, tags, message)
+        const result = handler(twitch, events, channel, tags, message)
         
         // Automatically emit socket event using command name (unless handler returns false)
         // This allows commands to opt-out by returning false if they want to handle emission manually
         if (result !== false) {
-          io.emit(commandName)
+          events.emit(commandName)
         }
         
         return true // Command was handled

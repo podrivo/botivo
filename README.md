@@ -79,25 +79,25 @@ Commands `!example` and `!train` are just examples of how to use Botivo. To crea
 ```js
 /**
  * Command handler function
- * @param {Object} client - Twitch client instance (tmi.js Client)
- * @param {Object} io - Socket.IO server instance for emitting events to overlay
+ * @param {Object} twitch - Twitch client instance (tmi.js Client)
+ * @param {Object} events - Socket.IO server instance for emitting events to overlay
  * @param {string} channel - Twitch channel name where the command was triggered
  * @param {Object} tags - Message tags with user info (username, display-name, mod, subscriber, badges, etc.)
  * @param {string} message - The full message text that triggered the command
  */
 
-export default function(client, io, channel, tags, message) {
+export default function(twitch, events, channel, tags, message) {
   
   // Send a message to chat
-  client.say(channel, `@${tags.username} used ${message}. The is the Twitch chat example message!`)
+  twitch.say(channel, `@${tags.username} used ${message}. The is the Twitch chat example message!`)
 
   // Print log to server
   console.log('▒ !example was used. This is a test message.')
 
   // You can also emit additional events to the overlay
   // This is optional
-  io.emit('extra-event-a')
-  io.emit('extra-event-b')
+  events.emit('extra-event-a')
+  events.emit('extra-event-b')
 }
 ```
 

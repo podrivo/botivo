@@ -1,5 +1,5 @@
-export default function(client, io, channel, tags, message) {
+export default function(twitch, events, channel, tags, message) {
 
   // Send a chat message
-  client.say(process.env.TWITCH_CHANNEL, `@${tags.username}, hop on! Train is about to leave!`)
+  twitch.say(process.env.TWITCH_CHANNEL, `@${tags.username}, hop on! Train is about to leave!`)
 }

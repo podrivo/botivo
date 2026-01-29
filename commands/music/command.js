@@ -37,10 +37,10 @@ let isQueueListenerSetup = false
  * Sets up the queue event listener to respond to queue size requests from overlay
  * Uses lazy initialization - only sets up once on first command call
  */
-function setupQueueListener(io, client, channel) {
+function setupQueueListener(events, twitch, channel) {
   if (isQueueListenerSetup) return
   
-  twitchClient = client
+  twitchClient = twitch
   twitchChannel = channel
   isQueueListenerSetup = true
   
@@ -62,12 +62,12 @@ function setupQueueListener(io, client, channel) {
   }
   
   // Attach listener to all existing connected sockets
-  io.sockets.sockets.forEach((socket) => {
+  events.sockets.sockets.forEach((socket) => {
     socket.on(SOCKET_EVENT_QUEUE, handleQueueSizeRequest)
   })
   
   // Attach listener to future connections
-  io.on('connection', (socket) => {
+  events.on('connection', (socket) => {
     socket.on(SOCKET_EVENT_QUEUE, handleQueueSizeRequest)
   })
 }
@@ -156,66 +156,66 @@ const SIMPLE_COMMANDS = ['play', 'pause', 'next', 'zoom', 'queue']
  * Handles volume command
  * Assumes volume has already been validated
  */
-function handleVolumeCommand(io, client, channel, volume) {
-  io.emit(COMMAND_NAME, 'vol', volume)
-  client.say(channel, MESSAGE_VOLUME.replace('{volume}', volume))
+function handleVolumeCommand(events, twitch, channel, volume) {
+  events.emit(COMMAND_NAME, 'vol', volume)
+  twitch.say(channel, MESSAGE_VOLUME.replace('{volume}', volume))
 }
 
 /**
  * Handles adding a video to the queue
  */
-function handleQueueAddCommand(io, client, channel, videoUrl) {
+function handleQueueAddCommand(events, twitch, channel, videoUrl) {
   const videoId = extractYouTubeVideoId(videoUrl)
   
   if (!videoId) {
-    client.say(channel, MESSAGE_USAGE)
+    twitch.say(channel, MESSAGE_USAGE)
     return
   }
   
-  io.emit(COMMAND_NAME, null, videoId)
+  events.emit(COMMAND_NAME, null, videoId)
 }
 
 /**
  * Handles simple commands (play, pause, next, zoom, queue)
  */
-function handleSimpleCommand(io, command) {
-  io.emit(COMMAND_NAME, command)
+function handleSimpleCommand(events, command) {
+  events.emit(COMMAND_NAME, command)
 }
 
 // ============================================================================
 // Main Command Handler
 // ============================================================================
 
-export default function(client, io, channel, tags, message) {
+export default function(twitch, events, channel, tags, message) {
   // Setup queue listener on first call (lazy initialization)
-  setupQueueListener(io, client, channel)
+  setupQueueListener(events, twitch, channel)
   
   const { command, volume, rawArgs } = parseCommandArgs(message)
   
   // No arguments provided - show usage
   if (rawArgs.length === 1) {
-    client.say(channel, MESSAGE_USAGE)
+    twitch.say(channel, MESSAGE_USAGE)
     return false
   }
   
   // Handle volume command
   if (command === 'vol') {
     if (isValidVolume(volume)) {
-      handleVolumeCommand(io, client, channel, volume)
+      handleVolumeCommand(events, twitch, channel, volume)
     } else {
-      client.say(channel, MESSAGE_VOLUME_USAGE)
+      twitch.say(channel, MESSAGE_VOLUME_USAGE)
     }
     return false
   }
   
   // Handle simple commands (play, pause, next, zoom, queue)
   if (SIMPLE_COMMANDS.includes(command)) {
-    handleSimpleCommand(io, command)
+    handleSimpleCommand(events, command)
     return false
   }
   
   // Default: treat as YouTube URL to add to queue
-  handleQueueAddCommand(io, client, channel, rawArgs[1])
+  handleQueueAddCommand(events, twitch, channel, rawArgs[1])
   
   // Return false to prevent auto-emission of 'music' event
   // We handle emission manually above with specific parameters

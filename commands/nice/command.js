@@ -1,5 +1,5 @@
-export default function(client, io, channel, tags, message) {
+export default function(twitch, events, channel, tags, message) {
   
   // Send chat message
-  client.say(channel, 'Nice! GlitchCat')
+  twitch.say(channel, 'Nice! GlitchCat')
 }
