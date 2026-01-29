@@ -105,7 +105,7 @@ export async function startCommands() {
     'commands',
     function handleCommands(client, io, channel) {
       const commandsList = getCommandsList()
-      const showAliases = CONFIG.defaultCommands?.commands?.showAliases !== false
+      const showAliases = CONFIG.defaultCommands?.commands?.showAliases === true
 
       // Filter out commands with permission: 'broadcaster'
       const filteredCommands = commandsList.filter(cmd => cmd.permission !== 'broadcaster')
