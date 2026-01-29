@@ -12,7 +12,8 @@ export const CONFIG = {
     commands: {
       active: true,
       cooldown: 0,
-      alias: ['command']
+      alias: ['command'],
+      showAliases: false         // Show aliases in !commands output: "!example [!demo]" vs "!example"
     },
     kill: {
       active: true,

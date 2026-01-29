@@ -105,13 +105,14 @@ export async function startCommands() {
     'commands',
     function handleCommands(client, io, channel) {
       const commandsList = getCommandsList()
+      const showAliases = CONFIG.defaultCommands?.commands?.showAliases !== false
 
       // Filter out commands with permission: 'broadcaster'
       const filteredCommands = commandsList.filter(cmd => cmd.permission !== 'broadcaster')
 
       // Format each command with aliases: !music [!yt, !youtube]
       const formattedCommands = filteredCommands.map(cmd => {
-        if (cmd.aliases.length > 0) {
+        if (showAliases && cmd.aliases.length > 0) {
           return `${cmd.trigger} [${cmd.aliases.join(', ')}]`
         }
         return cmd.trigger
