@@ -7,6 +7,13 @@ import { readFile } from 'fs/promises'
 import { getCommandFiles } from './commands.js'
 import { CONFIG } from './config.js'
 
+// Messages
+const MESSAGE_ERROR_LOADING_OVERLAY  = '\n▒ Overlay     × Error loading overlay: {error}'
+const MESSAGE_ERROR_PORT_IN_USE      = '▒ Overlay     × ERROR: SERVER_PORT {port} is already in use'
+const MESSAGE_ERROR_GENERIC          = '▒ Overlay     × ERROR: {error}'
+const MESSAGE_ERROR_INDEX_NOT_FOUND  = '▒ Overlay     × ERROR: {error}'
+const MESSAGE_SUCCESS_SERVER_RUNNING = '▒ Overlay     ✓ Server is running on http://localhost:{port}'
+
 // Get __dirname for ES modules
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -42,7 +49,7 @@ app.get('/', async (req, res) => {
     
     res.send(html)
   } catch (error) {
-    console.error('\n× Error loading overlay:', error)
+    console.error(MESSAGE_ERROR_LOADING_OVERLAY.replace('{error}', error))
     res.status(500).send('Error loading overlay')
   }
 })
@@ -54,9 +61,9 @@ app.use(`/${CONFIG.folderCommands}`, express.static(CONFIG.folderCommands))
 // Server error handling
 server.on('error', (err) => {
   if (err.code === 'EADDRINUSE') {
-    console.error(`▒ Overlay     × ERROR: SERVER_PORT ${process.env.SERVER_PORT} is already in use`)
+    console.error(MESSAGE_ERROR_PORT_IN_USE.replace('{port}', process.env.SERVER_PORT))
   } else {
-    console.error('▒ Overlay     × ERROR: ', err)
+    console.error(MESSAGE_ERROR_GENERIC.replace('{error}', err))
   }
   process.exit(1)
 })
@@ -68,13 +75,13 @@ export async function startOverlay(port) {
   try {
     await readFile(htmlPath, 'utf8')
   } catch (error) {
-    console.error('▒ Overlay     × ERROR:', error.message)
+    console.error(MESSAGE_ERROR_INDEX_NOT_FOUND.replace('{error}', error.message))
     process.exit(1)
   }
   
   return new Promise((resolve) => {
     server.listen(port, () => {
-      console.log(`▒ Overlay     ✓ Server is running on http://localhost:${port}`)
+      console.log(MESSAGE_SUCCESS_SERVER_RUNNING.replace('{port}', port))
       resolve(server)
     })
   })

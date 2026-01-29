@@ -4,6 +4,12 @@ import ora from 'ora'
 import { processCommand } from './commands.js'
 import { CONFIG } from './config.js'
 
+// Messages
+const MESSAGE_SUCCESS_CONNECTED        = '▒ Twitch      ✓ Connected to channel \'{channel}\', with user \'{username}\''
+const MESSAGE_ERROR_CONNECTION_TIMEOUT = '▒ Twitch      × ERROR: {error}'
+const MESSAGE_ERROR_LOGIN_FAILED       = '▒ Twitch      × ERROR: Failed to connect to Twitch. Check your TWITCH_USERNAME and TWITCH_PASSWORD in .env'
+const MESSAGE_ERROR_CONNECTION_FAILED  = '▒ Twitch      × ERROR: Failed to connect to Twitch:\n{error}'
+
 // Helper function to get environment variable with trimming
 function getEnvVar(name, transform = null) {
   const value = process.env[name]?.trim() || process.env[name]
@@ -61,7 +67,7 @@ export function startTwitch(io) {
       isResolved = true
 
       spinner.stop()
-      process.stdout.write(`\r\x1b[K▒ Twitch      ✓ Connected to channel '${channel}', with user '${username}'\n`)
+      process.stdout.write(`\r\x1b[K${MESSAGE_SUCCESS_CONNECTED.replace('{channel}', channel).replace('{username}', username)}\n`)
 
       resolve(client)
     })
@@ -73,7 +79,7 @@ export function startTwitch(io) {
       isResolved = true
       spinner.stop()
       const errorMsg = 'Twitch connection timeout. Check your TWITCH_USERNAME and TWITCH_PASSWORD in .env (make sure password has no extra spaces)'
-      process.stdout.write(`\r\x1b[K▒ Twitch      × ERROR: ${errorMsg}\n`)
+      process.stdout.write(`\r\x1b[K${MESSAGE_ERROR_CONNECTION_TIMEOUT.replace('{error}', errorMsg)}\n`)
       client.disconnect()
       reject(new Error(errorMsg))
       process.exit(1)
@@ -85,9 +91,9 @@ export function startTwitch(io) {
       isResolved = true
       const errMessage = err?.message || err?.toString() || String(err)
       if (errMessage.includes('Login authentication failed')) {
-        process.stdout.write(`\r\x1b[K▒ Twitch      × ERROR: Failed to connect to Twitch. Check your TWITCH_USERNAME and TWITCH_PASSWORD in .env\n`)
+        process.stdout.write(`\r\x1b[K${MESSAGE_ERROR_LOGIN_FAILED}\n`)
       } else {
-        process.stdout.write(`\r\x1b[K▒ Twitch      × ERROR: Failed to connect to Twitch:\n`, errMessage)
+        process.stdout.write(`\r\x1b[K${MESSAGE_ERROR_CONNECTION_FAILED.replace('{error}', errMessage)}`)
       }
       reject(err)
       process.exit(1)

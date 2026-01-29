@@ -8,7 +8,7 @@
   "type": "module",
   "main": "start.js",
   "scripts": {
-    "start": "nodemon --exitcrash --quiet start.js"
+    "start": "nodemon start.js --exitcrash --quiet"
   },
   "dependencies": {
     "dotenv": "^17.2.3",

@@ -4,6 +4,14 @@ import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
 import { CONFIG } from './config.js'
 
+// Messages
+const MESSAGE_ERROR_SCANNING_DIRECTORY = '▒ Commands    × ERROR: Error scanning commands directory: {error}'
+const MESSAGE_ERROR_LOADING_COMMAND    = '▒ Commands    × ERROR: Error loading command {commandName}: {error}'
+const MESSAGE_SUCCESS_LOADED_COMMANDS  = '▒ Commands    ✓ Successfully loaded {count} commands'
+const MESSAGE_ERROR_SCANNING_FILES     = '▒ Commands    × ERROR: Error scanning for {extension} files: {error}'
+const MESSAGE_COMMAND_USED             = '▒ Commands    ✓ {trigger} by {username}{message}'
+const MESSAGE_ERROR_EXECUTING_COMMAND  = '▒ Commands    × ERROR: Error executing command {trigger}: {error}'
+
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
@@ -60,7 +68,7 @@ function scanCommandDirectories() {
       .filter(entryPath => statSync(entryPath).isDirectory())
       .map(entryPath => entryPath.split(/[/\\]/).pop())
   } catch (err) {
-    console.error('▒ Commands    × ERROR: Error scanning commands directory:', err.message)
+    console.error(MESSAGE_ERROR_SCANNING_DIRECTORY.replace('{error}', err.message))
     process.exit(1)
     return []
   }
@@ -115,14 +123,14 @@ export async function startCommands() {
         throw new Error(`No handler function found. Export a default function or a handler function.`)
       }
     } catch (err) {
-      console.error(`▒ Commands    × ERROR: Error loading command ${commandName}:`, err.message)
+      console.error(MESSAGE_ERROR_LOADING_COMMAND.replace('{commandName}', commandName).replace('{error}', err.message))
       process.exit(1)
     }
   }
   
   // Log all loaded commands in a single message
   if (originalCommandCount > 0) {
-    console.log(`▒ Commands    ✓ Successfully loaded ${originalCommandCount} commands`)
+    console.log(MESSAGE_SUCCESS_LOADED_COMMANDS.replace('{count}', originalCommandCount))
   }
   
   commandsLoaded = true
@@ -163,7 +171,7 @@ export function getCommandFiles(extension) {
       }
     }
   } catch (err) {
-    console.error(`▒ Commands    × ERROR: Error scanning for ${extension.toUpperCase()} files:`, err.message)
+    console.error(MESSAGE_ERROR_SCANNING_FILES.replace('{extension}', extension.toUpperCase()).replace('{error}', err.message))
     process.exit(1)
   }
   
@@ -285,7 +293,8 @@ export function processCommand(client, io, channel, tags, message) {
         }
         
         // Log command usage
-        const logMessage = `▒ Command used: ${trigger} by ${username}${messageLower !== trigger ? ` (${message})` : ''}`
+        const messageSuffix = messageLower !== trigger ? ` (${message})` : ''
+        const logMessage = MESSAGE_COMMAND_USED.replace('{trigger}', trigger).replace('{username}', username).replace('{message}', messageSuffix)
         console.log(logMessage)
         
         // Emit to overlay console
@@ -306,7 +315,7 @@ export function processCommand(client, io, channel, tags, message) {
         
         return true // Command was handled
       } catch (err) {
-        console.error(`▒ Commands    × ERROR: Error executing command ${trigger}:`, err.message)
+        console.error(MESSAGE_ERROR_EXECUTING_COMMAND.replace('{trigger}', trigger).replace('{error}', err.message))
         return true // Command was attempted but failed
       }
     }

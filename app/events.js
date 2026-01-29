@@ -2,6 +2,11 @@
 import { Server } from 'socket.io'
 import ora from 'ora'
 
+// Messages
+const MESSAGE_SUCCESS_COMMUNICATION_STARTED = '▒ Events      ✓ Communication with overlay started'
+const MESSAGE_DISCONNECTED                  = '▒ Events      Disconnected from overlay. Make sure overlay is always open!'
+const MESSAGE_ERROR                         = '▒ Events      × ERROR: {error}'
+
 // Start Socket.IO
 export function startEvents(server, port) {
   const io = new Server(server)
@@ -17,19 +22,19 @@ export function startEvents(server, port) {
   return new Promise((resolve) => {
     io.on('connection', (socket) => {
       spinner.stop()
-      process.stdout.write(`\r\x1b[K▒ Events      ✓ Communication with overlay started\n`)
+      process.stdout.write(`\r\x1b[K${MESSAGE_SUCCESS_COMMUNICATION_STARTED}\n`)
       
       // Resolve promise on first connection
       resolve(io)
       
       socket.on('disconnect', () => {
         spinner.stop()
-        console.log(`▒ Events      Disconnected from overlay. Make sure overlay is always open!`)
+        console.log(MESSAGE_DISCONNECTED)
       })
 
       socket.on('error', (err) => {
         spinner.stop()
-        console.error('▒ Events      × ERROR:', err)
+        console.error(MESSAGE_ERROR.replace('{error}', err))
       })
     })
   })
