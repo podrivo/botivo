@@ -2,11 +2,6 @@ export default function (events) {
 
   // Get DOM element
   let element = document.querySelector('.example-element')
-  
-  if (!element) {
-    console.warn('example overlay: .example-element not found')
-    return
-  }
 
   // Simple fade in and scale animation
   anime.animate(element, {
