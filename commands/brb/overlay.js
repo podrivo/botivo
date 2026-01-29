@@ -1,4 +1,6 @@
 export default function (events) {
+
+  // Get DOM elements
   const borderEl = document.querySelector('.border')
   const brbEl = document.querySelector('.brb span')
 
