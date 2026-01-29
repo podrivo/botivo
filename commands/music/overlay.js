@@ -231,9 +231,9 @@ function handleVolumeCommand(volume) {
 /**
  * Handles queue command - sends current queue size back to server
  */
-function handleQueueCommand(socket) {
+function handleQueueCommand(events) {
   const playlist = getPlaylist()
-  socket.emit('queue', playlist)
+  events.emit('queue', playlist)
 }
 
 /**
@@ -257,7 +257,7 @@ function handleQueueAddCommand(videoId) {
  * @param {string} command - Command name (play, pause, next, zoom, vol, queue, or null for queue add)
  * @param {string|number} extra - Additional parameter (video ID for queue add, volume for vol)
  */
-function handleMusicCommand(socket, command, extra) {
+function handleMusicCommand(events, command, extra) {
   const musicEl = getMusicElement()
   if (!musicEl) return
   
@@ -284,7 +284,7 @@ function handleMusicCommand(socket, command, extra) {
       break
       
     case 'queue':
-      handleQueueCommand(socket)
+      handleQueueCommand(events)
       break
       
     // Default: treat as queue add (command is null, extra is video ID)
@@ -300,7 +300,7 @@ function handleMusicCommand(socket, command, extra) {
 // Initialization
 // ============================================================================
 
-export default function(socket) {
+export default function(events) {
   // Initialize playlist storage
   initializePlaylist()
   
@@ -308,7 +308,7 @@ export default function(socket) {
   loadYouTubeAPI()
   
   // Set up socket listener
-  socket.on('music', (command, extra) => {
-    handleMusicCommand(socket, command, extra)
+  events.on('music', (command, extra) => {
+    handleMusicCommand(events, command, extra)
   })
 }

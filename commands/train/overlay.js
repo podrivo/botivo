@@ -1,4 +1,4 @@
-export default function (socket) {
+export default function (events) {
 
   // Get DOM element
   let trainList = document.querySelector('.train-list')

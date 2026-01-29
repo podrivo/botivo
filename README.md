@@ -103,7 +103,7 @@ export default function(twitch, events, channel, tags, message) {
 
 `overlay.js` — **Animate DOM elements via [Anime.js](https://animejs.com/)**
 ```js
-export default function (socket) {
+export default function (events) {
 
   // Get DOM element
   let element = document.querySelector('.example-element')
@@ -130,8 +130,8 @@ export default function (socket) {
 
   // Grab additional events from command.js
   // This is optional
-  socket.on('additional-a',  () => {console.log(`'additional-a' received`)})
-  socket.on('additional-b', () => {console.log(`'additional-b' received`)})
+  events.on('additional-a',  () => {console.log(`'additional-a' received`)})
+  events.on('additional-b', () => {console.log(`'additional-b' received`)})
 }
 ```
 

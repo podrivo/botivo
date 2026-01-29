@@ -1,7 +1,7 @@
 // Track if listeners are set up (module-level to persist across calls)
 let listenersSetup = false
 
-export default function (socket) {
+export default function (events) {
   // Get DOM elements
   const borderEl = document.querySelector('.border')
   const brbEl = document.querySelector('.brb span')
@@ -12,8 +12,8 @@ export default function (socket) {
   }
   
   // Set up 'back' listener only once during initialization
-  if (!listenersSetup && socket) {
-    socket.on('back', () => {
+  if (!listenersSetup && events) {
+    events.on('back', () => {
       borderEl.classList.remove('on')
       brbEl.classList.remove('on')
     })
