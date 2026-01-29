@@ -1,7 +1,28 @@
+let initialized = false
+
 export default function (events) {
 
   // Get DOM element
   let element = document.querySelector('.example-element')
+
+  if (!element) {
+    console.warn('example overlay: .example-element not found')
+    return
+  }
+
+  // First call (during overlay initialization): set up listeners only
+  if (!initialized && events) {
+    // Grab additional events from command.js (optional)
+    events.on('additional-a', () => {
+      console.log(`'additional-a' received`)
+    })
+    events.on('additional-b', () => {
+      console.log(`'additional-b' received`)
+    })
+
+    initialized = true
+    return
+  }
 
   // Simple fade in and scale animation
   anime.animate(element, {
@@ -22,9 +43,4 @@ export default function (events) {
       }, 2500)
     }
   })
-
-  // Grab additional events from command.js
-  // This is optional
-  events.on('additional-a',  () => {console.log(`'additional-a' received`)})
-  events.on('additional-b', () => {console.log(`'additional-b' received`)})
 }

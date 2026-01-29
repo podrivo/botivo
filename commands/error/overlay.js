@@ -1,10 +1,19 @@
-export default function () {
+let initialized = false
+
+export default function (events) {
 
   // Get DOM element
   const errorElement = document.querySelector('.error')
   
   if (!errorElement) {
     console.warn('!error element not found')
+    return
+  }
+
+  // First call (during overlay initialization): do nothing visual/audio,
+  // just mark as initialized so subsequent socket events trigger the effect.
+  if (!initialized && events) {
+    initialized = true
     return
   }
 

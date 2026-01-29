@@ -1,5 +1,5 @@
 // Track if listeners are set up (module-level to persist across calls)
-let listenersSetup = false
+let initialized = false
 
 export default function (events) {
   // Get DOM elements
@@ -12,12 +12,12 @@ export default function (events) {
   }
   
   // Set up 'back' listener only once during initialization
-  if (!listenersSetup && events) {
+  if (!initialized && events) {
     events.on('back', () => {
       borderEl.classList.remove('on')
       brbEl.classList.remove('on')
     })
-    listenersSetup = true
+    initialized = true
     // Don't show border/text during initialization
     return
   }

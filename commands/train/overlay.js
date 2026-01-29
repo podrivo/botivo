@@ -1,7 +1,21 @@
+let initialized = false
+
 export default function (events) {
 
   // Get DOM element
   let trainList = document.querySelector('.train-list')
+
+  if (!trainList) {
+    console.warn('train overlay: .train-list not found')
+    return
+  }
+
+  // First call (during overlay initialization): do nothing visual/audio,
+  // just mark as initialized so subsequent socket events trigger the effect.
+  if (!initialized && events) {
+    initialized = true
+    return
+  }
 
   // Reset style and set new
   trainList.removeAttribute('style')
