@@ -19,6 +19,9 @@ const __dirname = dirname(__filename)
 const commands = {}
 let commandsLoaded = false
 
+// Built-in (default) commands (registered from this file)
+const defaultCommands = []
+
 // Rate limiting tracking
 const userLastCommandPerCommand = new Map() // Map<username_command, timestamp>
 let globalLastCommandTime = 0
@@ -59,6 +62,25 @@ function registerAliases(trigger, commandData, config) {
   return aliasTriggers
 }
 
+function registerDefaultCommand(commandName, handler, config = {}) {
+  const trigger = `${CONFIG.prefix}${commandName}`
+  const commandData = { handler, commandName, config }
+
+  // Check if command is active (defaults to true if not set)
+  if (config?.active === false) {
+    return
+  }
+
+  commands[trigger] = commandData
+  const aliasTriggers = registerAliases(trigger, commandData, config)
+
+  defaultCommands.push({
+    trigger,
+    aliases: aliasTriggers,
+    permission: config?.permission
+  })
+}
+
 // Helper function to scan command directories
 function scanCommandDirectories() {
   const commandsDir = join(__dirname, '..', CONFIG.folderCommands)
@@ -78,12 +100,47 @@ function scanCommandDirectories() {
 export async function startCommands() {
   if (commandsLoaded) return
   
+  // Register built-in (default) commands first
+  registerDefaultCommand(
+    'commands',
+    function handleCommands(client, io, channel) {
+      const commandsList = getCommandsList()
+
+      // Filter out commands with permission: 'broadcaster'
+      const filteredCommands = commandsList.filter(cmd => cmd.permission !== 'broadcaster')
+
+      // Format each command with aliases: !music [!yt, !youtube]
+      const formattedCommands = filteredCommands.map(cmd => {
+        if (cmd.aliases.length > 0) {
+          return `${cmd.trigger} [${cmd.aliases.join(', ')}]`
+        }
+        return cmd.trigger
+      })
+
+      const commandsString = formattedCommands.map(s => s.trim()).filter(Boolean).join(', ')
+      client.say(channel, `Available commands: ${commandsString}`)
+    },
+    CONFIG.defaultCommands?.commands || {}
+  )
+
+  registerDefaultCommand(
+    'kill',
+    function handleKill() {
+      console.log('▒ Kill command: Stopping all running commands')
+    },
+    CONFIG.defaultCommands?.kill || {}
+  )
+
   const commandNames = scanCommandDirectories()
   const loadedCommands = []
   const originalCommands = []
   let originalCommandCount = 0
   
   for (const commandName of commandNames) {
+    // This command is built-in (default) and lives in app/commands.js
+    if (commandName === 'commands') continue
+    if (commandName === 'kill') continue
+
     try {
       // Import the command module
       const commandModule = await import(`../commands/${commandName}/command.js`)
@@ -328,27 +385,36 @@ export function processCommand(client, io, channel, tags, message) {
 export function getCommandsList() {
   const commandNames = scanCommandDirectories()
   const commandsWithAliases = []
-  
+
+  // Default commands
+  commandsWithAliases.push(...defaultCommands)
+
+  // Directory-based commands
   for (const commandName of commandNames) {
+    // Built-in (default) command
+    if (commandName === 'commands') continue
+    if (commandName === 'kill') continue
+
     const trigger = `${CONFIG.prefix}${commandName}`
     const commandData = commands[trigger]
-    
+
     if (commandData) {
       const config = commandData.config || {}
       const aliases = config.alias || []
-      
+
       // Format aliases with prefix
-      const aliasTriggers = Array.isArray(aliases) 
+      const aliasTriggers = Array.isArray(aliases)
         ? aliases.map(alias => `${CONFIG.prefix}${alias.toLowerCase()}`)
         : aliases ? [`${CONFIG.prefix}${aliases.toLowerCase()}`] : []
-      
+
       commandsWithAliases.push({
         trigger,
-        aliases: aliasTriggers
+        aliases: aliasTriggers,
+        permission: config.permission
       })
     }
   }
-  
+
   // Sort by trigger
   return commandsWithAliases.sort((a, b) => a.trigger.localeCompare(b.trigger))
 }
