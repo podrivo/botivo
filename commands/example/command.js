@@ -13,10 +13,10 @@ export default function(twitch, events, channel, tags, message) {
   twitch.say(channel, `@${tags.username} used ${message}. The is the Twitch chat example message!`)
 
   // Print log to server
-  console.log('▒ !example was used. This is a test message.')
+  console.log('!example was used. This is a test message.')
 
   // You can also emit additional events to the overlay
   // This is optional
-  events.emit('additional-a')
-  events.emit('additional-b')
+  events.emit('example-additional-a')
+  events.emit('example-additional-b')
 }

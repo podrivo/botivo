@@ -1,29 +1,18 @@
-// Track if listeners are set up (module-level to persist across calls)
-let initialized = false
-
 export default function (events) {
-  // Get DOM elements
   const borderEl = document.querySelector('.border')
   const brbEl = document.querySelector('.brb span')
-  
+
   if (!borderEl || !brbEl) {
     console.warn('!brb elements not found')
     return
   }
-  
-  // Set up 'back' listener only once during initialization
-  if (!initialized && events) {
-    events.on('back', () => {
-      borderEl.classList.remove('on')
-      brbEl.classList.remove('on')
-    })
-    initialized = true
-    // Don't show border/text during initialization
-    return
+
+  // Toggle: if already on, hide; otherwise show
+  if (borderEl.classList.contains('on')) {
+    borderEl.classList.remove('on')
+    brbEl.classList.remove('on')
+  } else {
+    borderEl.classList.add('on')
+    brbEl.classList.add('on')
   }
-  
-  // Handle !brb command - show border and text
-  // This runs when 'brb' event is received (after initialization)
-  borderEl.classList.add('on')
-  brbEl.classList.add('on')
 }

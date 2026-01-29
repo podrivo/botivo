@@ -62,7 +62,6 @@ function initializePlaylist() {
 
 let youtubePlayer = null
 let isPlayerInitialized = false
-let initialized = false
 
 /**
  * Loads the YouTube IFrame API script
@@ -301,25 +300,22 @@ function handleMusicCommand(events, command, extra) {
 // Initialization
 // ============================================================================
 
+export function init(events) {
+  // Initialize playlist storage
+  initializePlaylist()
+
+  // Load YouTube API
+  loadYouTubeAPI()
+
+  // Set up socket listener for music subcommands
+  events.on('music', (command, extra) => {
+    handleMusicCommand(events, command, extra)
+  })
+}
+
+// Default handler is kept for consistency with the rest of the commands,
+// but all per-command logic is driven by the 'music' event listener above.
 export default function(events) {
-  // First call (during overlay initialization): set up playlist, YouTube API,
-  // and socket listeners only. Do not run per-command logic here.
-  if (!initialized && events) {
-    // Initialize playlist storage
-    initializePlaylist()
-
-    // Load YouTube API
-    loadYouTubeAPI()
-
-    // Set up socket listener for music subcommands
-    events.on('music', (command, extra) => {
-      handleMusicCommand(events, command, extra)
-    })
-
-    initialized = true
-    return
-  }
-
-  // Subsequent calls (from 'music' socket event) don't need to do anything here,
-  // since individual music actions are handled via the 'music' event listener above.
+  // No-op: music overlay reacts via the 'music' socket event and
+  // handleMusicCommand, not via direct command invocations.
 }

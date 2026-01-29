@@ -91,11 +91,6 @@ window.onload = async function() {
     return false
   }
 
-  // Helper function to find handler in a module
-  function findHandler(module) {
-    return module.default || module.handler || module.init
-  }
-
   // Helper function to create socket wrapper that prevents duplicate listeners
   function createSocketWrapper(originalSocketOn, initializedEvents) {
     return function(eventName, callback) {
@@ -141,87 +136,93 @@ window.onload = async function() {
         try {
           const clientModule = await import(`/commands/${htmlFile.command}/overlay.js`)
           
-          // Find handler function
-          const handler = findHandler(clientModule)
+          // New lifecycle:
+          // - Optional: module.init(events) is called once during initialization
+          //   with animations/audio disabled and socket.on wrapped to avoid
+          //   duplicate listeners.
+          // - Required for commands with overlay logic:
+          //   module.default(events, ...args) is called on each command event.
+          const initHandler = typeof clientModule.init === 'function'
+            ? clientModule.init
+            : null
+          const commandHandler = (clientModule.default || clientModule.handler)
+          const hasCommandHandler = typeof commandHandler === 'function'
           
-          if (handler && typeof handler === 'function') {
-            // Track which socket events have been set up to prevent duplicate listeners
-            const initializedEvents = new Set()
+          // Track which socket events have been set up to prevent duplicate listeners
+          const initializedEvents = new Set()
+          
+          // Run optional init handler once during overlay initialization
+          if (initHandler) {
+            // Wrap socket.on to prevent duplicate event listeners
+            const originalSocketOn = socket.on.bind(socket)
+            socket.on = createSocketWrapper(originalSocketOn, initializedEvents)
             
-            // Check if handler accepts parameters (indicates it wants socket for listener setup)
-            const handlerLength = handler.length
-            
-            if (handlerLength > 0) {
-              // Wrap socket.on to prevent duplicate event listeners
-              const originalSocketOn = socket.on.bind(socket)
-              socket.on = createSocketWrapper(originalSocketOn, initializedEvents)
-              
-              // Temporarily disable animations and audio during initialization
-              const originalAnimeAnimate = window.anime?.animate
-              if (window.anime && originalAnimeAnimate) {
-                window.anime.animate = function() {
-                  // Return a no-op animation object during initialization
-                  return {
-                    onComplete: function(fn) { return this },
-                    restart: function() { return this },
-                    resume: function() { return this },
-                    pause: function() { return this },
-                    seek: function() { return this }
-                  }
+            // Temporarily disable animations and audio during initialization
+            const originalAnimeAnimate = window.anime?.animate
+            if (window.anime && originalAnimeAnimate) {
+              window.anime.animate = function() {
+                // Return a no-op animation object during initialization
+                return {
+                  onComplete: function(fn) { return this },
+                  restart: function() { return this },
+                  resume: function() { return this },
+                  pause: function() { return this },
+                  seek: function() { return this }
                 }
-              }
-              
-              // Temporarily disable Audio playback during initialization
-              // Save the current Audio (which may already be overridden for tracking)
-              const currentAudio = window.Audio
-              if (currentAudio) {
-                window.Audio = function(...args) {
-                  const audio = new currentAudio(...args)
-                  // Override play() to be a no-op during initialization
-                  const originalPlay = audio.play.bind(audio)
-                  audio.play = function() {
-                    // Return a resolved promise to prevent errors
-                    return Promise.resolve()
-                  }
-                  return audio
-                }
-              }
-              
-              // Call handler during initialization to set up event listeners
-              // Animation and audio won't run because they're disabled
-              handler(socket)
-              
-              // Restore original functions
-              socket.on = originalSocketOn
-              if (window.anime && originalAnimeAnimate) {
-                window.anime.animate = originalAnimeAnimate
-              }
-              if (currentAudio) {
-                window.Audio = currentAudio
               }
             }
             
-            // Wrap handler to restore HTML if it was cleared by kill-all and prevent duplicate listeners
+            // Temporarily disable Audio playback during initialization
+            // Save the current Audio (which may already be overridden for tracking)
+            const currentAudio = window.Audio
+            if (currentAudio) {
+              window.Audio = function(...args) {
+                const audio = new currentAudio(...args)
+                // Override play() to be a no-op during initialization
+                const originalPlay = audio.play.bind(audio)
+                audio.play = function() {
+                  // Return a resolved promise to prevent errors
+                  return Promise.resolve()
+                }
+                return audio
+              }
+            }
+            
+            // Call init handler to set up event listeners or other one-time logic.
+            // Animation and audio won't run because they're disabled.
+            initHandler(socket)
+            
+            // Restore original functions
+            socket.on = originalSocketOn
+            if (window.anime && originalAnimeAnimate) {
+              window.anime.animate = originalAnimeAnimate
+            }
+            if (currentAudio) {
+              window.Audio = currentAudio
+            }
+          }
+          
+          if (hasCommandHandler) {
+            // Wrap command handler to restore HTML if it was cleared by kill-all
+            // and to prevent duplicate listeners when using events.on.
             const wrappedHandler = function() {
               // Restore HTML if container was cleared
               restoreCommandHtml(htmlFile.command)
               
-              if (handlerLength > 0) {
-                // For handlers with socket parameter, wrap socket.on to prevent duplicate listeners
-                const originalSocketOn = socket.on.bind(socket)
-                socket.on = createSocketWrapper(originalSocketOn, initializedEvents)
-                
-                // Execute the handler (listeners already set up, command logic will run)
-                handler(socket, ...arguments)
-                
-                // Restore original socket.on after handler execution
-                socket.on = originalSocketOn
-              } else {
-                // For handlers without parameters, just call normally
-                handler(...arguments)
-              }
+              // For handlers that use events.on, wrap socket.on to prevent
+              // duplicate listeners (reusing the same initializedEvents set).
+              const originalSocketOn = socket.on.bind(socket)
+              socket.on = createSocketWrapper(originalSocketOn, initializedEvents)
+              
+              // Execute the command handler. The first argument is always the
+              // events/socket object, followed by any additional payload.
+              commandHandler(socket, ...arguments)
+              
+              // Restore original socket.on after handler execution
+              socket.on = originalSocketOn
             }
-            // Use wrapped handler as event handler
+            
+            // Use wrapped handler as event handler for this command
             socket.on(htmlFile.command, wrappedHandler)
           }
         } catch (importError) {

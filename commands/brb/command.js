@@ -8,11 +8,11 @@ export default function(twitch, events, channel, tags, message) {
 
   if (!isBack && !isBrb) return false
 
-  // Either command: if active, deactivate once
+  // Either command: if active, deactivate once (emit 'brb' so overlay toggles off)
   if (brbActive) {
     brbActive = false
     twitch.say(channel, 'Back to action!')
-    events.emit('back')
+    events.emit('brb')
     return false
   }
 
