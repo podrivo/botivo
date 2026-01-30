@@ -2,7 +2,6 @@
 // Constants
 const STORAGE_PLAYLIST = 'playlist'
 const YOUTUBE_API_URL = 'https://www.youtube.com/iframe_api'
-const DEFAULT_VIDEO_ID = 'su2ZN0qCM6Y'
 const ELEMENT_MUSIC = '.music-wrapper'
 const ELEMENT_PLAYER = '#player'
 
@@ -30,10 +29,10 @@ function savePlaylist(playlist) {
 let youtubePlayer = null
 let isPlayerInitialized = false
 
-// Initializes the YouTube player
-// Must be called after YouTube API is loaded
-function initializePlayer() {
-  if (isPlayerInitialized) return
+// Initializes the YouTube player with the first video ID
+// Must be called after YouTube API is loaded; only called when we have a video (e.g. first !music link)
+function initializePlayer(videoId) {
+  if (isPlayerInitialized || !videoId) return
   
   youtubePlayer = new YT.Player(ELEMENT_PLAYER.slice(1), {
     playerVars: {
@@ -46,7 +45,7 @@ function initializePlayer() {
       iv_load_policy: 3,
       rel: 0
     },
-    videoId: DEFAULT_VIDEO_ID,
+    videoId,
     events: {
       onReady: null,
       onStateChange: onPlayerStateChange
@@ -60,11 +59,16 @@ function initializePlayer() {
 
 /**
  * YouTube API callback (must be global)
- * Called automatically when YouTube API loads
+ * Called when YouTube API loads; initializes player with first video in playlist if any
  */
-// window.onYouTubeIframeAPIReady = function() {
-//   initializePlayer()
-// }
+function onYouTubeIframeAPIReady() {
+  const playlist = getPlaylist()
+  if (playlist.length > 0 && !isPlayerInitialized) {
+    const videoId = playlist.shift()
+    savePlaylist(playlist)
+    initializePlayer(videoId)
+  }
+}
 
 // Handles player state changes
 function onPlayerStateChange(event) {
@@ -192,10 +196,19 @@ export default function (events, command, extra) {
       handleQueueCommand(events)
       break
 
-    // Default: treat as queue add (command is null, extra is video ID)
+    // Default: treat as queue add (command is null, extra is video ID) — first link is the first videoId
     default:
       if (extra) {
         handleQueueAddCommand(extra)
+        // If API already loaded and player not initialized, start with this video
+        if (window.YT && window.YT.Player && !isPlayerInitialized) {
+          const playlist = getPlaylist()
+          if (playlist.length > 0) {
+            const videoId = playlist.shift()
+            savePlaylist(playlist)
+            initializePlayer(videoId)
+          }
+        }
       }
       break
   }
@@ -205,11 +218,8 @@ export default function (events, command, extra) {
     savePlaylist([])
   }
 
-  // Check if YouTube API is already loaded
-  if (window.YT && window.YT.Player) {
-    initializePlayer()
-    // return
-  }
+  // Register global callback for when YouTube API loads (so first video starts after script loads)
+  window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady
 
   // Check if script is already being loaded
   if (document.querySelector(`script[src="${YOUTUBE_API_URL}"]`)) {
