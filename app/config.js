@@ -12,13 +12,13 @@ export const CONFIG = {
       active: true,
       cooldown: 0,
       alias: ['command'],
-      showAliases: false // Show aliases in !commands output: "!example [!demo]" vs "!example"
+      showAliases: false // Show aliases: "!example [!demo]" vs "!example"
     },
     kill: {
       active: true,
       cooldown: 0,
       permission: 'broadcaster',
-      alias: ['stop', 'killall', 'kill-all']
+      alias: ['stop', 'killall']
     }
   }
 }
