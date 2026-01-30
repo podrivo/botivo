@@ -1,5 +1,16 @@
 window.onload = async function() {
 
+  // Track Anime.js animations so !kill can call .reset() on them (like commands/train/overlay.js)
+  window.__animeKillRestartList = []
+  if (window.anime && typeof window.anime.animate === 'function') {
+    const originalAnimate = window.anime.animate.bind(window.anime)
+    window.anime.animate = function (...args) {
+      const anim = originalAnimate(...args)
+      if (anim && typeof anim.reset === 'function') window.__animeKillRestartList.push(anim)
+      return anim
+    }
+  }
+
   // Socket.IO
   let socket = io()
 
@@ -8,27 +19,17 @@ window.onload = async function() {
   socket.on('disconnect', () => console.log('Overlay disconnected from Events'))
   socket.on('connect_error', (err) => console.error('Connection error:', err))
 
-  // Store original HTML content for each command container (for restoration after kill)
-  const commandHtmlStorage = new Map() // Map<commandName, htmlContent>
-  
-  // Track all Audio instances to stop them on kill-all
+  // Track all Audio instances to stop them on !kill (new Audio() does not create a DOM element)
   const activeAudioInstances = new Set() // Set<Audio>
 
-  // Override Audio constructor to track instances
   const OriginalAudio = window.Audio
   window.Audio = function(...args) {
     const audio = new OriginalAudio(...args)
     activeAudioInstances.add(audio)
-    
-    // Remove from set when audio ends or is stopped
     audio.addEventListener('ended', () => activeAudioInstances.delete(audio))
     audio.addEventListener('pause', () => {
-      // Only remove if paused and currentTime is 0 (fully stopped)
-      if (audio.currentTime === 0) {
-        activeAudioInstances.delete(audio)
-      }
+      if (audio.currentTime === 0) activeAudioInstances.delete(audio)
     })
-    
     return audio
   }
 
@@ -38,58 +39,66 @@ window.onload = async function() {
     console.log(logMessage)
   })
 
-  // Function to stop all running commands
+  // !kill handler: pause and reset audio, video, animations, transitions (no DOM removal).
+  // Triggered by app/commands.js default command which emits 'kill'.
   function stopAllCommands() {
-    console.log('Kill event received: Stopping all commands')
-    
-    // Stop all tracked Audio instances (created with new Audio())
+    console.log('Kill event received: Pausing and resetting media and animations')
+
+    // YouTube IFrame player (commands/youtube sets window.player; not an HTML <video>)
+    if (window.player && typeof window.player.stopVideo === 'function') {
+      try {
+        window.player.stopVideo()
+      } catch (e) { /* ignore */ }
+    }
+
+    // Audio: tracked instances (new Audio()) and <audio> elements
     activeAudioInstances.forEach(audio => {
       try {
         audio.pause()
         audio.currentTime = 0
-      } catch (e) {
-        // Ignore errors (audio might already be stopped)
-      }
+      } catch (e) { /* ignore */ }
     })
     activeAudioInstances.clear()
-    
-    // Stop all HTML audio elements
-    const allAudioElements = document.querySelectorAll('audio')
-    allAudioElements.forEach(audio => {
+    document.querySelectorAll('audio').forEach(audio => {
       try {
         audio.pause()
         audio.currentTime = 0
-      } catch (e) {
-        // Ignore errors
-      }
+      } catch (e) { /* ignore */ }
     })
-    
-    // Clear all command containers (HTML is already stored from initial load)
-    // When elements are removed from DOM, anime.js animations automatically stop
-    const commandsContainer = document.getElementById('commands-container')
-    if (commandsContainer) {
-      const containers = commandsContainer.querySelectorAll('[id$="-container"]')
-      containers.forEach(container => {
-        // Clear the container (original HTML is already stored in commandHtmlStorage)
-        container.innerHTML = ''
-        container.removeAttribute('style')
+
+    // Video: pause and reset (native <video>; YouTube uses window.player above)
+    document.querySelectorAll('video').forEach(video => {
+      try {
+        video.pause()
+        video.currentTime = 0
+      } catch (e) { /* ignore */ }
+    })
+
+    // Anime.js: reset all tracked animations (like animation.reset() in commands/train/overlay.js)
+    if (window.__animeKillRestartList) {
+      window.__animeKillRestartList.forEach(anim => {
+        try {
+          if (anim && typeof anim.reset === 'function') anim.reset()
+        } catch (e) { /* ignore */ }
+      })
+    }
+
+    // CSS: pause animations and transitions, then remove inline styles so elements stay clean
+    const root = document.getElementById('commands-container')
+    if (root) {
+      const all = [root, ...root.querySelectorAll('*')]
+      all.forEach(el => {
+        el.style.animationPlayState = 'paused'
+        el.style.transition = 'none'
+      })
+      all.forEach(el => {
+        el.style.removeProperty('animation-play-state')
+        el.style.removeProperty('transition')
       })
     }
   }
 
-  // Listen for kill event (auto-emitted by command system)
   socket.on('kill', stopAllCommands)
-
-  // Helper function to restore HTML for a command if it was cleared
-  function restoreCommandHtml(commandName) {
-    const containerId = `${commandName}-container`
-    const container = document.getElementById(containerId)
-    if (container && !container.innerHTML.trim() && commandHtmlStorage.has(commandName)) {
-      container.innerHTML = commandHtmlStorage.get(commandName)
-      return true
-    }
-    return false
-  }
 
   // Helper function to create socket wrapper that prevents duplicate listeners
   function createSocketWrapper(originalSocketOn, initializedEvents) {
@@ -128,9 +137,6 @@ window.onload = async function() {
         const htmlResponse = await fetch(htmlFile.path)
         const html = await htmlResponse.text()
         container.innerHTML = html
-
-        // Store the HTML content for this command (for restoration after kill)
-        commandHtmlStorage.set(htmlFile.command, html)
 
         // Try to dynamically import and initialize the client script
         try {
@@ -203,12 +209,8 @@ window.onload = async function() {
           }
           
           if (hasCommandHandler) {
-            // Wrap command handler to restore HTML if it was cleared by kill-all
-            // and to prevent duplicate listeners when using events.on.
+            // Wrap command handler to prevent duplicate listeners when using events.on.
             const wrappedHandler = function() {
-              // Restore HTML if container was cleared
-              restoreCommandHtml(htmlFile.command)
-              
               // For handlers that use events.on, wrap socket.on to prevent
               // duplicate listeners (reusing the same initializedEvents set).
               const originalSocketOn = socket.on.bind(socket)
@@ -228,10 +230,6 @@ window.onload = async function() {
         } catch (importError) {
           // No client file found - that's okay, command might not need client-side logic
           console.warn(`No overlay.js found for ${htmlFile.command}, skipping client initialization`)
-          // Still register a handler to restore HTML if it was cleared
-          socket.on(htmlFile.command, () => {
-            restoreCommandHtml(htmlFile.command)
-          })
         }
       } catch (error) {
         console.error(`Error loading ${htmlFile.command} command:`, error)

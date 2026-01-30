@@ -199,7 +199,7 @@ export const config = {
 
 Stop all running commands
 ---
-In case commands are too much and you can reset the overlay. `!kill` will stop all animations and audios, and reset DOM elements. This works great in case many commands are running at the same time and are creating chaos. It has 3 aliases: 'stop', 'killall' and 'kill-all'.
+In case commands are too much and you want to quiet the overlay. `!kill` pauses and resets all audio, video, CSS animations/transitions, and Anime.js animations (it does not remove DOM elements). This works great when many commands are running at the same time and are creating chaos. It has 3 aliases: 'stop', 'killall' and 'kill-all'.
 
 
 Global configuration

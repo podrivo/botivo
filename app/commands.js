@@ -124,10 +124,12 @@ export async function startCommands() {
     CONFIG.defaultCommands?.commands || {}
   )
 
+  // !kill: pauses and resets audio, video, CSS animations/transitions, and Anime.js (no DOM removal).
+  // Overlay receives 'kill' and runs stopAllCommands() in overlay/js/main.js.
   registerDefaultCommand(
     'kill',
     function handleKill() {
-      console.log('▒ Kill command: Stopping all running commands')
+      console.log('▒ Kill command: Pausing all media and animations')
     },
     CONFIG.defaultCommands?.kill || {}
   )
