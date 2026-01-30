@@ -5,7 +5,7 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  border: 2px solid transparent;
+  border: 0px solid transparent;
   animation: rainbow 120s linear infinite;
   transition: all 1s cubic-bezier(0.22, 1, 0.36, 1);
   color: white;
