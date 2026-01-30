@@ -1,7 +1,7 @@
 // Track if brb is currently active
 let brbActive = false
 
-export default function(twitch, events, channel, tags, message) {
+export default function (twitch, events, channel, tags, message) {
   const messageLower = message.toLowerCase().trim()
   const isBack = messageLower === '!back'
   const isBrb = messageLower === '!brb'

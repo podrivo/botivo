@@ -1,7 +1,7 @@
 import { CONFIG } from './config.js'
 import { getCommandsList } from './commands.js'
 
-export function handler(twitch, events, channel) {
+export function handler (twitch, events, channel) {
   const commandsList = getCommandsList()
   const showAliases = CONFIG.defaultCommands?.commands?.showAliases === true
 

@@ -7,7 +7,7 @@
  * @param {string} message - The full message text that triggered the command
  */
 
-export default function(twitch, events, channel, tags, message) {
+export default function (twitch, events, channel, tags, message) {
 
   // Send a message to chat
   twitch.say(channel, `@${tags.username} used ${message}. The is the Twitch chat example message!`)

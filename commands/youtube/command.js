@@ -187,7 +187,7 @@ function handleSimpleCommand(events, command) {
 // Main Command Handler
 // ============================================================================
 
-export default function(twitch, events, channel, tags, message) {
+export default function (twitch, events, channel, tags, message) {
   // Setup queue listener on first call (lazy initialization)
   setupQueueListener(events, twitch, channel)
   
