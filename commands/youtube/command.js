@@ -15,8 +15,6 @@
 // Constants
 // ============================================================================
 
-const VOLUME_MIN = 0
-const VOLUME_MAX = 100
 const COMMAND_NAME = 'music'
 const MESSAGE_USAGE_TEMPLATE = 'Use {command} youtube-link | play | pause | next | vol 0-100 | queue | zoom'
 const MESSAGE_VOLUME = 'Volume set to {volume}'
@@ -142,7 +140,7 @@ function parseCommandArgs(message) {
  * @returns {boolean} - True if valid
  */
 function isValidVolume(volume) {
-  return volume !== null && !isNaN(volume) && volume >= VOLUME_MIN && volume <= VOLUME_MAX
+  return volume !== null && !isNaN(volume) && volume >= 0 && volume <= 100
 }
 
 // ============================================================================
