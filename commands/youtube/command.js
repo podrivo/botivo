@@ -15,7 +15,8 @@
 // Constants
 // ============================================================================
 
-const COMMAND_NAME = 'music'
+// Must match the command directory name so overlay's socket.on('youtube', ...) receives the event
+const COMMAND_NAME = 'youtube'
 const MESSAGE_USAGE_TEMPLATE = 'Use {command} youtube-link | play | pause | next | vol 0-100 | queue | zoom'
 const MESSAGE_VOLUME = 'Volume set to {volume}'
 const MESSAGE_VOLUME_USAGE_TEMPLATE = 'Use {command} vol 0-100'
@@ -217,7 +218,7 @@ export default function(twitch, events, channel, tags, message) {
   // Default: treat as YouTube URL to add to queue
   handleQueueAddCommand(events, twitch, channel, rawArgs[1], invokedTrigger)
   
-  // Return false to prevent auto-emission of 'music' event
-  // We handle emission manually above with specific parameters
+  // Return false to prevent auto-emission of 'youtube' event
+  // We handle emission manually above with specific parameters (command + optional videoId)
   return false
 }
