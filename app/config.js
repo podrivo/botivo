@@ -9,13 +9,13 @@ export const CONFIG = {
   // Built-in default commands
   defaultCommands: {
     commands: {
-      active: true,
+      enabled: true,
       cooldown: 0,
       alias: ['command'],
       showAliases: false // Show aliases: "!example [!demo]" vs "!example"
     },
     kill: {
-      active: true,
+      enabled: true,
       cooldown: 0,
       permission: 'broadcaster',
       alias: ['stop', 'killall']

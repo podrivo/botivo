@@ -66,8 +66,8 @@ function registerDefaultCommand(commandName, handler, config = {}) {
   const trigger = `${CONFIG.prefix}${commandName}`
   const commandData = { handler, commandName, config }
 
-  // Check if command is active (defaults to true if not set)
-  if (config?.active === false) {
+  // Check if command is enabled (defaults to true if not set)
+  if (config?.enabled === false) {
     return
   }
 
@@ -148,9 +148,9 @@ export async function startCommands() {
         // Get command config from config.js, or use defaults if not found
         const commandConfig = await loadCommandConfig(commandName)
         
-        // Check if command is active (defaults to true if not set)
-        if (commandConfig.active === false) {
-          // Skip inactive commands - don't register them
+        // Check if command is enabled (defaults to true if not set)
+        if (commandConfig.enabled === false) {
+          // Skip disabled commands - don't register them
           continue
         }
         
@@ -291,10 +291,10 @@ export function processCommand(twitch, events, channel, tags, message) {
       const username = tags.username || 'unknown'
       const now = Date.now()
       
-      // Check if command is active (defaults to true if not set)
-      if (config?.active === false) {
-        // Silently ignore - command is inactive
-        return true // Command was blocked because it's inactive
+      // Check if command is enabled (defaults to true if not set)
+      if (config?.enabled === false) {
+        // Silently ignore - command is disabled
+        return true // Command was blocked because it's disabled
       }
       
       // Permission check - must come before rate limiting

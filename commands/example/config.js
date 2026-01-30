@@ -1,8 +1,8 @@
 /**
  * Command Configuration
  * 
- * Active:
- * - active: boolean            // Whether the command is available (defaults to true if not set)
+ * Enabled:
+ * - enabled: boolean           // Whether the command is available (defaults to true if not set)
  * 
  * Permissions:
  * - permission: 'broadcaster'  // Only broadcaster
@@ -22,6 +22,8 @@
  */
 
 export const config = {
+  enabled: true,
+  permission: 'viewer',
   cooldown: 5000,
   alias: 'demo',
 }
