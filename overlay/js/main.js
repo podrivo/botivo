@@ -79,6 +79,10 @@ window.onload = async function() {
       window.__animeKillRestartList.forEach(anim => {
         try {
           if (anim && typeof anim.reset === 'function') anim.reset()
+          // reset() does not remove inline styles; clean them so elements don't keep opacity/margin/transform
+          if (window.anime && typeof window.anime.cleanInlineStyles === 'function') {
+            window.anime.cleanInlineStyles(anim)
+          }
         } catch (e) { /* ignore */ }
       })
     }
@@ -94,6 +98,11 @@ window.onload = async function() {
       all.forEach(el => {
         el.style.removeProperty('animation-play-state')
         el.style.removeProperty('transition')
+      })
+      // Remove inline styles Anime.js leaves after reset (opacity, margin-top, transform, etc.)
+      const animeStyleProps = ['opacity', 'margin-top', 'transform']
+      all.forEach(el => {
+        animeStyleProps.forEach(prop => el.style.removeProperty(prop))
       })
     }
   }
