@@ -1,7 +1,7 @@
 // Command registry
 import { readdirSync, statSync } from 'fs'
-import { fileURLToPath } from 'url'
-import { dirname, join } from 'path'
+import { fileURLToPath, pathToFileURL } from 'url'
+import { basename, dirname, join } from 'path'
 import { CONFIG } from './config.js'
 
 // Messages
@@ -81,6 +81,30 @@ function registerDefaultCommand(commandName, handler, config = {}) {
   })
 }
 
+// Load built-in commands from app/cmd-*.js files (e.g. cmd-kill.js, cmd-commands.js)
+async function loadBuiltInCmdFiles() {
+  const appDir = __dirname
+  const entries = readdirSync(appDir)
+  const cmdFiles = entries
+    .filter(name => name.startsWith('cmd-') && name.endsWith('.js'))
+    .sort()
+  for (const file of cmdFiles) {
+    const modulePath = join(appDir, file)
+    const commandName = basename(file, '.js').replace(/^cmd-/, '')
+    try {
+      const mod = await import(pathToFileURL(modulePath).href)
+      const handler = mod.handler || mod.default
+      const config = mod.config ?? CONFIG.defaultCommands?.[commandName] ?? {}
+      if (typeof handler === 'function') {
+        registerDefaultCommand(commandName, handler, config)
+      }
+    } catch (err) {
+      console.error(MESSAGE_ERROR_LOADING_COMMAND.replace('{commandName}', file).replace('{error}', err.message))
+      process.exit(1)
+    }
+  }
+}
+
 // Helper function to scan command directories
 function scanCommandDirectories() {
   const commandsDir = join(__dirname, '..', CONFIG.folderCommands)
@@ -100,39 +124,8 @@ function scanCommandDirectories() {
 export async function startCommands() {
   if (commandsLoaded) return
   
-  // Register built-in (default) commands first
-  registerDefaultCommand(
-    'commands',
-    function handleCommands(twitch, events, channel) {
-      const commandsList = getCommandsList()
-      const showAliases = CONFIG.defaultCommands?.commands?.showAliases === true
-
-      // Filter out commands with permission: 'broadcaster'
-      const filteredCommands = commandsList.filter(cmd => cmd.permission !== 'broadcaster')
-
-      // Format each command with aliases: !music [!yt, !youtube]
-      const formattedCommands = filteredCommands.map(cmd => {
-        if (showAliases && cmd.aliases.length > 0) {
-          return `${cmd.trigger} [${cmd.aliases.join(', ')}]`
-        }
-        return cmd.trigger
-      })
-
-      const commandsString = formattedCommands.map(s => s.trim()).filter(Boolean).join(', ')
-      twitch.say(channel, `Available commands: ${commandsString}`)
-    },
-    CONFIG.defaultCommands?.commands || {}
-  )
-
-  // !kill: pauses and resets audio, video, CSS animations/transitions, and Anime.js (no DOM removal).
-  // Overlay receives 'kill' and runs stopAllCommands() in overlay/js/main.js.
-  registerDefaultCommand(
-    'kill',
-    function handleKill() {
-      console.log('▒ Kill command: Pausing all media and animations')
-    },
-    CONFIG.defaultCommands?.kill || {}
-  )
+  // Register built-in (default) commands from app/cmd-*.js files first
+  await loadBuiltInCmdFiles()
 
   const commandNames = scanCommandDirectories()
   const loadedCommands = []
@@ -140,16 +133,13 @@ export async function startCommands() {
   let originalCommandCount = 0
   
   for (const commandName of commandNames) {
-    // This command is built-in (default) and lives in app/commands.js
-    if (commandName === 'commands') continue
-    if (commandName === 'kill') continue
+    // Skip if this command is already registered as a built-in (app/cmd-*.js)
+    const trigger = `${CONFIG.prefix}${commandName}`
+    if (defaultCommands.some(dc => dc.trigger === trigger)) continue
 
     try {
       // Import the command module
       const commandModule = await import(`../commands/${commandName}/command.js`)
-      
-      // Derive command trigger from directory name (e.g., train -> !train)
-      const trigger = `${CONFIG.prefix}${commandName}`
       
       // Find the handler function
       const handler = findHandler(commandModule, commandName)
@@ -397,11 +387,10 @@ export function getCommandsList() {
 
   // Directory-based commands
   for (const commandName of commandNames) {
-    // Built-in (default) command
-    if (commandName === 'commands') continue
-    if (commandName === 'kill') continue
-
     const trigger = `${CONFIG.prefix}${commandName}`
+    // Skip if already registered as built-in (app/cmd-*.js)
+    if (defaultCommands.some(dc => dc.trigger === trigger)) continue
+
     const commandData = commands[trigger]
 
     if (commandData) {
