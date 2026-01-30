@@ -1,3 +1,14 @@
+// Logs
+const LOG_OVERLAY_CONNECTED         = '▒ Overlay      ✓ Connected to Events'
+const LOG_OVERLAY_DISCONNECTED      = '▒ Overlay      ✓ Disconnected from Events'
+const LOG_CONNECTION_ERROR          = '▒ Overlay      × Connection error: {error}'
+const LOG_COMMAND_USED              = '▒ Overlay      ✓ Command used: {command} by {username}{suffix}'
+const LOG_KILL_RECEIVED             = '▒ Overlay      ✓ Kill event received: Pausing and resetting media and animations'
+const LOG_ERROR_CONTAINER_NOT_FOUND = '▒ Overlay      × Error: commands-container element not found'
+const LOG_WARN_NO_OVERLAY_JS        = '▒ Overlay      × No overlay.js found for {command}, skipping client initialization'
+const LOG_ERROR_LOADING_COMMAND     = '▒ Overlay      × Error loading {command} command: {error}'
+const LOG_ERROR_FETCHING_HTML       = '▒ Overlay      × Error fetching command HTML files: {error}'
+
 window.onload = async function() {
 
   // Track Anime.js animations so !kill can call .reset() on them (like commands/train/overlay.js)
@@ -15,9 +26,9 @@ window.onload = async function() {
   let socket = io()
 
   // Socket.IO error handling
-  socket.on('connect', () => console.log('Overlay connected to Events'))
-  socket.on('disconnect', () => console.log('Overlay disconnected from Events'))
-  socket.on('connect_error', (err) => console.error('Connection error:', err))
+  socket.on('connect', () => console.log(LOG_OVERLAY_CONNECTED))
+  socket.on('disconnect', () => console.log(LOG_OVERLAY_DISCONNECTED))
+  socket.on('connect_error', (err) => console.error(LOG_CONNECTION_ERROR.replace('{error}', err?.message ?? String(err))))
 
   // Track all Audio instances to stop them on !kill (new Audio() does not create a DOM element)
   const activeAudioInstances = new Set() // Set<Audio>
@@ -35,14 +46,14 @@ window.onload = async function() {
 
   // Listen for command usage logs
   socket.on('command-log', (data) => {
-    const logMessage = `Command used: ${data.command} by ${data.username}${data.message.toLowerCase().trim() !== data.command ? ` (${data.message})` : ''}`
-    console.log(logMessage)
+    const suffix = data.message.toLowerCase().trim() !== data.command ? ` (${data.message})` : ''
+    console.log(LOG_COMMAND_USED.replace('{command}', data.command).replace('{username}', data.username).replace('{suffix}', suffix))
   })
 
   // !kill handler: pause and reset audio, video, animations, transitions (no DOM removal).
   // Triggered by app/commands.js default command which emits 'kill'.
   function stopAllCommands() {
-    console.log('Kill event received: Pausing and resetting media and animations')
+    console.log(LOG_KILL_RECEIVED)
 
     // YouTube IFrame player (commands/youtube sets window.player; not an HTML <video>)
     if (window.player && typeof window.player.stopVideo === 'function') {
@@ -129,7 +140,7 @@ window.onload = async function() {
     const commandsContainer = document.getElementById('commands-container')
     
     if (!commandsContainer) {
-      console.error('Error: commands-container element not found')
+      console.error(LOG_ERROR_CONTAINER_NOT_FOUND)
       return
     }
 
@@ -238,13 +249,13 @@ window.onload = async function() {
           }
         } catch (importError) {
           // No client file found - that's okay, command might not need client-side logic
-          console.warn(`No overlay.js found for ${htmlFile.command}, skipping client initialization`)
+          console.warn(LOG_WARN_NO_OVERLAY_JS.replace('{command}', htmlFile.command))
         }
       } catch (error) {
-        console.error(`Error loading ${htmlFile.command} command:`, error)
+        console.error(LOG_ERROR_LOADING_COMMAND.replace('{command}', htmlFile.command).replace('{error}', error?.message ?? String(error)))
       }
     }
   } catch (error) {
-    console.error('Error fetching command HTML files:', error)
+    console.error(LOG_ERROR_FETCHING_HTML.replace('{error}', error?.message ?? String(error)))
   }
 }
