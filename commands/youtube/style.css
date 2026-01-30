@@ -1,4 +1,4 @@
-.music-wrapper {
+.youtube-wrapper {
   z-index: 50;
   width: 100%;
   height: 100%;
@@ -8,7 +8,7 @@
   left: 0;
 }
 
-.music-wrapper #player {
+.youtube-wrapper #player {
   overflow: hidden;
   pointer-events: all;
   position: absolute;
@@ -20,7 +20,7 @@
 }
 
 /* zoom */
-.music-wrapper.zoom #player {
+.youtube-wrapper.zoom #player {
   width: 100%;
   height: 100%;
 }

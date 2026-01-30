@@ -2,7 +2,7 @@
 // Constants
 const STORAGE_PLAYLIST = 'playlist'
 const YOUTUBE_API_URL = 'https://www.youtube.com/iframe_api'
-const ELEMENT_MUSIC = '.music-wrapper'
+const ELEMENT_MUSIC = '.youtube-wrapper'
 const ELEMENT_PLAYER = '#player'
 
 // ============================================================================
@@ -30,7 +30,7 @@ let youtubePlayer = null
 let isPlayerInitialized = false
 
 // Initializes the YouTube player with the first video ID
-// Must be called after YouTube API is loaded; only called when we have a video (e.g. first !music link)
+// Must be called after YouTube API is loaded; only called when we have a video (e.g. first !youtube link)
 function initializePlayer(videoId) {
   if (isPlayerInitialized || !videoId) return
   
