@@ -1,5 +1,5 @@
 /* shape — scoped to #shape-container */
-#shape-container {
+.shape-wrapper {
   position: fixed;
   top: 0;
   left: 0;
@@ -12,26 +12,26 @@
   --shapeBorder: calc(var(--shapeSize) / 2);
 }
 
-#shape-container .chat-shape {
+.chat-shape {
   position: absolute;
   top: calc(100% - var(--shapeSize) - 40px);
   left: calc(50% - (var(--shapeSize) / 2));
-  background: black;
+  background: pink;
   width: var(--shapeSize);
   height: var(--shapeSize);
   transition: all 2s cubic-bezier(0.33, 1, 0.68, 1);
   transform-origin: bottom center;
 }
 
-#shape-container .chat-shape.circle {
+.chat-shape.circle {
   border-radius: var(--shapeBorder);
 }
 
-#shape-container .chat-shape.square {
+.chat-shape.square {
   border-radius: 0;
 }
 
-#shape-container .chat-shape.rect {
+.chat-shape.rect {
   transform: scaleX(1.6);
   border-radius: 0;
 }

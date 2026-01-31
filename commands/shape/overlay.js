@@ -97,7 +97,7 @@ export default function (socket, cmd, subCmd) {
   // reset
   if (cmd === 'reset' && !chatShape.classList.contains(cmd)) {
     chatShape.className = 'chat-shape circle'
-    chatShape.style.background = 'white'
+    chatShape.style.background = 'pink'
     chatShape.style.top = 'calc(100% - ' + shapeSize + 'px - 40px)'
     chatShape.style.left = 'calc(50% - ' + shapeSizeHalf + 'px)'
     chatShape.style.transformOrigin = 'bottom center'
