@@ -189,44 +189,60 @@ export async function startCommands() {
   commandsLoaded = true
 }
 
-// Get list of files (HTML or CSS) in command directories
-export function getCommandFiles(extension) {
+// Extension → asset type for getCommandAssets()
+const ASSET_EXTENSIONS = {
+  html: ['.html'],
+  css: ['.css'],
+  js: ['.js'],
+  image: ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg', '.ico'],
+  audio: ['.wav', '.mp3', '.ogg', '.m4a', '.aac']
+}
+
+function getAssetType(filename) {
+  const lower = filename.toLowerCase()
+  for (const [type, exts] of Object.entries(ASSET_EXTENSIONS)) {
+    if (exts.some(ext => lower.endsWith(ext))) return type
+  }
+  return null
+}
+
+// Get all files in command assets/ folders, classified by type
+export function getCommandAssets() {
   const commandNames = scanCommandDirectories()
-  const files = []
-  
+  const result = { html: [], css: [], js: [], image: [], audio: [] }
+
   try {
     const commandsDir = join(__dirname, '..', CONFIG.folderCommands)
-    
+
     for (const commandName of commandNames) {
       const assetsDir = join(commandsDir, commandName, 'assets')
       try {
         if (!statSync(assetsDir).isDirectory()) continue
         const dirEntries = readdirSync(assetsDir)
         for (const entry of dirEntries) {
-          if (entry.endsWith(`.${extension}`)) {
-            const filePath = join(assetsDir, entry)
-            if (statSync(filePath).isFile()) {
-              const file = {
-                command: commandName,
-                path: `/${CONFIG.folderCommands}/${commandName}/assets/${entry}`
-              }
-              if (extension === 'html') {
-                file.containerId = `${commandName}-container`
-              }
-              files.push(file)
-            }
+          const filePath = join(assetsDir, entry)
+          if (!statSync(filePath).isFile()) continue
+          const type = getAssetType(entry)
+          if (!type) continue
+          const file = {
+            command: commandName,
+            path: `/${CONFIG.folderCommands}/${commandName}/assets/${entry}`
           }
+          if (type === 'html') {
+            file.containerId = `${commandName}-container`
+          }
+          result[type].push(file)
         }
       } catch (err) {
         // assets/ doesn't exist or can't be read, skip
       }
     }
   } catch (err) {
-    console.error(MESSAGE_ERROR_SCANNING_FILES.replace('{extension}', extension.toUpperCase()).replace('{error}', err.message))
+    console.error(MESSAGE_ERROR_SCANNING_FILES.replace('{extension}', 'ASSETS').replace('{error}', err.message))
     process.exit(1)
   }
-  
-  return files
+
+  return result
 }
 
 // Permission hierarchy (from highest to lowest)

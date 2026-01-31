@@ -4,7 +4,7 @@ import express from 'express'
 import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
 import { readFile } from 'fs/promises'
-import { getCommandFiles } from './commands.js'
+import { getCommandAssets } from './commands.js'
 import { CONFIG } from './config.js'
 
 // Messages
@@ -32,21 +32,33 @@ app.get('/', async (req, res) => {
   try {
     const htmlPath = getProjectPath(CONFIG.folderOverlay, 'index.html')
     let html = await readFile(htmlPath, 'utf8')
-    
-    // Inject command HTML files list into the page
-    const htmlFiles = getCommandFiles('html')
-    const commandListScript = `<script>window.COMMAND_HTML_FILES = ${JSON.stringify(htmlFiles)};</script>`
+    const assets = getCommandAssets()
+
+    // Inject COMMAND_HTML_FILES and head assets (CSS, preload image/audio) before </head>
+    const commandListScript = `<script>window.COMMAND_HTML_FILES = ${JSON.stringify(assets.html)};</script>`
     html = html.replace('</head>', `${commandListScript}</head>`)
-    
-    // Inject command CSS files automatically
-    const cssFiles = getCommandFiles('css')
-    const cssLinks = cssFiles.map(css => 
-      `<link rel="stylesheet" href="${css.path}">`
-    ).join('\n    ')
+
+    const cssLinks = assets.css.map(css => `<link rel="stylesheet" href="${css.path}">`).join('\n    ')
     if (cssLinks) {
       html = html.replace('</head>', `    ${cssLinks}\n  </head>`)
     }
-    
+
+    const imagePreloads = assets.image.map(f => `<link rel="preload" as="image" href="${f.path}">`).join('\n    ')
+    if (imagePreloads) {
+      html = html.replace('</head>', `    ${imagePreloads}\n  </head>`)
+    }
+
+    const audioPreloads = assets.audio.map(f => `<link rel="preload" as="audio" href="${f.path}">`).join('\n    ')
+    if (audioPreloads) {
+      html = html.replace('</head>', `    ${audioPreloads}\n  </head>`)
+    }
+
+    // Inject command JS (libraries) in body before existing scripts
+    const scriptTags = assets.js.map(f => `<script src="${f.path}"></script>`).join('\n    ')
+    if (scriptTags) {
+      html = html.replace('<div id="commands-container"></div>', `<div id="commands-container"></div>\n\n    ${scriptTags}`)
+    }
+
     res.send(html)
   } catch (error) {
     console.error(MESSAGE_ERROR_LOADING_OVERLAY.replace('{error}', error))
