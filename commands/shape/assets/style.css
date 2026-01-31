@@ -6,7 +6,7 @@
   width: 100%;
   height: 100%;
   pointer-events: none;
-  --shapeSize: 80px;
+  --shapeSize: 48px;
   --shapeRect: calc(var(--shapeSize) * 4.5 / 3);
   --shapeRectAlign: calc(((var(--shapeRect) - var(--shapeSize)) / 2) * -1);
   --shapeBorder: calc(var(--shapeSize) / 2);

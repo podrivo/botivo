@@ -102,4 +102,14 @@ export default function (socket, cmd, subCmd) {
     chatShape.style.left = 'calc(50% - ' + shapeSizeHalf + 'px)'
     chatShape.style.transformOrigin = 'bottom center'
   }
+
+  // hide
+  if (cmd === 'hide') {
+    chatShape.style.opacity = '0'
+  }
+
+  // show — remove opacity only when it is 0
+  if (cmd === 'show' && chatShape.style.opacity === '0') {
+    chatShape.style.removeProperty('opacity')
+  }
 }

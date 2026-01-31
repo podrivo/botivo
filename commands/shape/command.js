@@ -3,7 +3,7 @@
  * Returns false so we emit custom payload (cmd or color + value) instead of auto-emit(commandName).
  */
 export default function (twitch, events, channel, tags, message) {
-  const sayAvailableCommands = 'Available commands: square, circle, rect, color, top, bottom, left, right, center, reset'
+  const sayAvailableCommands = 'Available commands: show, hide, square, circle, rect, color, top, bottom, left, right, center, reset'
 
   const args = message.split(' ')
   const shapeCommand = args[1]
@@ -47,6 +47,14 @@ export default function (twitch, events, channel, tags, message) {
   }
   if (shapeCommand === 'reset') {
     events.emit('shape', 'reset')
+    return false
+  }
+  if (shapeCommand === 'hide') {
+    events.emit('shape', 'hide')
+    return false
+  }
+  if (shapeCommand === 'show') {
+    events.emit('shape', 'show')
     return false
   }
   if (shapeCommand === 'color') {
