@@ -6,7 +6,7 @@ export default function (socket) {
 
   anime.animate(container, {
     opacity: [0, 1],
-    bottom: '-40px',
+    translateY: '-40px',
     duration: fade,
     ease: 'outQuint',
     complete: () => {
