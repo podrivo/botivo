@@ -1,0 +1,14 @@
+@font-face {
+  src: url('../font/InterVariable.ttf');
+  font-family: 'Inter'; 
+  font-style: normal;
+}
+
+html,
+body {
+  font-family: 'Inter', sans-serif;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizelegibility;
+  overflow: hidden;
+}
