@@ -75,6 +75,20 @@ style.css   // CSS is loaded into the overlay (optional)
 
 Commands `!example` and `!train` are just examples of how to use Botivo. To create a new command, duplicate the `/commands/example` and rename the folder `/commands/mycommand/`.
 
+### Built-in commands
+
+- `!commands` — lists available commands in chat (app built-in)
+- `!kill` (aliases: `!stop`, `!killall`, `!kill-all`) — stop all overlay activity (app built-in; see [Kill](#kill))
+- `!example` — example command
+- `!train` — example command (train animation)
+- `!tts` — text-to-speech (see [TTS](#tts-text-to-speech))
+- `!shape` — control overlay shape, position, and color
+- `!brb` / `!back` — broadcaster "be right back" toggle
+- `!youtube` (aliases: `!yt`, `!music`, `!video`) — YouTube playback control
+- `!nice` — "Nice!" overlay + sound
+- `!wow` — "Wooow!" overlay + random sound
+- `!error` — test/demo: overlay-only (no chat reply); shows error overlay and plays error sound
+
 `command.js` — **Sends Twitch chat messages via [tmi.js](https://tmijs.com/)**
 ```js
 /**
@@ -197,6 +211,24 @@ export const config = {
 }
 ```
 
+### Command reference
+
+### Commands
+
+The `!commands` command lists available commands in chat (app built-in).
+
+### Kill
+
+The `!kill` command (aliases: `!stop`, `!killall`, `!kill-all`) pauses and resets all audio, video, CSS animations/transitions, and Anime.js animations (it does not remove DOM elements). Useful when many commands are running at the same time and you want to quiet the overlay.
+
+### Example
+
+The `!example` command is the example command; it sends a chat reply and triggers overlay animation.
+
+### Train
+
+The `!train` command runs the example train animation (Kappa emote train from right to left).
+
 ### TTS (Text-to-speech)
 
 The `!tts` command speaks text in the overlay using the browser's Speech Synthesis API. Use `!tts <message>` for default (English) or `!tts <lang> <message>` for a specific language (e.g. `!tts es hola mundo`).
@@ -205,10 +237,29 @@ Available voices depend on the viewer's operating system and browser (macOS, Win
 
 For the **full list of language codes** and how to **add or remove languages** (edit `commands/tts/config.js`), see [docs/TTS.md](docs/TTS.md).
 
+### Shape
 
-Stop all running commands
----
-In case commands are too much and you want to quiet the overlay. `!kill` pauses and resets all audio, video, CSS animations/transitions, and Anime.js animations (it does not remove DOM elements). This works great when many commands are running at the same time and are creating chaos. It has 3 aliases: 'stop', 'killall' and 'kill-all'.
+The `!shape` command updates the overlay shape, position, and color in real time. Use `!shape` with no arguments to see help. Use `!shape <cmd>` where `<cmd>` is one of: `show`, `hide`, `square`, `circle`, `rect`, `color <value>`, `top`, `bottom`, `left`, `right`, `center`, `reset`.
+
+### BRB (Be right back)
+
+The `!brb` and `!back` commands toggle a "be right back" overlay (broadcaster-only). Use `!brb` to turn it on (chat says "Be right back..."); use `!back` to turn it off (chat says "Back to action!" and the overlay toggles off).
+
+### YouTube
+
+The `!youtube` command (aliases: `!yt`, `!music`, `!video`) controls YouTube playback on the overlay. Send a YouTube URL to add a video to the queue. Subcommands: `play`, `pause`, `next`, `vol 0-100`, `queue`, `zoom`.
+
+### Nice
+
+The `!nice` command shows a "Nice!" overlay and plays a sound.
+
+### Wow
+
+The `!wow` command shows a "Wooow!" overlay and plays a random sound.
+
+### Error
+
+The `!error` command is a test/demo; overlay-only (no chat reply). It shows an error overlay and plays an error sound.
 
 
 Global configuration
