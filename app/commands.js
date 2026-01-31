@@ -12,6 +12,11 @@ const MESSAGE_ERROR_SCANNING_FILES     = '▒ Commands    × ERROR: Error scanni
 const MESSAGE_COMMAND_USED             = '▒ Commands    ✓ {trigger} by {username}{message}'
 const MESSAGE_ERROR_EXECUTING_COMMAND  = '▒ Commands    × ERROR: Error executing command {trigger}: {error}'
 
+// Command registration priority (lower number = higher priority)
+const PRIORITY_DEFAULT = 1  // built-in cmd-*.js
+const PRIORITY_CUSTOM  = 2  // main trigger from commands/ folder
+const PRIORITY_ALIAS   = 3  // alias from any command
+
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
@@ -44,8 +49,44 @@ async function loadCommandConfig(commandName) {
   }
 }
 
+function priorityLabel(priority) {
+  if (priority === PRIORITY_DEFAULT) return 'default command'
+  if (priority === PRIORITY_CUSTOM) return 'custom command'
+  if (priority === PRIORITY_ALIAS) return 'alias'
+  return 'command'
+}
+
+function logConflict(trigger, existing, incomingCommandName, incomingPriority) {
+  const existingLabel = priorityLabel(existing.priority)
+  const incomingLabel = priorityLabel(incomingPriority)
+  if (existing.priority === PRIORITY_ALIAS && incomingPriority === PRIORITY_ALIAS) {
+    console.warn(`▒ Commands    ! Alias conflict: ${trigger} already registered as alias for command '${existing.commandName}'; skipping alias for command '${incomingCommandName}'`)
+  } else {
+    console.warn(`▒ Commands    ! Command conflict: ${trigger} already registered as ${existingLabel} for command '${existing.commandName}'; skipping ${incomingLabel} for command '${incomingCommandName}'`)
+  }
+}
+
+/**
+ * Register a command/alias only if the slot is free or existing has lower priority.
+ * Returns true if registered, false if skipped due to conflict.
+ */
+function setCommandIfHigherPriority(trigger, commandData, priority) {
+  const entry = { ...commandData, priority }
+  const existing = commands[trigger]
+  if (existing === undefined) {
+    commands[trigger] = entry
+    return true
+  }
+  if (existing.priority <= priority) {
+    logConflict(trigger, existing, commandData.commandName, priority)
+    return false
+  }
+  commands[trigger] = entry
+  return true
+}
+
 // Helper function to register aliases
-function registerAliases(trigger, commandData, config) {
+function registerAliases(trigger, commandData, config, aliasPriority) {
   if (!config.alias) return []
   
   const aliases = Array.isArray(config.alias) ? config.alias : [config.alias]
@@ -54,8 +95,9 @@ function registerAliases(trigger, commandData, config) {
   for (const alias of aliases) {
     if (alias && typeof alias === 'string') {
       const aliasTrigger = `${CONFIG.prefix}${alias.toLowerCase()}`
-      commands[aliasTrigger] = commandData
-      aliasTriggers.push(aliasTrigger)
+      if (setCommandIfHigherPriority(aliasTrigger, commandData, aliasPriority)) {
+        aliasTriggers.push(aliasTrigger)
+      }
     }
   }
   
@@ -71,8 +113,8 @@ function registerDefaultCommand(commandName, handler, config = {}) {
     return
   }
 
-  commands[trigger] = commandData
-  const aliasTriggers = registerAliases(trigger, commandData, config)
+  setCommandIfHigherPriority(trigger, commandData, PRIORITY_DEFAULT)
+  const aliasTriggers = registerAliases(trigger, commandData, config, PRIORITY_DEFAULT)
 
   defaultCommands.push({
     trigger,
@@ -156,12 +198,14 @@ export async function startCommands() {
         
         // Store handler with command name and config for auto socket emission
         const commandData = { handler, commandName, config: commandConfig }
-        commands[trigger] = commandData
-        loadedCommands.push(trigger)
-        originalCommandCount++
+        const mainRegistered = setCommandIfHigherPriority(trigger, commandData, PRIORITY_CUSTOM)
+        if (mainRegistered) {
+          loadedCommands.push(trigger)
+          originalCommandCount++
+        }
         
-        // Register aliases and get their triggers
-        const aliasTriggers = registerAliases(trigger, commandData, commandConfig)
+        // Register aliases and get their triggers (only those actually registered)
+        const aliasTriggers = registerAliases(trigger, commandData, commandConfig, PRIORITY_ALIAS)
         loadedCommands.push(...aliasTriggers)
         
         // Format command display with aliases
