@@ -11,6 +11,8 @@ const MESSAGE_SUCCESS_LOADED_COMMANDS  = '▒ Commands    ✓ Successfully loade
 const MESSAGE_ERROR_SCANNING_FILES     = '▒ Commands    × ERROR: Error scanning for {extension} files: {error}'
 const MESSAGE_COMMAND_USED             = '▒ Commands    ✓ {trigger} by {username}{message}'
 const MESSAGE_ERROR_EXECUTING_COMMAND  = '▒ Commands    × ERROR: Error executing command {trigger}: {error}'
+const MESSAGE_REPLACED_DISABLED        = '▒ Commands    ! {trigger}: replacing disabled command \'{existingCommandName}\' with enabled command \'{incomingCommandName}\''
+const MESSAGE_CUSTOM_SKIPPED_BUILTIN  = '▒ Commands    ! Custom command \'{commandName}\' skipped: built-in command with same name already registered'
 
 // Command registration priority (lower number = higher priority)
 const PRIORITY_DEFAULT = 1  // built-in cmd-*.js
@@ -66,8 +68,16 @@ function logConflict(trigger, existing, incomingCommandName, incomingPriority) {
   }
 }
 
+function logReplacedDisabled(trigger, existingCommandName, incomingCommandName) {
+  console.warn(MESSAGE_REPLACED_DISABLED
+    .replace('{trigger}', trigger)
+    .replace('{existingCommandName}', existingCommandName)
+    .replace('{incomingCommandName}', incomingCommandName))
+}
+
 /**
  * Register a command/alias only if the slot is free or existing has lower priority.
+ * An enabled command can override an existing entry that has enabled: false (same or lower priority).
  * Returns true if registered, false if skipped due to conflict.
  */
 function setCommandIfHigherPriority(trigger, commandData, priority) {
@@ -78,6 +88,13 @@ function setCommandIfHigherPriority(trigger, commandData, priority) {
     return true
   }
   if (existing.priority <= priority) {
+    const existingDisabled = existing.config?.enabled === false
+    const incomingEnabled = commandData.config?.enabled !== false
+    if (existingDisabled && incomingEnabled) {
+      logReplacedDisabled(trigger, existing.commandName, commandData.commandName)
+      commands[trigger] = entry
+      return true
+    }
     logConflict(trigger, existing, commandData.commandName, priority)
     return false
   }
@@ -177,7 +194,10 @@ export async function startCommands() {
   for (const commandName of commandNames) {
     // Skip if this command is already registered as a built-in (app/cmd-*.js)
     const trigger = `${CONFIG.prefix}${commandName}`
-    if (defaultCommands.some(dc => dc.trigger === trigger)) continue
+    if (defaultCommands.some(dc => dc.trigger === trigger)) {
+      console.warn(MESSAGE_CUSTOM_SKIPPED_BUILTIN.replace('{commandName}', commandName))
+      continue
+    }
 
     try {
       // Import the command module
