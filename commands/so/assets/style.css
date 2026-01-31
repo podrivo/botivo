@@ -1,0 +1,39 @@
+.so-overlay {
+  position: fixed;
+  top: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  pointer-events: none;
+  opacity: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 1rem 1.5rem;
+  background: rgba(145, 70, 255, 0.9);
+  border-radius: 12px;
+  color: #fff;
+  font-family: sans-serif;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.so-overlay.on {
+  pointer-events: auto;
+}
+
+.so-overlay .so-text {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.so-overlay .so-link {
+  color: #e9d5ff;
+  font-size: 0.9rem;
+  text-decoration: underline;
+}
+
+.so-overlay .so-link:hover {
+  color: #fff;
+}

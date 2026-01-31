@@ -1,0 +1,47 @@
+.socials-overlay {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 1000;
+  pointer-events: none;
+  opacity: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 1rem 1.25rem;
+  background: rgba(0, 0, 0, 0.85);
+  border-radius: 12px;
+  color: #fff;
+  font-family: sans-serif;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.socials-overlay.on {
+  pointer-events: auto;
+}
+
+.socials-overlay .socials-heading {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.socials-overlay .socials-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.socials-overlay .socials-link {
+  color: #a5b4fc;
+  font-size: 0.95rem;
+  text-decoration: none;
+}
+
+.socials-overlay .socials-link:hover {
+  color: #c7d2fe;
+  text-decoration: underline;
+}
