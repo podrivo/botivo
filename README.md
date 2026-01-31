@@ -152,7 +152,7 @@ export default function (events) {
 ```js
 /**
  * Command Configuration
- * 
+ *
  * Enabled:
  * - enabled: boolean           // Whether the command is available (defaults to true if not set)
  * 
@@ -174,10 +174,10 @@ export default function (events) {
  */
 
 export const config = {
+  enabled: true,
+  permission: 'viewer',
   cooldown: 5000,
   alias: 'demo',
-  permission: 'viewer',
-  enabled: true
 }
 
 ```
