@@ -12,7 +12,7 @@ export default function (events) {
   errorElement.classList.add('on')
 
   // Play error sound
-  const audioError = new Audio('/commands/error/error.wav')
+  const audioError = new Audio('/commands/error/assets/error.wav')
   audioError.play().catch(err => {
     console.warn('Could not play !error audio:', err)
   })

@@ -198,19 +198,17 @@ export function getCommandFiles(extension) {
     const commandsDir = join(__dirname, '..', CONFIG.folderCommands)
     
     for (const commandName of commandNames) {
-      const commandDir = join(commandsDir, commandName)
+      const assetsDir = join(commandsDir, commandName, 'assets')
       try {
-        // Read all files in the command directory
-        const dirEntries = readdirSync(commandDir)
-        
-        // Find all files with the requested extension
+        if (!statSync(assetsDir).isDirectory()) continue
+        const dirEntries = readdirSync(assetsDir)
         for (const entry of dirEntries) {
           if (entry.endsWith(`.${extension}`)) {
-            const filePath = join(commandDir, entry)
+            const filePath = join(assetsDir, entry)
             if (statSync(filePath).isFile()) {
               const file = {
                 command: commandName,
-                path: `/${CONFIG.folderCommands}/${commandName}/${entry}`
+                path: `/${CONFIG.folderCommands}/${commandName}/assets/${entry}`
               }
               if (extension === 'html') {
                 file.containerId = `${commandName}-container`
@@ -220,7 +218,7 @@ export function getCommandFiles(extension) {
           }
         }
       } catch (err) {
-        // Directory doesn't exist or can't be read, skip
+        // assets/ doesn't exist or can't be read, skip
       }
     }
   } catch (err) {

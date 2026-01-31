@@ -15,6 +15,6 @@ export default function (events) {
   }, 1200)
 
   // Play audio file
-  const audio = new Audio('/commands/nice/nice.wav')
+  const audio = new Audio('/commands/nice/assets/nice.wav')
   audio.play()
 }

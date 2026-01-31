@@ -23,6 +23,6 @@ export default function (events) {
   animation.resume()
 
   // Play audio with error handling
-  const audio = new Audio('/commands/train/train.wav')
+  const audio = new Audio('/commands/train/assets/train.wav')
   audio.play()
 }
