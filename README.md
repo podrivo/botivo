@@ -66,11 +66,10 @@ Commands
 ---
 Each command consists of:
 ```js
-command.js  // Server side of things (required)
-overlay.js  // Overlay side of things (optional)
-config.js   // Set custom configurations (optional)
-index.html  // HTML is injected into the overlay (optional)
-style.css   // CSS is loaded into the overlay (optional)
+command.js  // Server side (required)
+overlay.js  // Overlay side (optional)
+config.js   // Custom config (optional)
+assets/     // HTML, CSS, JS, images, audio, etc.; injected into the overlay (optional)
 ```
 
 Commands `!example` and `!train` are just examples of how to use Botivo. To create a new command, duplicate the `/commands/example` and rename the folder `/commands/mycommand/`.
@@ -183,7 +182,7 @@ export const config = {
 
 ```
 
-`index.html` — **HTML will be injected into the overlay**
+`assets/index.html` — **HTML will be injected into the overlay**
 ```html
 <!-- !example command HTML -->
 <div class="example-element">
@@ -191,7 +190,7 @@ export const config = {
 </div>
 ```
 
-`style.css` — **CSS will be loaded into the overlay**
+`assets/style.css` — **CSS will be loaded into the overlay**
 ```css
 .example-element {
   position: fixed;
