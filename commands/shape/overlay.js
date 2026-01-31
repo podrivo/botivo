@@ -12,11 +12,13 @@ export default function (socket, cmd, subCmd) {
   // shapes
   ;['circle', 'square', 'rect'].forEach((shape) => {
     if (cmd === shape && !chatShape.classList.contains(cmd)) {
-      chatShape.className = 'chat-shape ' + shape
+      chatShape.classList.remove('circle', 'square', 'rect')
+      chatShape.classList.add(shape)
 
       window.clearTimeout(timeoutShape)
       timeoutShape = window.setTimeout(function () {
-        chatShape.className = 'chat-shape circle'
+        chatShape.classList.remove('square', 'rect')
+        chatShape.classList.add('circle')
       }, 1200000)
     }
   })
@@ -96,7 +98,8 @@ export default function (socket, cmd, subCmd) {
 
   // reset
   if (cmd === 'reset' && !chatShape.classList.contains(cmd)) {
-    chatShape.className = 'chat-shape circle'
+    chatShape.classList.remove('square', 'rect')
+    chatShape.classList.add('circle')
     chatShape.style.background = 'pink'
     chatShape.style.top = 'calc(100% - ' + shapeSize + 'px - 40px)'
     chatShape.style.left = 'calc(50% - ' + shapeSizeHalf + 'px)'
@@ -105,11 +108,11 @@ export default function (socket, cmd, subCmd) {
 
   // hide
   if (cmd === 'hide') {
-    chatShape.style.opacity = '0'
+    chatShape.classList.remove('on')
   }
 
-  // show — remove opacity only when it is 0
-  if (cmd === 'show' && chatShape.style.opacity === '0') {
-    chatShape.style.removeProperty('opacity')
+  // show — make shape visible (only way to display it after !shape commands)
+  if (cmd === 'show') {
+    chatShape.classList.add('on')
   }
 }
