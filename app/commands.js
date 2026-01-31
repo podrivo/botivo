@@ -12,7 +12,10 @@ const MESSAGE_ERROR_SCANNING_FILES     = '▒ Commands    × ERROR: Error scanni
 const MESSAGE_COMMAND_USED             = '▒ Commands    ✓ {trigger} by {username}{message}'
 const MESSAGE_ERROR_EXECUTING_COMMAND  = '▒ Commands    × ERROR: Error executing command {trigger}: {error}'
 const MESSAGE_REPLACED_DISABLED        = '▒ Commands    ! {trigger}: replacing disabled command \'{existingCommandName}\' with enabled command \'{incomingCommandName}\''
-const MESSAGE_CUSTOM_SKIPPED_BUILTIN  = '▒ Commands    ! Custom command \'{commandName}\' skipped: built-in command with same name already registered'
+const MESSAGE_CUSTOM_SKIPPED_BUILTIN  = '▒ Commands    ! Conflict: Custom command \'{commandName}\' skipped: built-in command with same name already registered'
+const MESSAGE_DISABLED = '▒ Commands    ! Disabled: {commandNames}'
+const MESSAGE_CONFLICT_ALIAS           = '▒ Commands    ! Conflict: {trigger} already registered as alias for command \'{existingCommandName}\'; skipping alias for command \'{incomingCommandName}\''
+const MESSAGE_CONFLICT_COMMAND        = '▒ Commands    ! Conflict: {trigger} already registered as {existingLabel} for command \'{existingCommandName}\'; skipping {incomingLabel} for command \'{incomingCommandName}\''
 
 // Command registration priority (lower number = higher priority)
 const PRIORITY_DEFAULT = 1  // built-in cmd-*.js
@@ -62,9 +65,17 @@ function logConflict(trigger, existing, incomingCommandName, incomingPriority) {
   const existingLabel = priorityLabel(existing.priority)
   const incomingLabel = priorityLabel(incomingPriority)
   if (existing.priority === PRIORITY_ALIAS && incomingPriority === PRIORITY_ALIAS) {
-    console.warn(`▒ Commands    ! Alias conflict: ${trigger} already registered as alias for command '${existing.commandName}'; skipping alias for command '${incomingCommandName}'`)
+    console.warn(MESSAGE_CONFLICT_ALIAS
+      .replace('{trigger}', trigger)
+      .replace('{existingCommandName}', existing.commandName)
+      .replace('{incomingCommandName}', incomingCommandName))
   } else {
-    console.warn(`▒ Commands    ! Command conflict: ${trigger} already registered as ${existingLabel} for command '${existing.commandName}'; skipping ${incomingLabel} for command '${incomingCommandName}'`)
+    console.warn(MESSAGE_CONFLICT_COMMAND
+      .replace('{trigger}', trigger)
+      .replace('{existingLabel}', existingLabel)
+      .replace('{existingCommandName}', existing.commandName)
+      .replace('{incomingLabel}', incomingLabel)
+      .replace('{incomingCommandName}', incomingCommandName))
   }
 }
 
@@ -121,13 +132,16 @@ function registerAliases(trigger, commandData, config, aliasPriority) {
   return aliasTriggers
 }
 
+/**
+ * Register a built-in command. Returns true if registered, false if skipped (e.g. disabled).
+ */
 function registerDefaultCommand(commandName, handler, config = {}) {
   const trigger = `${CONFIG.prefix}${commandName}`
   const commandData = { handler, commandName, config }
 
   // Check if command is enabled (defaults to true if not set)
   if (config?.enabled === false) {
-    return
+    return false
   }
 
   setCommandIfHigherPriority(trigger, commandData, PRIORITY_DEFAULT)
@@ -138,6 +152,7 @@ function registerDefaultCommand(commandName, handler, config = {}) {
     aliases: aliasTriggers,
     permission: config?.permission
   })
+  return true
 }
 
 // Load built-in commands from app/cmd-*.js files (e.g. cmd-kill.js, cmd-commands.js)
@@ -147,6 +162,7 @@ async function loadBuiltInCmdFiles() {
   const cmdFiles = entries
     .filter(name => name.startsWith('cmd-') && name.endsWith('.js'))
     .sort()
+  const skippedDisabled = []
   for (const file of cmdFiles) {
     const modulePath = join(appDir, file)
     const commandName = basename(file, '.js').replace(/^cmd-/, '')
@@ -155,12 +171,16 @@ async function loadBuiltInCmdFiles() {
       const handler = mod.handler || mod.default
       const config = mod.config ?? CONFIG.defaultCommands?.[commandName] ?? {}
       if (typeof handler === 'function') {
-        registerDefaultCommand(commandName, handler, config)
+        const registered = registerDefaultCommand(commandName, handler, config)
+        if (!registered) skippedDisabled.push(commandName)
       }
     } catch (err) {
       console.error(MESSAGE_ERROR_LOADING_COMMAND.replace('{commandName}', file).replace('{error}', err.message))
       process.exit(1)
     }
+  }
+  if (skippedDisabled.length > 0) {
+    console.warn(MESSAGE_DISABLED.replace('{commandNames}', skippedDisabled.join(', ')))
   }
 }
 
@@ -190,7 +210,8 @@ export async function startCommands() {
   const loadedCommands = []
   const originalCommands = []
   let originalCommandCount = 0
-  
+  const skippedDisabledCustom = []
+
   for (const commandName of commandNames) {
     // Skip if this command is already registered as a built-in (app/cmd-*.js)
     const trigger = `${CONFIG.prefix}${commandName}`
@@ -212,7 +233,7 @@ export async function startCommands() {
         
         // Check if command is enabled (defaults to true if not set)
         if (commandConfig.enabled === false) {
-          // Skip disabled commands - don't register them
+          skippedDisabledCustom.push(commandName)
           continue
         }
         
@@ -240,6 +261,10 @@ export async function startCommands() {
       console.error(MESSAGE_ERROR_LOADING_COMMAND.replace('{commandName}', commandName).replace('{error}', err.message))
       process.exit(1)
     }
+  }
+
+  if (skippedDisabledCustom.length > 0) {
+    console.warn(MESSAGE_DISABLED.replace('{commandNames}', skippedDisabledCustom.join(', ')))
   }
   
   // Log all loaded commands in a single message
