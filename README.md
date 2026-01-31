@@ -197,6 +197,15 @@ export const config = {
 }
 ```
 
+### TTS (Text-to-speech)
+
+The `!tts` command speaks text in the overlay using the browser's Speech Synthesis API. Use `!tts <message>` for default (English) or `!tts <lang> <message>` for a specific language (e.g. `!tts es hola mundo`).
+
+Available voices depend on the viewer's operating system and browser (macOS, Windows, and Linux ship different default voices). The supported language list is kept to languages commonly present on default installs.
+
+For the **full list of language codes** and how to **add or remove languages** (edit `commands/tts/config.js`), see [docs/TTS.md](docs/TTS.md).
+
+
 Stop all running commands
 ---
 In case commands are too much and you want to quiet the overlay. `!kill` pauses and resets all audio, video, CSS animations/transitions, and Anime.js animations (it does not remove DOM elements). This works great when many commands are running at the same time and are creating chaos. It has 3 aliases: 'stop', 'killall' and 'kill-all'.

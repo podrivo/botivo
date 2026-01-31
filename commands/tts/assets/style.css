@@ -1,0 +1,8 @@
+/* TTS has no visible overlay; speech is played via SpeechSynthesis API */
+.tts {
+  position: absolute;
+  pointer-events: none;
+  visibility: hidden;
+  width: 0;
+  height: 0;
+}

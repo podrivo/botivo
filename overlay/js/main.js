@@ -98,6 +98,11 @@ window.onload = async function() {
       })
     }
 
+    // TTS: cancel any ongoing speech (commands/tts)
+    if (window.speechSynthesis && typeof window.speechSynthesis.cancel === 'function') {
+      window.speechSynthesis.cancel()
+    }
+
     // CSS: pause animations and transitions, then remove inline styles so elements stay clean
     const root = document.getElementById('commands-container')
     if (root) {
