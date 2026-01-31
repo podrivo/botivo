@@ -17,7 +17,7 @@
 
 // Must match the command directory name so overlay's socket.on('youtube', ...) receives the event
 const COMMAND_NAME = 'youtube'
-const MESSAGE_USAGE_TEMPLATE = 'Use {command} youtube-link | play | pause | next | vol 0-100 | queue | zoom'
+const MESSAGE_USAGE_TEMPLATE = "Use '{command} + cmd' to control YouTube playback on the screen. Available commands: youtube-link, play, pause, next, vol 0-100, queue, zoom"
 const MESSAGE_VOLUME = 'Volume set to {volume}'
 const MESSAGE_VOLUME_USAGE_TEMPLATE = 'Use {command} vol 0-100'
 const MESSAGE_QUEUE_SIZE_SINGULAR = '1 song in queue'
