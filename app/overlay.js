@@ -34,18 +34,13 @@ app.get('/', async (req, res) => {
     let html = await readFile(htmlPath, 'utf8')
     const assets = getCommandAssets()
 
-    // Inject COMMAND_HTML_FILES and head assets (CSS, preload image) before </head>
+    // Inject COMMAND_HTML_FILES and head assets (CSS) before </head>
     const commandListScript = `<script>window.COMMAND_HTML_FILES = ${JSON.stringify(assets.html)};</script>`
     html = html.replace('</head>', `${commandListScript}</head>`)
 
     const cssLinks = assets.css.map(css => `<link rel="stylesheet" href="${css.path}">`).join('\n    ')
     if (cssLinks) {
       html = html.replace('</head>', `    ${cssLinks}\n  </head>`)
-    }
-
-    const imagePreloads = assets.image.map(f => `<link rel="preload" as="image" href="${f.path}">`).join('\n    ')
-    if (imagePreloads) {
-      html = html.replace('</head>', `    ${imagePreloads}\n  </head>`)
     }
 
     // Inject command JS (libraries) in body before existing scripts
