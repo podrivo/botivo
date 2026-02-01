@@ -29,6 +29,7 @@ window.onload = async function() {
   socket.on('connect', () => console.log(LOG_OVERLAY_CONNECTED))
   socket.on('disconnect', () => console.log(LOG_OVERLAY_DISCONNECTED))
   socket.on('connect_error', (err) => console.error(LOG_CONNECTION_ERROR.replace('{error}', err?.message ?? String(err))))
+  socket.io.on('reconnect', () => location.reload())
 
   // Track all Audio instances to stop them on !kill (new Audio() does not create a DOM element)
   const activeAudioInstances = new Set() // Set<Audio>
@@ -162,6 +163,9 @@ window.onload = async function() {
         const htmlResponse = await fetch(htmlFile.path)
         const html = await htmlResponse.text()
         container.innerHTML = html
+
+        const splittingTargets = container.querySelectorAll('[data-splitting]')
+        if (window.Splitting && splittingTargets.length) Splitting({ target: splittingTargets })
 
         // Try to dynamically import and initialize the client script
         try {

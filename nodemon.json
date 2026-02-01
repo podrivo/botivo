@@ -1,4 +1,5 @@
 {
+  "watch": ["app", "overlay", "commands", "start.js"],
   "ext": "html,css,js,cjs,mjs,json,pug",
   "events": {
     "crash": "echo \"\n█ BOTIVO crashed!\""
