@@ -1,6 +1,6 @@
 {
   "name": "botivo",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Botivo combines a Twitch chatbot with a powerful OBS overlay",
   "author": "Pedro Ivo Hudson @podrivo",
   "repository": "https://github.com/podrivo/botivo",
