@@ -1,6 +1,6 @@
 export const config = {
   enabled: true,
   permission: 'moderator',
-  cooldown: 30000,
+  cooldown: 1000,
   alias: 'shoutout',
 }
