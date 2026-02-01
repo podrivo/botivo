@@ -12,7 +12,7 @@ const MESSAGE_ERROR_LOADING_OVERLAY  = '\n▒ Overlay     × Error loading overl
 const MESSAGE_ERROR_PORT_IN_USE      = '▒ Overlay     × ERROR: SERVER_PORT {port} is already in use'
 const MESSAGE_ERROR_GENERIC          = '▒ Overlay     × ERROR: {error}'
 const MESSAGE_ERROR_INDEX_NOT_FOUND  = '▒ Overlay     × ERROR: {error}'
-const MESSAGE_SUCCESS_SERVER_RUNNING = '▒ Overlay     ✓ Server is running on http://localhost:{port}'
+const MESSAGE_SUCCESS_SERVER_RUNNING = '▒ Overlay     ✓ Add this URL in OBS: Browser Source → http://localhost:{port}'
 
 // Get __dirname for ES modules
 const __filename = fileURLToPath(import.meta.url)

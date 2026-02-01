@@ -2,6 +2,21 @@
 
 Botivo combines a Twitch chatbot with a powerful OBS overlay, enabling custom commands and fully customizable overlays built with HTML, CSS, and JavaScript. Built-in Anime.js makes creating animations simple and fast.
 
+### Quick start
+
+1. Install [Node.js](https://nodejs.org/).
+2. Clone the repo and run `npm install`.
+3. Copy `.env.example` to `.env` (e.g. `cp .env.example .env` on Mac/Linux).
+4. Get a Twitch token — see [docs/TWITCH_TOKEN.md](docs/TWITCH_TOKEN.md).
+5. Fill `.env` with `TWITCH_USERNAME`, `TWITCH_TOKEN`, `TWITCH_CHANNEL`, and optionally `SERVER_PORT`.
+6. Run `npm start`.
+7. Add the overlay in OBS — see [docs/OBS_SETUP.md](docs/OBS_SETUP.md). Use the URL printed in the terminal (e.g. `http://localhost:8080`).
+
+### Glossary
+
+- **Overlay** — The browser page that shows your alerts/animations; you add its URL as a Browser Source in OBS.
+- **Command** — A trigger like `!train`; when someone types it in chat, the bot and (optionally) the overlay react.
+- **OBS Browser Source** — In OBS: Add Source → Browser → enter the overlay URL so the stream shows the overlay.
 
 Usage
 ---
@@ -44,7 +59,7 @@ You should see logs on your terminal:
 █ BOTIVO is ready to go!
 ```
 
-Open the overlay URL in your browser, go to your chat on your Twitch channel page and send a `!train` message. You should see a simple Kappa emote train animation from right to left. Detail: Make sure you click on the browser window before, so that it plays the audio. (This is not needed in OBS)
+Open the overlay URL in your browser, go to your chat on your Twitch channel page and send a `!train` message. You should see a simple Kappa emote train animation from right to left. Detail: Make sure you click on the browser window before, so that it plays the audio. (This is not needed in OBS) For setup steps, see [Quick start](#quick-start) and [OBS setup](docs/OBS_SETUP.md).
 
 
 How it works
@@ -60,9 +75,22 @@ What it can't do
 ---
 Due to how Twitch API works, this bot can only see chat messages. You won't be able to detect new followers, raids, channel points or any other Twitch functionality other than chat. It relies on [tmi.js](https://tmijs.com/) to connect with Twitch IRC, so make sure you see their [documentation](https://tmijs.com/#guide) for more details.
 
+### Troubleshooting
+
+- **Bot doesn't respond to commands** — Check `TWITCH_CHANNEL` (no `#`), `TWITCH_USERNAME` and `TWITCH_TOKEN` in `.env`; ensure the bot account is in the channel and the token is valid ([docs/TWITCH_TOKEN.md](docs/TWITCH_TOKEN.md)).
+- **Overlay is blank** — Open the overlay URL in a browser first to confirm it loads; ensure the bot is running and the overlay tab is open (or OBS is using the same URL).
+- **Port already in use** — Change `SERVER_PORT` in `.env` to another port (e.g. 8081) and use that URL in OBS.
 
 Commands
 ---
+### Adding a new command
+
+1. **Copy a template** — For a **chat-only** command (no overlay): copy the `commands/hello` folder. For a **chat + overlay** command: copy the `commands/example` folder.
+2. **Rename the folder** — Rename it to your command name (e.g. `meme` → use `!meme` in chat).
+3. **Edit the chat message** — In `command.js`, change what the bot says (e.g. `twitch.say(...)`).
+4. **If you want overlay** — Edit `overlay.js` and the files in `assets/` (HTML, CSS, sounds, etc.).
+5. **Optional** — In `config.js` set cooldown, permission, or alias.
+
 Each command consists of:
 ```js
 command.js  // Server side (required)
@@ -71,12 +99,11 @@ config.js   // Custom config (optional)
 assets/     // HTML, CSS, JS, images, audio, etc.; injected into the overlay (optional)
 ```
 
-Commands `!example` and `!train` are just examples of how to use Botivo. To create a new command, duplicate the `/commands/example` and rename the folder `/commands/mycommand/`.
-
 ### Built-in commands
 
 - `!commands` — lists available commands in chat (app built-in)
 - `!kill` (aliases: `!stop`, `!killall`, `!kill-all`) — stop all overlay activity (app built-in; see [Kill](#kill))
+- `!hello` — chat-only example (replies "Hello, @username!")
 - `!example` — example command
 - `!train` — example command (train animation)
 - `!tts` — text-to-speech (see [TTS](#tts-text-to-speech))
@@ -218,6 +245,10 @@ The `!commands` command lists available commands in chat (app built-in).
 ### Kill
 
 The `!kill` command (aliases: `!stop`, `!killall`, `!kill-all`) pauses and resets all audio, video, CSS animations/transitions, and Anime.js animations (it does not remove DOM elements). Useful when many commands are running at the same time and you want to quiet the overlay.
+
+### Hello
+
+The `!hello` command is a minimal chat-only example; it replies in chat with "Hello, @username!". Use it as the template for commands that only send a chat message (no overlay).
 
 ### Example
 
