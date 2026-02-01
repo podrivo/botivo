@@ -5,11 +5,4 @@ export default function (twitch, events, channel, tags, message) {
 
   // Send a message to chat
   twitch.say(channel, `We love you too, @${displayName}! <3`)
-
-  // Emit an event to the overlay
-  events.emit('love', {
-    username: tags.username,
-    displayName
-  })
-  return false
 }
