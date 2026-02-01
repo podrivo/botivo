@@ -226,8 +226,8 @@ export const config = {
   padding: 24px 32px;
   background-color: rgba(0, 0, 0, 0.7);
   color: white;
-  border-radius: 20px;
-  font-family: sans-serif;
+  border-radius: 32px;
+  corner-shape: squircle;
   font-size: 24px;
   font-weight: 400;
   opacity: 0;

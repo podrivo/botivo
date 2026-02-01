@@ -17,6 +17,7 @@
   top: calc(100% - var(--shapeSize) - 40px);
   left: calc(50% - (var(--shapeSize) / 2));
   background: pink;
+  corner-shape: squircle;
   width: var(--shapeSize);
   height: var(--shapeSize);
   opacity: 0;
@@ -33,10 +34,10 @@
 }
 
 .chat-shape.square {
-  border-radius: 0;
+  border-radius: 8px;
 }
 
 .chat-shape.rect {
   transform: scaleX(1.6);
-  border-radius: 0;
+  border-radius: 8px;
 }
