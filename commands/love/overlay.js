@@ -1,9 +1,12 @@
 export default function (socket, data) {
-  const container = document.querySelector('.love-overlay')
-  if (!container) return
 
+  // Get DOM elements
+  const container = document.querySelector('.love-overlay')
   const nameEl = container.querySelector('.love-name')
   const displayName = (data && data.displayName) || (data && data.username) || 'Someone'
+
+  const hideAfter = 3500
+  const fade = 500
 
   if (nameEl) {
     nameEl.textContent = displayName
@@ -13,16 +16,15 @@ export default function (socket, data) {
 
   anime.animate(container, {
     opacity: [0, 1],
-    duration: 500,
-    ease: 'outExpo',
+    duration: fade,
+    ease: 'outQuint',
     complete: () => {
-      const hideAfter = 3500
-      const fadeOut = 500
+      
       setTimeout(() => {
         anime.animate(container, {
           opacity: [1, 0],
-          duration: fadeOut,
-          ease: 'inExpo',
+          duration: fade,
+          ease: 'inQuint',
           complete: () => {
             container.classList.remove('on')
           }
