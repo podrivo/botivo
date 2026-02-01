@@ -1,3 +1,4 @@
+// List of wow audio files
 const WOW_AUDIOS = [
   '/commands/wow/assets/wow-01.wav',
   '/commands/wow/assets/wow-02.wav',
@@ -6,15 +7,22 @@ const WOW_AUDIOS = [
 ]
 
 export default function (events) {
-  const element = document.querySelector('#wow-container .wow')
 
+  // Get DOM element
+  const element = document.querySelector('.wow span')
+
+  // Resize text to fit container
+  fitty(element, { maxSize: 999 })
+
+  // Add 'on' class to show the wow overlay
   setTimeout(() => {
     element.classList.add('on')
-    element.addEventListener('transitionend', () => {
+    element.addEventListener('animationend', () => {
       element.classList.remove('on')
-    }, { once: true })
+    })
   }, 600)
 
-  const audio = new Audio(array[Math.floor(Math.random() * array.length)](WOW_AUDIOS))
+  // Play random audio
+  const audio = new Audio(WOW_AUDIOS[Math.floor(Math.random() * WOW_AUDIOS.length)])
   audio.play()
 }
