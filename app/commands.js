@@ -412,12 +412,13 @@ export function processCommand(twitch, events, channel, tags, message) {
       const commandCooldown = commandData.config?.cooldown !== undefined 
         ? commandData.config.cooldown 
         : CONFIG.cooldownGlobal
+      const usesGlobalCooldown = commandData.config?.cooldown === undefined
       const commandKey = `${username}_${trigger}`
       
       // If command has cooldown: 0, bypass all cooldown checks
       if (commandCooldown > 0) {
-        // Check global cooldown
-        if (now - globalLastCommandTime < CONFIG.cooldownGlobal) {
+        // Check global cooldown (only for commands that don't specify their own)
+        if (usesGlobalCooldown && now - globalLastCommandTime < CONFIG.cooldownGlobal) {
           // Silently ignore - don't spam chat with rate limit messages
           return true // Command was rate limited
         }
@@ -434,7 +435,7 @@ export function processCommand(twitch, events, channel, tags, message) {
       try {
         // Update rate limiting timestamps (only if command has a cooldown)
         if (commandCooldown > 0) {
-          globalLastCommandTime = now
+          if (usesGlobalCooldown) globalLastCommandTime = now
           userLastCommandPerCommand.set(commandKey, now)
         }
         
