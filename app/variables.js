@@ -35,7 +35,7 @@ export function variablesValidate() {
   }
 
   // Validate environment variables
-  const requiredVars = ['TWITCH_USERNAME', 'TWITCH_PASSWORD', 'TWITCH_CHANNEL', 'SERVER_PORT']
+  const requiredVars = ['TWITCH_USERNAME', 'TWITCH_TOKEN', 'TWITCH_CHANNEL', 'SERVER_PORT']
   const missingVars = requiredVars.filter(v => !process.env[v])
 
   if (missingVars.length > 0) {

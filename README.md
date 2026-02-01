@@ -11,20 +11,19 @@ cd botivo
 npm install
 ```
 
-Rename file `.env.example` to `.env` and set your environment variables. For `TWITCH_PASSWORD`, you'll need a OAuth Access Token, which you can get [here](https://twitchtokengenerator.com/).
+Rename file `.env.example` to `.env` and set your environment variables. For `TWITCH_TOKEN`, you'll need a OAuth Access Token, which you can get [here](https://twitchtokengenerator.com/).
 ```dotenv
-TWITCH_USERNAME="your-bot-username"
 # Your bot's Twitch username (the account that will send messages)
+TWITCH_USERNAME="your-bot-username"
 
-TWITCH_PASSWORD="oauth:your-oauth-token-here"
 # Get your authorization token from: https://twitchtokengenerator.com/
-# The token should start with "oauth:" (e.g., oauth:abc123xyz...)
+TWITCH_TOKEN="your-access-token-here"
 
-TWITCH_CHANNEL="your-channel-name"
 # The channel name where the bot will listen for commands (without the #)
+TWITCH_CHANNEL="your-channel-name"
 
-SERVER_PORT="8080"
 # The port number where the overlay will be served (default: 8080)
+SERVER_PORT="8080"
 ```
 
 Start the application:

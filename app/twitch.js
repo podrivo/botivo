@@ -7,7 +7,7 @@ import { CONFIG } from './config.js'
 // Messages
 const MESSAGE_SUCCESS_CONNECTED        = '▒ Twitch      ✓ Connected to channel \'{channel}\', with user \'{username}\''
 const MESSAGE_ERROR_CONNECTION_TIMEOUT = '▒ Twitch      × ERROR: {error}'
-const MESSAGE_ERROR_LOGIN_FAILED       = '▒ Twitch      × ERROR: Failed to connect to Twitch. Check your TWITCH_USERNAME and TWITCH_PASSWORD in .env'
+const MESSAGE_ERROR_LOGIN_FAILED       = '▒ Twitch      × ERROR: Failed to connect to Twitch. Check your TWITCH_USERNAME and TWITCH_TOKEN in .env'
 const MESSAGE_ERROR_CONNECTION_FAILED  = '▒ Twitch      × ERROR: Failed to connect to Twitch:\n{error}'
 
 // Helper function to get environment variable with trimming
@@ -29,7 +29,7 @@ export function startTwitch(events) {
   return new Promise((resolve, reject) => {
     // Trim credentials to handle whitespace issues from .env parsing
     const username = getEnvVar('TWITCH_USERNAME')
-    const password = getEnvVar('TWITCH_PASSWORD', (pwd) => {
+    const password = getEnvVar('TWITCH_TOKEN', (pwd) => {
       // Automatically add 'oauth:' prefix if missing (makes it optional)
       return pwd && !pwd.startsWith('oauth:') ? `oauth:${pwd}` : pwd
     })
@@ -78,7 +78,7 @@ export function startTwitch(events) {
       if (isResolved) return
       isResolved = true
       spinner.stop()
-      const errorMsg = 'Twitch connection timeout. Check your TWITCH_USERNAME and TWITCH_PASSWORD in .env (make sure password has no extra spaces)'
+      const errorMsg = 'Twitch connection timeout. Check your TWITCH_USERNAME and TWITCH_TOKEN in .env (make sure password has no extra spaces)'
       process.stdout.write(`\r\x1b[K${MESSAGE_ERROR_CONNECTION_TIMEOUT.replace('{error}', errorMsg)}\n`)
       twitch.disconnect()
       reject(new Error(errorMsg))
