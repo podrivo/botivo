@@ -164,6 +164,9 @@ window.onload = async function() {
         const html = await htmlResponse.text()
         container.innerHTML = html
 
+        const fittyTargets = container.querySelectorAll('[data-fitty]')
+        if (window.fitty && fittyTargets.length) fittyTargets.forEach(el => fitty(el, { maxSize: 999 }))
+
         const splittingTargets = container.querySelectorAll('[data-splitting]')
         if (window.Splitting && splittingTargets.length) Splitting({ target: splittingTargets })
 

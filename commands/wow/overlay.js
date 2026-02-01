@@ -11,9 +11,6 @@ export default function (events) {
   // Get DOM element
   const element = document.querySelector('.wow span')
 
-  // Resize text to fit container
-  fitty(element, { maxSize: 999 })
-
   // Add 'on' class to show the wow overlay
   setTimeout(() => {
     element.classList.add('on')

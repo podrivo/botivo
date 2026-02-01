@@ -56,13 +56,14 @@ Default MutationObserver config: `{ subtree: true, childList: true, characterDat
 
 ### How Botivo uses it
 
-There is no global Fitty call. Commands that need text to fit the container call `fitty()` in their `overlay.js`, often with a higher `maxSize` so large overlay headlines can scale:
+The main overlay ([overlay/js/main.js](overlay/js/main.js)) runs Fitty **after** each command's HTML is injected. It only targets that command's container, in the same way as Splitting:
 
 ```js
-fitty(element, { maxSize: 999 })
+const fittyTargets = container.querySelectorAll('[data-fitty]')
+if (window.fitty && fittyTargets.length) fittyTargets.forEach(el => fitty(el, { maxSize: 999 }))
 ```
 
-Examples: [commands/brb/overlay.js](commands/brb/overlay.js), [commands/wow/overlay.js](commands/wow/overlay.js), [commands/nice/overlay.js](commands/nice/overlay.js).
+So only nodes with the `[data-fitty]` attribute inside the newly injected HTML get Fitty applied. Use it in your command HTML when text should fit the container, e.g. `<span data-fitty>BRB</span>`. The `maxSize: 999` option lets large overlay headlines scale. Commands such as brb, wow, and nice use `data-fitty` in their HTML and no longer call `fitty()` in overlay.js.
 
 ### Return value and methods
 

@@ -1,20 +1,17 @@
-export default function (events) {
+export default function () {
 
-  // Get DOM elements
+  // Get DOM element
   const niceChars = document.querySelectorAll('.nice .char')
 
-  // Add 'on' class to each character
-  // Delay is to match the audio file
-  setTimeout(function(){
+  setTimeout(function () {
     niceChars.forEach(char => {
       char.classList.add('on')
-      char.addEventListener('transitionend', () => {
+      char.addEventListener('animationend', () => {
         char.classList.remove('on')
       })
     })
-  }, 1200)
+  }, 600)
 
-  // Play audio file
   const audio = new Audio('/commands/nice/assets/nice.wav')
   audio.play()
 }
