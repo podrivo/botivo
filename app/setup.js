@@ -1,15 +1,11 @@
 #!/usr/bin/env node
 /**
  * Setup Botivo: get Twitch token via TwitchTokenGenerator.com, prompt for
- * TWITCH_USERNAME, TWITCH_CHANNEL, SERVER_PORT, then update .env in place.
+ * TWITCH_USERNAME, TWITCH_CHANNEL, then update .env in place.
  *
  * Usage:
  *   node app/setup.js
  *   npm run setup
- *
- * Refresh token only (then prompt for other vars and update .env):
- *   node app/setup.js --refresh
- *   TWITCH_REFRESH_TOKEN=xxx node app/setup.js --refresh
  */
 
 import { exec } from 'child_process'
@@ -19,10 +15,22 @@ import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
 import { readFileSync, writeFileSync, existsSync } from 'fs'
 
+// Messages
+const MESSAGE_PROMPT_CHANNEL          = '▒ Setup       → What\'s the Twitch channel?'
+const MESSAGE_PROMPT_USERNAME         = '▒ Setup       → And the Twitch account?'
+const MESSAGE_INFO_AUTH_URL           = '\nOpen this URL in your browser and authorize with your Twitch account:\nPress Enter to open your browser and continue authentication...'
+const MESSAGE_INFO_WAITING            = '\nWaiting for authorization…\n'
+const MESSAGE_SUCCESS_ENV_UPDATED     = '\n.env updated successfully.'
+const MESSAGE_ERROR_SESSION_NOT_FOUND = 'Session not found. Run the script again to create a new one.'
+const MESSAGE_ERROR_SESSION_EXPIRED   = 'Session already used or expired. Run the script again to create a new one.'
+const MESSAGE_ERROR_CREATE_FAILED     = 'Create failed: {status}'
+const MESSAGE_ERROR_INVALID_SCOPES    = 'Invalid scopes (tried chat:read+chat:edit and chat_read+chat_edit). Check TwitchTokenGenerator.com for supported scope format.'
+const MESSAGE_ERROR_UNKNOWN           = 'Unknown error'
+
 const TTG_BASE = 'https://twitchtokengenerator.com/api'
 const APP_TITLE = 'Botivo'
 const POLL_INTERVAL_SEC = 4
-const VAR_KEYS = ['TWITCH_USERNAME', 'TWITCH_TOKEN', 'TWITCH_REFRESH_TOKEN', 'TWITCH_CHANNEL', 'SERVER_PORT']
+const VAR_KEYS = ['TWITCH_USERNAME', 'TWITCH_TOKEN', 'TWITCH_CHANNEL', 'SERVER_PORT']
 
 // Try chat:read+chat:edit first; TTG may use scope IDs like chat_read+chat_edit
 const SCOPE_ALTERNATIVES = ['chat:read+chat:edit', 'chat_read+chat_edit']
@@ -33,19 +41,6 @@ const ENV_EXAMPLE_PATH = join(__dirname, '..', '.env.example')
 
 function base64Encode(str) {
   return Buffer.from(str, 'utf8').toString('base64')
-}
-
-function getRefreshToken() {
-  const env = process.env.TWITCH_REFRESH_TOKEN?.trim()
-  if (env) return env
-  const args = process.argv.slice(2)
-  const i = args.indexOf('--refresh')
-  if (i !== -1 && args[i + 1] && !args[i + 1].startsWith('-')) return args[i + 1].trim()
-  return null
-}
-
-function hasRefreshFlag() {
-  return process.argv.includes('--refresh')
 }
 
 function sleep(seconds) {
@@ -69,9 +64,9 @@ async function createSession() {
     if (data.error === 13 || (data.message && String(data.message).toLowerCase().includes('invalid scope'))) {
       continue
     }
-    throw new Error(data.message || data.error_description || `Create failed: ${res.status}`)
+    throw new Error(data.message || data.error_description || MESSAGE_ERROR_CREATE_FAILED.replace('{status}', res.status))
   }
-  throw new Error('Invalid scopes (tried chat:read+chat:edit and chat_read+chat_edit). Check TwitchTokenGenerator.com for supported scope format.')
+  throw new Error(MESSAGE_ERROR_INVALID_SCOPES)
 }
 
 async function pollStatus(id) {
@@ -79,35 +74,29 @@ async function pollStatus(id) {
   const res = await fetch(url)
   const data = await res.json().catch(() => ({}))
   if (data.success && data.token) {
-    return { success: true, token: data.token, refresh: data.refresh || null }
+    return { success: true, token: data.token }
   }
   const err = data.error
-  const msg = data.message || 'Unknown error'
+  const msg = data.message || MESSAGE_ERROR_UNKNOWN
   if (err === 3) return { success: false, pending: true }
-  if (err === 2) throw new Error('Session not found. Run the script again to create a new one.')
-  if (err === 4 || err === 6) throw new Error('Session already used or expired. Run the script again to create a new one.')
+  if (err === 2) throw new Error(MESSAGE_ERROR_SESSION_NOT_FOUND)
+  if (err === 4 || err === 6) throw new Error(MESSAGE_ERROR_SESSION_EXPIRED)
   throw new Error(msg)
 }
 
-async function refreshTokenViaTTG(refreshToken) {
-  const url = `${TTG_BASE}/refresh/${encodeURIComponent(refreshToken)}`
-  const res = await fetch(url)
-  const data = await res.json().catch(() => ({}))
-  if (!data.token) {
-    const msg = data.message || data.error_description || `Refresh failed: ${res.status}`
-    throw new Error(msg + '. Run the script without --refresh to authorize again in the browser.')
-  }
-  return { token: data.token, refresh: data.refresh || refreshToken }
-}
-
 function ask(rl, question, defaultValue) {
-  const prompt = defaultValue != null && defaultValue !== '' ? `${question} (default: ${defaultValue}): ` : `${question}: `
   return new Promise((resolve) => {
-    rl.question(prompt, (answer) => {
+    rl.question(`${question} `, (answer) => {
       const trimmed = answer.trim()
       resolve(trimmed !== '' ? trimmed : (defaultValue ?? ''))
     })
   })
+}
+
+/** Remove # or @ prefix from channel name if present */
+function cleanChannelName(channel) {
+  if (!channel) return channel
+  return channel.replace(/^[#@]/, '')
 }
 
 /** Parse .env-style content into a map of key -> value for known keys, and return raw lines. */
@@ -134,7 +123,7 @@ function updateEnvLines(lines, vars) {
     }
     return line
   })
-  const appendOrder = ['TWITCH_USERNAME', 'TWITCH_TOKEN', 'TWITCH_REFRESH_TOKEN', 'TWITCH_CHANNEL', 'SERVER_PORT']
+  const appendOrder = ['TWITCH_USERNAME', 'TWITCH_TOKEN', 'TWITCH_CHANNEL', 'SERVER_PORT']
   for (const key of appendOrder) {
     if (seen.has(key) || vars[key] === undefined || vars[key] === '') continue
     updated.push(`${key}="${String(vars[key]).replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`)
@@ -143,43 +132,25 @@ function updateEnvLines(lines, vars) {
   return out.endsWith('\n') ? out : out + '\n'
 }
 
-async function promptForVars(rl, current, token, refreshToken) {
-  const username = await ask(rl, 'Twitch username (bot account)', current.TWITCH_USERNAME)
-  const channel = await ask(rl, 'Twitch channel (no #)', current.TWITCH_CHANNEL)
-  const portRaw = await ask(rl, 'Overlay server port', current.SERVER_PORT || '8080')
-  const port = portRaw.trim() !== '' ? portRaw : '8080'
-  return {
-    TWITCH_USERNAME: username,
-    TWITCH_TOKEN: token,
-    TWITCH_REFRESH_TOKEN: refreshToken || '',
-    TWITCH_CHANNEL: channel,
-    SERVER_PORT: port
-  }
-}
 
-async function runTokenFlow() {
-  if (hasRefreshFlag()) {
-    const refresh = getRefreshToken()
-    if (!refresh) {
-      console.error('Usage: node app/setup.js --refresh [refresh_token]')
-      console.error('   or: TWITCH_REFRESH_TOKEN=xxx node app/setup.js --refresh')
-      process.exit(1)
-    }
-    const { token, refresh: newRefresh } = await refreshTokenViaTTG(refresh)
-    return { token, refreshToken: newRefresh }
-  }
-
+async function runTokenFlow(rl) {
   const session = await createSession()
   const { id, authUrl } = session
-  console.log('\nOpen this URL in your browser and authorize with your Twitch account:')
+  console.log(MESSAGE_INFO_AUTH_URL)
   console.log(authUrl)
-  console.log('\nWaiting for authorization…\n')
+  
+  // Wait for user to press Enter
+  await new Promise((resolve) => {
+    rl.question('', () => resolve())
+  })
+  
   openBrowser(authUrl)
+  console.log(MESSAGE_INFO_WAITING)
 
   for (;;) {
     const result = await pollStatus(id)
     if (result.success) {
-      return { token: result.token, refreshToken: result.refresh }
+      return result.token
     }
     if (result.pending) {
       await sleep(POLL_INTERVAL_SEC)
@@ -188,30 +159,49 @@ async function runTokenFlow() {
   }
 }
 
-async function main() {
-  let token
-  let refreshToken = null
-  try {
-    const result = await runTokenFlow()
-    token = result.token
-    refreshToken = result.refreshToken || null
-  } catch (err) {
-    console.error(err.message)
-    process.exit(1)
-  }
-
+export async function runSetup() {
+  // 1. Load existing .env
   const envContent = existsSync(ENV_PATH)
     ? readFileSync(ENV_PATH, 'utf8')
     : readFileSync(ENV_EXAMPLE_PATH, 'utf8')
   const { current, lines } = parseEnvContent(envContent)
 
-  const rl = createInterface({ input: process.stdin, output: process.stdout })
-  const vars = await promptForVars(rl, current, token, refreshToken)
-  rl.close()
+  // 2. Prompt for channel and username FIRST
+  const rl = createInterface({ 
+    input: process.stdin, 
+    output: process.stdout,
+    terminal: false
+  })
+  const channelRaw = await ask(rl, MESSAGE_PROMPT_CHANNEL, current.TWITCH_CHANNEL)
+  const channel = cleanChannelName(channelRaw)
+  const username = await ask(rl, MESSAGE_PROMPT_USERNAME, current.TWITCH_USERNAME)
+
+  // 3. Then do token flow (with browser prompt)
+  let token
+  try {
+    token = await runTokenFlow(rl)
+  } catch (err) {
+    rl.close()
+    console.error(err.message)
+    process.exit(1)
+  }
+
+  // 4. Update .env with all values (PORT uses default 8080 if not set)
+  const port = current.SERVER_PORT || '8080'
+  const vars = {
+    TWITCH_USERNAME: username,
+    TWITCH_TOKEN: token,
+    TWITCH_CHANNEL: channel,
+    SERVER_PORT: port
+  }
 
   const newContent = updateEnvLines(lines, vars)
   writeFileSync(ENV_PATH, newContent, 'utf8')
-  console.log('\n.env updated successfully.')
+  rl.close()
+  console.log(MESSAGE_SUCCESS_ENV_UPDATED)
 }
 
-main()
+// Run setup if this file is being executed directly
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  runSetup()
+}

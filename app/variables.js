@@ -5,10 +5,10 @@ import { dirname, join } from 'path'
 import { existsSync } from 'fs'
 
 // Messages
-const MESSAGE_ERROR_ENV_NOT_FOUND = '▒ Variables   × ERROR: File .env was not found'
-const MESSAGE_ERROR_MISSING_VARS  = '▒ Variables   × ERROR: Missing following environment variables {vars}'
-const MESSAGE_ERROR_INVALID_PORT  = '▒ Variables   × ERROR: SERVER_PORT must be a valid number between 1 and 65535. Got: {port}'
-const MESSAGE_SUCCESS_ENV_FOUND   = '▒ Variables   ✓ Found .env and environment variables'
+const MESSAGE_INFO_SETUP_REQUIRED  = '▒ Variables   × ERROR: .env file not found. Starting setup...\n'
+const MESSAGE_ERROR_MISSING_VARS   = '▒ Variables   × ERROR: Missing following environment variables {vars}'
+const MESSAGE_ERROR_INVALID_PORT   = '▒ Variables   × ERROR: SERVER_PORT must be a valid number between 1 and 65535. Got: {port}'
+const MESSAGE_SUCCESS_ENV_FOUND    = '▒ Variables   ✓ Found .env and environment variables'
 
 // Set dotenv (suppress dotenv message)
 function suppressDotenvLogs() {
@@ -27,11 +27,14 @@ const __dirname = dirname(__filename)
 const envPath = join(__dirname, '..', '.env')
 
 // Validate environment
-export function variablesValidate() {
+export async function variablesValidate() {
   // Check if .env file exists
   if (!existsSync(envPath)) {
-    console.error(MESSAGE_ERROR_ENV_NOT_FOUND)
-    process.exit(1)
+    console.log(MESSAGE_INFO_SETUP_REQUIRED)
+    const { runSetup } = await import('./setup.js')
+    await runSetup()
+    // Reload dotenv after setup
+    config({ override: true })
   }
 
   // Validate environment variables

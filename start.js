@@ -25,7 +25,7 @@ import { startCommands } from './app/commands.js'
   console.log(`█ BOTIVO starting...\n`)
 
   // Validate environment variables
-  variablesValidate()
+  await variablesValidate()
   const port = variablesPort()
 
   // Start overlay server (Express.js)
