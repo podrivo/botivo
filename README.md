@@ -1,43 +1,41 @@
 <img src="https://github.com/podrivo/botivo/assets/546221/217e12ad-10ab-438a-8828-0ef7bcca89ce" width="400" alt="Botivo logo">
 
-Botivo combines a Twitch chatbot with a powerful OBS overlay, enabling custom commands and fully customizable overlays built with HTML, CSS, and JavaScript. Built-in Anime.js makes creating animations simple and fast.
+Botivo combines a Twitch chatbot with a powerful OBS overlay, enabling custom commands and fully customizable overlays built with HTML, CSS, and JavaScript. Built-in libraries makes creating animations simple and fast.
 
-### Quick start
 
-1. Install [Node.js](https://nodejs.org/).
-2. Clone the repo and run `npm install`.
-3. Copy `.env.example` to `.env` (e.g. `cp .env.example .env` on Mac/Linux).
-4. Get a Twitch token — see [docs/TWITCH_TOKEN.md](docs/TWITCH_TOKEN.md).
-5. Fill `.env` with `TWITCH_USERNAME`, `TWITCH_TOKEN`, `TWITCH_CHANNEL`, and optionally `SERVER_PORT`.
-6. Run `npm start`.
-7. Add the overlay in OBS — see [docs/OBS_SETUP.md](docs/OBS_SETUP.md). Use the URL printed in the terminal (e.g. `http://localhost:8080`).
+How it works
+---
+Botivo listens to your Twitch chat, and when a command is typed it can both reply in chat and tell the overlay — a webpage loaded via Browser Source in OBS — to play an animation, video or sound.
 
-### Glossary
+Add infinite commands by just adding new folders and files. There are examples included to help you get started. Make sure to check how the structure works, and customize all commands you need.
 
-- **Overlay** — The browser page that shows your alerts/animations; you add its URL as a Browser Source in OBS.
-- **Command** — A trigger like `!train`; when someone types it in chat, the bot and (optionally) the overlay react.
-- **OBS Browser Source** — In OBS: Add Source → Browser → enter the overlay URL so the stream shows the overlay.
 
 Usage
 ---
-Download or clone this repository, and install dependencies. You'll need [Node.js](https://nodejs.org/) installed.
+Make sure [Node.js](https://nodejs.org/) is installed in your machine. [Download](https://github.com/podrivo/botivo/releases) or clone this repository.
+
+Open your system's terminal and navigate to the downloaded folder and install.
 ```shell
 cd botivo
 npm install
 ```
 
-Rename file `.env.example` to `.env` and set your environment variables. For `TWITCH_TOKEN`, you'll need a OAuth Access Token, which you can get [here](https://twitchtokengenerator.com/).
+Rename file `.env.example` to `.env` and make sure to set your environment variables.
 ```dotenv
-# Your bot's Twitch username (the account that will send messages)
-TWITCH_USERNAME="your-bot-username"
+# Your bot's Twitch username
+# The account that will send messages
+TWITCH_USERNAME="twitch_bot_username"
 
-# Get your authorization token from: https://twitchtokengenerator.com/
-TWITCH_TOKEN="your-access-token-here"
+# Get your access token from:
+# https://twitchtokengenerator.com/
+TWITCH_TOKEN="twitch_bot_access_token"
 
-# The channel name where the bot will listen for commands (without the #)
-TWITCH_CHANNEL="your-channel-name"
+# Channel name where the bot will listen for commands
+# Don't include the #
+TWITCH_CHANNEL="twitch_channel_name"
 
-# The port number where the overlay will be served (default: 8080)
+# Port nsumber for overlay server
+# Default: 8080
 SERVER_PORT="8080"
 ```
 
@@ -51,47 +49,39 @@ You should see logs on your terminal:
 █ BOTIVO starting...
 
 ▒ Variables   ✓ Found .env and environment variables
-▒ Overlay     ✓ Server is running on http://localhost:8080
+▒ Overlay     ✓ Add this URL in OBS (Browser Source) → http://localhost:8080
 ▒ Events      ✓ Communication with overlay started
-▒ Twitch      ✓ Connected to channel 'channel', with user 'user'
-▒ Commands    ✓ Successfully loaded 3 commands
+▒ Twitch      ✓ Connected to channel 'podrivo', with user 'LemosTheBot'
+▒ Commands    ✓ Successfully loaded 15 custom and 2 built-in commands
 
 █ BOTIVO is ready to go!
 ```
 
-Open the overlay URL in your browser, go to your chat on your Twitch channel page and send a `!train` message. You should see a simple Kappa emote train animation from right to left. Detail: Make sure you click on the browser window before, so that it plays the audio. (This is not needed in OBS) For setup steps, see [Quick start](#quick-start) and [OBS setup](docs/OBS_SETUP.md).
+Add the overlay URL in your OBS. Go to your Twitch channel chat page and send a `!train` message. You should see a simple Kappa emote train animation from right to left.
+
+For setup steps, see [OBS setup](docs/OBS_SETUP.md).
 
 
-How it works
+How it technically works
 ---
 Botivo is initiated in `start.js`. It connects to Twitch IRC using [tmi.js](https://tmijs.com/), via an [Express](https://expressjs.com/) server.
 
-Botivo automatically discovers and loads commands from the `/commands` directory. When a command is triggered in chat, the `command.js` emits an event via [Socket.IO](https://socket.io/) to overlay, then `overlay.js` grabs the event and triggers the DOM manipulation with [Anime.js](https://animejs.com/). Use can also use CSS to create animations and HTML5 to play audios. The overlay uses Splitting.js and Fitty for text effects and fitting; see [docs/OVERLAY_LIBRARIES.md](docs/OVERLAY_LIBRARIES.md) for default options and how they're used.
+Botivo automatically discovers and loads commands from the `/commands` directory. When a command is triggered in chat, the `command.js` emits an event via [Socket.IO](https://socket.io/) to overlay, then `overlay.js` grabs the event and triggers the DOM manipulation.
 
-In order to use your overlay as a `Browser Source` in [OBS Studio](https://obsproject.com/), you need to keep the bot running in your computer and set the overlay URL that is included in your terminal log, usually `http://localhost:8080`.
+Use any JavaScript library and CSS to create animations and HTML5 to play audios and videos. Built-in libraries [Anime.js](https://animejs.com/), [Splitting.js](https://splitting.js.org/) and [Fitty](https://rikschennink.github.io/fitty/) for animations and text effects.
+
+To use your overlay as a `Browser Source` in [OBS Studio](https://obsproject.com/), you need to keep the bot running in your computer and set the overlay URL that is included in your terminal log, usually `http://localhost:8080`.
+
+See [docs/OVERLAY_LIBRARIES.md](docs/OVERLAY_LIBRARIES.md) for default options and how they're used.
 
 
 What it can't do
 ---
 Due to how Twitch API works, this bot can only see chat messages. You won't be able to detect new followers, raids, channel points or any other Twitch functionality other than chat. It relies on [tmi.js](https://tmijs.com/) to connect with Twitch IRC, so make sure you see their [documentation](https://tmijs.com/#guide) for more details.
 
-### Troubleshooting
-
-- **Bot doesn't respond to commands** — Check `TWITCH_CHANNEL` (no `#`), `TWITCH_USERNAME` and `TWITCH_TOKEN` in `.env`; ensure the bot account is in the channel and the token is valid ([docs/TWITCH_TOKEN.md](docs/TWITCH_TOKEN.md)).
-- **Overlay is blank** — Open the overlay URL in a browser first to confirm it loads; ensure the bot is running and the overlay tab is open (or OBS is using the same URL).
-- **Port already in use** — Change `SERVER_PORT` in `.env` to another port (e.g. 8081) and use that URL in OBS.
-
 Commands
 ---
-### Adding a new command
-
-1. **Copy a template** — For a **chat-only** command (no overlay): copy the `commands/hello` folder. For a **chat + overlay** command: copy the `commands/example` folder.
-2. **Rename the folder** — Rename it to your command name (e.g. `meme` → use `!meme` in chat).
-3. **Edit the chat message** — In `command.js`, change what the bot says (e.g. `twitch.say(...)`).
-4. **If you want overlay** — Edit `overlay.js` and the files in `assets/` (HTML, CSS, sounds, etc.).
-5. **Optional** — In `config.js` set cooldown, permission, or alias.
-
-Each command consists of:
+### Structure
 ```js
 command.js  // Server side (required)
 overlay.js  // Overlay side (optional)
@@ -99,21 +89,36 @@ config.js   // Custom config (optional)
 assets/     // HTML, CSS, JS, images, audio, etc.; injected into the overlay (optional)
 ```
 
+
+### Adding a new command
+1. **Copy a template** — For a **chat-only** command (no overlay): copy the `commands/hello` folder. For a **chat + overlay** command: copy the `commands/example` folder.
+2. **Rename the folder** — Rename it to your command name (e.g. `meme` → use `!meme` in chat).
+3. **Edit the chat message** — In `command.js`, change what the bot says (e.g. `twitch.say(...)`).
+4. **If you want overlay** — Edit `overlay.js` and the files in `assets/` (HTML, CSS, sounds, etc.).
+5. **Optional** — In `config.js` set cooldown, permission, or alias.
+
+
 ### Built-in commands
+| Name | Description | Alias |
+|---------|-------------|---------|
+| `!commands` | Lists available commands in chat (app built-in). | — |
+| `!kill` | Stop all overlay activity (app built-in; see [Kill](#kill)). | `!stop`, `!killall`, `!kill-all` |
 
-- `!commands` — lists available commands in chat (app built-in)
-- `!kill` (aliases: `!stop`, `!killall`, `!kill-all`) — stop all overlay activity (app built-in; see [Kill](#kill))
-- `!hello` — chat-only example (replies "Hello, @username!")
-- `!example` — example command
-- `!train` — example command (train animation)
-- `!tts` — text-to-speech (see [TTS](#tts-text-to-speech))
-- `!shape` — control overlay shape, position, and color
-- `!brb` / `!back` — broadcaster "be right back" toggle
-- `!youtube` (aliases: `!yt`, `!music`, `!video`) — YouTube playback control
-- `!nice` — "Nice!" overlay + sound
-- `!wow` — "Wooow!" overlay + random sound
-- `!error` — test/demo: overlay-only (no chat reply); shows error overlay and plays error sound
+### Example commands
+| Name | Description | Alias |
+|---------|-------------|---------|
+| `!hello` | Chat-only example (replies "Hello, @username!"). | — |
+| `!example` | Example command. | — |
+| `!train` | Example command (train animation). | — |
+| `!tts` | Text-to-speech (see [TTS](#tts-text-to-speech)). | — |
+| `!shape` | Control overlay shape, position, and color. | — |
+| `!brb` | Broadcaster "be right back" toggle. | `!back` |
+| `!youtube` | YouTube playback control. | `!yt`, `!music`, `!video` |
+| `!nice` | "Nice!" overlay + sound. | — |
+| `!wow` | "Wooow!" overlay + random sound. | — |
+| `!error` | Test/demo: overlay-only (no chat reply); shows error overlay and plays error sound. | — |
 
+### Command files
 `command.js` — **Sends Twitch chat messages via [tmi.js](https://tmijs.com/)**
 ```js
 /**
