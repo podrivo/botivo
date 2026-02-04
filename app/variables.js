@@ -11,15 +11,19 @@ const MESSAGE_ERROR_INVALID_PORT   = '▒ Variables   × ERROR: SERVER_PORT must
 const MESSAGE_SUCCESS_ENV_FOUND    = '▒ Variables   ✓ Found .env and environment variables'
 
 // Set dotenv (suppress dotenv message)
-function suppressDotenvLogs() {
+function configWithSuppressedLogs(options) {
   const originalLog = console.log
   console.log = (...args) => {
-    if (!args[0]?.includes?.('[dotenv@')) originalLog(...args)
+    const message = args[0]?.toString() || ''
+    if (!message.includes('[dotenv@') && !message.includes('injecting env')) {
+      originalLog(...args)
+    }
   }
-  config()
+  const result = config(options)
   console.log = originalLog
+  return result
 }
-suppressDotenvLogs()
+configWithSuppressedLogs()
 
 // Get __dirname for ES modules
 const __filename = fileURLToPath(import.meta.url)
@@ -34,7 +38,7 @@ export async function variablesValidate() {
     const { runSetup } = await import('./setup.js')
     await runSetup()
     // Reload dotenv after setup
-    config({ override: true })
+    configWithSuppressedLogs({ override: true })
   }
 
   // Validate environment variables
