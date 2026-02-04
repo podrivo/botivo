@@ -14,18 +14,25 @@ import { createInterface } from 'readline'
 import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
 import { readFileSync, writeFileSync, existsSync } from 'fs'
+import ora from 'ora'
 
 // Messages
 const MESSAGE_PROMPT_CHANNEL          = '▒ Setup       → What\'s the Twitch channel?'
-const MESSAGE_PROMPT_USERNAME         = '▒ Setup       → And the Twitch account?'
+const MESSAGE_PROMPT_USERNAME         = '▒ Setup       → And what\'s the Twitch bot account?'
 const MESSAGE_INFO_AUTH_URL           = '▒ Setup       → Press Enter to continue. Or open the URL: '
-const MESSAGE_INFO_WAITING            = '▒ Setup       → Waiting for authorization…'
 const MESSAGE_SUCCESS_ENV_UPDATED     = '▒ Setup       ✓ .env updated successfully.\n'
 const MESSAGE_ERROR_SESSION_NOT_FOUND = 'Session not found. Run the script again to create a new one.'
 const MESSAGE_ERROR_SESSION_EXPIRED   = 'Session already used or expired. Run the script again to create a new one.'
 const MESSAGE_ERROR_CREATE_FAILED     = 'Create failed: {status}'
 const MESSAGE_ERROR_INVALID_SCOPES    = 'Invalid scopes (tried chat:read+chat:edit and chat_read+chat_edit). Check TwitchTokenGenerator.com for supported scope format.'
 const MESSAGE_ERROR_UNKNOWN           = 'Unknown error'
+
+const spinner = ora({
+  spinner: 'dots4',
+  color: 'white',
+  text: 'Waiting for authorization...',
+  prefixText: '▒ Setup      '
+})
 
 const TTG_BASE = 'https://twitchtokengenerator.com/api'
 const APP_TITLE = 'Botivo'
@@ -148,7 +155,7 @@ async function runTokenFlow(rl) {
   })
   
   openBrowser(authUrl)
-  console.log(MESSAGE_INFO_WAITING)
+  spinner.start()
 
   for (;;) {
     const result = await pollStatus(id)
@@ -201,6 +208,7 @@ export async function runSetup() {
   const newContent = updateEnvLines(lines, vars)
   writeFileSync(ENV_PATH, newContent, 'utf8')
   rl.close()
+  spinner.stop()
   console.log(MESSAGE_SUCCESS_ENV_UPDATED)
 }
 
