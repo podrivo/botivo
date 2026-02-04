@@ -18,9 +18,9 @@ import { readFileSync, writeFileSync, existsSync } from 'fs'
 // Messages
 const MESSAGE_PROMPT_CHANNEL          = '▒ Setup       → What\'s the Twitch channel?'
 const MESSAGE_PROMPT_USERNAME         = '▒ Setup       → And the Twitch account?'
-const MESSAGE_INFO_AUTH_URL           = '\nOpen this URL in your browser and authorize with your Twitch account:\nPress Enter to open your browser and continue authentication...'
-const MESSAGE_INFO_WAITING            = '\nWaiting for authorization…\n'
-const MESSAGE_SUCCESS_ENV_UPDATED     = '\n.env updated successfully.'
+const MESSAGE_INFO_AUTH_URL           = '▒ Setup       → Press Enter to continue. Or open the URL: '
+const MESSAGE_INFO_WAITING            = '▒ Setup       → Waiting for authorization…'
+const MESSAGE_SUCCESS_ENV_UPDATED     = '▒ Setup       ✓ .env updated successfully.'
 const MESSAGE_ERROR_SESSION_NOT_FOUND = 'Session not found. Run the script again to create a new one.'
 const MESSAGE_ERROR_SESSION_EXPIRED   = 'Session already used or expired. Run the script again to create a new one.'
 const MESSAGE_ERROR_CREATE_FAILED     = 'Create failed: {status}'
@@ -136,12 +136,15 @@ function updateEnvLines(lines, vars) {
 async function runTokenFlow(rl) {
   const session = await createSession()
   const { id, authUrl } = session
-  console.log(MESSAGE_INFO_AUTH_URL)
-  console.log(authUrl)
+  process.stdout.write(MESSAGE_INFO_AUTH_URL + authUrl)
   
   // Wait for user to press Enter
   await new Promise((resolve) => {
-    rl.question('', () => resolve())
+    rl.once('line', () => {
+      // Move cursor up one line and clear it to remove the blank line
+      process.stdout.write('\r\x1b[K')
+      resolve()
+    })
   })
   
   openBrowser(authUrl)
