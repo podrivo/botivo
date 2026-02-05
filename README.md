@@ -34,7 +34,7 @@ TWITCH_TOKEN="twitch_bot_access_token"
 # Don't include the #
 TWITCH_CHANNEL="twitch_channel_name"
 
-# Port nsumber for overlay server
+# Port number for overlay server
 # Default: 8080
 SERVER_PORT="8080"
 ```
@@ -101,8 +101,8 @@ assets/     // HTML, CSS, JS, images, audio, etc.; injected into the overlay (op
 ### Built-in commands
 | Name | Description | Alias |
 |---------|-------------|---------|
-| `!commands` | Lists available commands in chat (app built-in). | — |
-| `!kill` | Stop all overlay activity (app built-in; see [Kill](#kill)). | `!stop`, `!killall`, `!kill-all` |
+| `!commands` | Lists available commands in chat (app built-in). | `!command` |
+| `!kill` | Stop all overlay activity (app built-in; see [Kill](#kill)). | `!stop`, `!killall` |
 
 ### Example commands
 | Name | Description | Alias |
@@ -117,6 +117,11 @@ assets/     // HTML, CSS, JS, images, audio, etc.; injected into the overlay (op
 | `!nice` | "Nice!" overlay + sound. | — |
 | `!wow` | "Wooow!" overlay + random sound. | — |
 | `!error` | Test/demo: overlay-only (no chat reply); shows error overlay and plays error sound. | — |
+| `!discord` | Sends Discord server invite link. | — |
+| `!love` | Responds with love message. | `!heart` |
+| `!lurk` | Shows lurking message with overlay. | `!lurking` |
+| `!so` | Shoutout to another Twitch channel (moderator-only). | `!shoutout` |
+| `!socials` | Displays social media links. | `!links`, `!social` |
 
 ### Command files
 `command.js` — **Sends Twitch chat messages via [tmi.js](https://tmijs.com/)**
@@ -245,11 +250,11 @@ export const config = {
 
 ### Commands
 
-The `!commands` command lists available commands in chat (app built-in).
+The `!commands` command (alias: `!command`) lists available commands in chat (app built-in).
 
 ### Kill
 
-The `!kill` command (aliases: `!stop`, `!killall`, `!kill-all`) pauses and resets all audio, video, CSS animations/transitions, and Anime.js animations (it does not remove DOM elements). Useful when many commands are running at the same time and you want to quiet the overlay.
+The `!kill` command (aliases: `!stop`, `!killall`) pauses and resets all audio, video, CSS animations/transitions, and Anime.js animations (it does not remove DOM elements). Useful when many commands are running at the same time and you want to quiet the overlay.
 
 ### Hello
 
@@ -295,6 +300,26 @@ The `!wow` command shows a "Wooow!" overlay and plays a random sound.
 
 The `!error` command is a test/demo; overlay-only (no chat reply). It shows an error overlay and plays an error sound.
 
+### Discord
+
+The `!discord` command sends a Discord server invite link to chat. Edit `commands/discord/command.js` to set your Discord invite URL.
+
+### Love
+
+The `!love` command (alias: `!heart`) responds in chat with a love message to the user who triggered it.
+
+### Lurk
+
+The `!lurk` command (alias: `!lurking`) sends a message to chat acknowledging the user is lurking and displays an overlay animation.
+
+### SO (Shoutout)
+
+The `!so` command (alias: `!shoutout`) allows moderators to shout out another Twitch channel. Use `!so <channel>` to mention a channel in chat and display it on the overlay. Example: `!so podrivo`.
+
+### Socials
+
+The `!socials` command (aliases: `!links`, `!social`) displays your social media links in chat. Edit `commands/socials/command.js` to customize your social media links.
+
 
 Global configuration
 ---
@@ -306,7 +331,23 @@ export const CONFIG = {
   twitchReconnect: true,       // Automatically reconnect to Twitch on disconnect
   folderCommands: 'commands',  // Directory name where commands are stored
   folderOverlay: 'overlay',    // Directory name where overlay files are stored
-  cooldownGlobal: 5000         // Global cooldown if a command doesn't specify its own
+  cooldownGlobal: 5000,        // Global cooldown if a command doesn't specify its own
+
+  // Built-in default commands configuration
+  defaultCommands: {
+    commands: {
+      enabled: true,
+      cooldown: 0,
+      alias: ['command'],
+      showAliases: false // Show aliases in !commands output: "!example [!demo]" vs "!example"
+    },
+    kill: {
+      enabled: true,
+      cooldown: 0,
+      permission: 'broadcaster',
+      alias: ['stop', 'killall']
+    }
+  }
 }
 ```
 
