@@ -5,41 +5,22 @@ Botivo combines a Twitch chatbot with a powerful OBS overlay, enabling custom co
 
 How it works
 ---
-Botivo listens to your Twitch chat, and when a command is typed it can both reply in chat and tell the overlay — a webpage loaded via Browser Source in OBS — to play an animation, video or sound.
+Botivo listens to your Twitch chat, and when a command is typed it can both reply in chat and/or emmit evento to the overlay — a webpage loaded via Browser Source in OBS Studio — to play an animation, video or sound.
 
-Add infinite commands by just adding new folders and files. There are examples included to help you get started. Make sure to check how the structure works, and customize all commands you need.
+Add infinite commands by just adding new folders and files. There are examples included to help you get started. Make sure to check how commands works, and customize everything you need.
 
 
 Usage
 ---
 Make sure [Node.js](https://nodejs.org/) is installed in your machine. [Download](https://github.com/podrivo/botivo/releases) or clone this repository.
 
-Open your system's terminal and navigate to the downloaded folder and install.
+Open your system's terminal, navigate to the downloaded folder and install.
 ```shell
 cd botivo
 npm install
 ```
 
-Rename file `.env.example` to `.env` and make sure to set your environment variables.
-```dotenv
-# Your bot's Twitch username
-# The account that will send messages
-TWITCH_USERNAME="twitch_bot_username"
-
-# Get your access token from:
-# https://twitchtokengenerator.com/
-TWITCH_TOKEN="twitch_bot_access_token"
-
-# Channel name where the bot will listen for commands
-# Don't include the #
-TWITCH_CHANNEL="twitch_channel_name"
-
-# Port number for overlay server
-# Default: 8080
-SERVER_PORT="8080"
-```
-
-Start the application:
+After installing, start the application and follow instructions. Setup will set Twitch's username, channel and authorizations in `.env` file.
 ```shell
 npm start
 ```
