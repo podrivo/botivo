@@ -131,6 +131,11 @@ export const CONFIG = {
 ```
 
 
+Additional docs
+---
+See additional documentation here: [/docs](/docs)
+
+
 What it can't do
 ---
 Due to how Twitch API works, this bot can only see chat messages. You won't be able to detect new followers, raids, channel points or any other Twitch functionality other than chat. It relies on [tmi.js](https://tmijs.com/) to connect with Twitch IRC, so make sure you see their [documentation](https://tmijs.com/#guide) for more details.
