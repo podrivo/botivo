@@ -93,7 +93,6 @@ Command configuration
 If you need to customize a command configuration, you can edit `/commands/name/config.js`.
 ```js
 export const config = {
-
   enabled: true,              // Whether the command is available (defaults to true if not set)
   permission: 'broadcaster',  // Permissions roles (lowest → highest): viewer (default), subscriber, vip, moderator, broadcaster.
   cooldown: 1000,             // Time in milliseconds (defaults to 'cooldownGlobal' if not set)
@@ -107,9 +106,7 @@ Global configuration
 ---
 If you need to customize Botivo, you can edit `/app/config.js`.
 ```js
-// Botivo configuration
 export const CONFIG = {
-
   prefix: '!',                 // Command prefix ("!" for !train, !example)
   twitchReconnect: true,       // Automatically reconnect to Twitch on disconnect
   folderCommands: 'commands',  // Directory name where commands are stored
@@ -118,15 +115,14 @@ export const CONFIG = {
 
   defaultCommands: {
 
-    // !commands
+    // Config !commands
     commands: {
       enabled: true,
       cooldown: 0,
       alias: ['command'],
       showAliases: false       // Show aliases: "!example [!demo]" vs "!example"
     },
-
-    // !kill
+    // Config !kill
     kill: {
       enabled: true,
       cooldown: 0,
