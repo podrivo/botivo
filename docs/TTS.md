@@ -1,6 +1,6 @@
 # TTS (Text-to-speech)
 
-The `!tts` command speaks text in the overlay using the browser's **Speech Synthesis API**. Which voices are available depends on the viewer's **operating system and browser** (macOS, Windows, and Linux ship different default voices). The supported language list is tuned for languages commonly present on default installs.
+The `!tts` command speaks text in the overlay using the browser's **Speech Synthesis API**. Which voices are available depends on the viewer's **operating system and browser** (macOS, Windows, and Linux ship different default voices). The supported language list is tuned for languages commonly present on default installs. Behavior may differ on mobile or in browsers with limited Speech Synthesis API support.
 
 ## Usage
 
@@ -49,3 +49,8 @@ Example: to add Turkish (`tr`), add:
 3. Save the file.
 
 No new files are required; all customization is done in `commands/tts/config.js`.
+
+## Troubleshooting
+
+- **No sound:** Ensure the overlay is loaded in OBS and the browser source (or system) is not muted. The TTS runs in the overlay page, so the machine running the bot must have audio available if you hear it via OBS.
+- **Wrong or missing language:** Confirm the language code is in the **ttsLanguages** array in `commands/tts/config.js` and that the OS/browser provides a voice for that BCP 47 tag (e.g. `es-ES`). Some languages may have no voice on certain systems.

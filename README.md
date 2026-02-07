@@ -133,7 +133,11 @@ export const CONFIG = {
 
 Additional docs
 ---
-See additional documentation here: [/docs](/docs)
+- [docs/COMMANDS.md](docs/COMMANDS.md) — Adding and configuring commands; built-in and custom command reference.
+- [docs/OBS_SETUP.md](docs/OBS_SETUP.md) — Add the overlay to OBS Studio (Browser Source).
+- [docs/OVERLAY_LIBRARIES.md](docs/OVERLAY_LIBRARIES.md) — Anime.js, Splitting.js, and Fitty usage in the overlay.
+- [docs/TTS.md](docs/TTS.md) — Text-to-speech language codes and how to add or remove languages.
+- [docs/TWITCH_TOKEN.md](docs/TWITCH_TOKEN.md) — Get a Twitch OAuth token for the bot.
 
 
 What it can't do

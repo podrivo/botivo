@@ -1,6 +1,6 @@
 # Overlay libraries (Anime.js, Splitting & Fitty)
 
-The overlay uses **Anime.js**, **Splitting.js**, and **Fitty** for animations, text effects, and fitting. This doc lists their default options and how Botivo uses them.
+The overlay uses **Anime.js**, **Splitting.js**, and **Fitty** for animations, text effects, and fitting. This doc lists their default options and how Botivo uses them. Paths in this doc are relative to the project root.
 
 ## Anime.js
 
@@ -24,7 +24,11 @@ Use **`anime.animate(target, options)`** to run an animation. `target` can be a 
 
 ### How Botivo uses it
 
-Command overlay scripts (e.g. [commands/example/overlay.js](commands/example/overlay.js), [commands/train/overlay.js](commands/train/overlay.js)) call `anime.animate(element, { ... })` to animate elements. The main overlay ([overlay/js/main.js](overlay/js/main.js)) **wraps** `anime.animate` so that every created animation is pushed to `window.__animeKillRestartList`. When the **!kill** event is received, the overlay iterates that list, calls `.reset()` on each animation, then uses `anime.cleanInlineStyles(anim)` so elements don’t keep inline opacity/transform/margin. It also removes common Anime.js inline properties (`opacity`, `margin-top`, `transform`) from all nodes in the commands container. So any animation started via `anime.animate` is automatically stopped and cleaned up on !kill.
+Command overlay scripts (e.g. [commands/example/overlay.js](commands/example/overlay.js), [commands/train/overlay.js](commands/train/overlay.js)) call `anime.animate(element, { ... })` to animate elements.
+
+#### Cleanup on !kill
+
+When **!kill** runs, all animations in the list are reset and inline styles are removed so the overlay is clean. The main overlay ([overlay/js/main.js](overlay/js/main.js)) **wraps** `anime.animate` so that every created animation is pushed to `window.__animeKillRestartList`. When the **!kill** event is received, the overlay iterates that list, calls `.reset()` on each animation, then uses `anime.cleanInlineStyles(anim)` so elements don’t keep inline opacity/transform/margin. It also removes common Anime.js inline properties (`opacity`, `margin-top`, `transform`) from all nodes in the commands container. Any animation started via `anime.animate` is automatically stopped and cleaned up on !kill.
 
 ### Reference
 
@@ -53,7 +57,7 @@ const splittingTargets = container.querySelectorAll('[data-splitting]')
 if (window.Splitting && splittingTargets.length) Splitting({ target: splittingTargets })
 ```
 
-So only nodes with `[data-splitting]` inside the newly injected HTML are split. The `by` option is not passed; each element uses its own `data-splitting` value (e.g. `data-splitting="words"`) or defaults to **chars**.
+Only elements with the `[data-splitting]` attribute inside the command's injected HTML are processed. In your command HTML, add the attribute to elements you want split, e.g. `<span data-splitting>Your text</span>` (chars) or `<span data-splitting="words">Hello world</span>`. The `by` option is not passed; each element uses its own `data-splitting` value or defaults to **chars**.
 
 ### Plugins
 

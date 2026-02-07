@@ -1,11 +1,20 @@
 # Commands
 
+**Prerequisites:** The bot must be running for commands to work. Custom commands live in the `commands/` folder (folder name = command name, e.g. `commands/meme` → `!meme`).
+
+## Table of contents
+
+- [Adding a new command](#adding-a-new-command)
+- [Command files](#command-files)
+- [Built-in commands](#built-in-commands)
+- [Custom commands](#custom-commands)
+
 ## Adding a new command
 1. **Copy a template** — For a **chat-only** command (no overlay): copy the `commands/hello` folder. For a **chat + overlay** command: copy the `commands/example` folder.
 2. **Rename the folder** — Rename it to your command name (e.g. `meme` → use `!meme` in chat).
 3. **Edit the chat message** — In `command.js`, change what the bot says (e.g. `twitch.say(...)`).
 4. **If you want overlay** — Edit `overlay.js` and the files in `assets/` (HTML, CSS, sounds, etc.).
-5. **Optional** — In `config.js` set cooldown, permission, or alias.
+5. **Optional** — In `config.js` set cooldown, permission, alias, or disable the command with `enabled: false`.
 
 
 ## Command files
@@ -23,15 +32,15 @@
 export default function(twitch, events, channel, tags, message) {
   
   // Send a message to chat
-  twitch.say(channel, `@${tags.username} used ${message}. The is the Twitch chat example message!`)
+  twitch.say(channel, `@${tags.username} used ${message}. This is the Twitch chat example message!`)
 
   // Print log to server
   console.log('▒ !example was used. This is a test message.')
 
   // You can also emit additional events to the overlay
   // This is optional
-  events.emit('extra-event-a')
-  events.emit('extra-event-b')
+  events.emit('example-additional-a')
+  events.emit('example-additional-b')
 }
 ```
 
@@ -64,8 +73,8 @@ export default function (events) {
 
   // Grab additional events from command.js
   // This is optional
-  events.on('additional-a',  () => {console.log(`'additional-a' received`)})
-  events.on('additional-b', () => {console.log(`'additional-b' received`)})
+  events.on('example-additional-a',  () => {console.log(`'example-additional-a' received`)})
+  events.on('example-additional-b', () => {console.log(`'example-additional-b' received`)})
 }
 ```
 
@@ -139,7 +148,7 @@ The `!commands` command (alias: `!command`) lists available commands in chat (ap
 
 ### !kill
 
-The `!kill` command (aliases: `!stop`, `!killall`) pauses and resets all audio, video, CSS animations/transitions, and Anime.js animations (it does not remove DOM elements). Useful when many commands are running at the same time and you want to quiet the overlay.
+The `!kill` command (aliases: `!stop`, `!killall`) pauses and resets all audio, video, CSS animations/transitions, and Anime.js animations on the overlay (it does not remove DOM elements). It only affects the overlay — not Twitch chat or the bot itself. Useful when many commands are running at the same time and you want to quiet the overlay.
 
 ## Custom commands
 
@@ -191,3 +200,7 @@ The `!so` command (alias: `!shoutout`) allows moderators to shout out another Tw
 
 ### !socials
 The `!socials` command (aliases: `!links`, `!social`) displays your social media links in chat. Edit `commands/socials/command.js` to customize your social media links.
+
+## See also
+
+- [OBS_SETUP.md](OBS_SETUP.md) — Add the overlay to OBS Studio so the overlay is visible on stream.
