@@ -94,17 +94,10 @@ If you need to customize a command configuration, you can edit `/commands/name/c
 ```js
 export const config = {
 
-  // Whether the command is available (defaults to true if not set)
-  enabled: true,
-
-  // Permissions roles (lowest → highest): viewer (default), subscriber, vip, moderator, broadcaster.
-  permission: 'broadcaster',
-
-  // Time in milliseconds (defaults to 'cooldownGlobal' if not set)
-  cooldown: 1000,
-
-  // Alternative command names that trigger the same command
-  alias: ['demo', 'test'],
+  enabled: true,              // Whether the command is available (defaults to true if not set)
+  permission: 'broadcaster',  // Permissions roles (lowest → highest): viewer (default), subscriber, vip, moderator, broadcaster.
+  cooldown: 1000,             // Time in milliseconds (defaults to 'cooldownGlobal' if not set)
+  alias: ['demo', 'test']     // Alternative command names that trigger the same command
 }
 
 ```
@@ -116,20 +109,24 @@ If you need to customize Botivo, you can edit `/app/config.js`.
 ```js
 // Botivo configuration
 export const CONFIG = {
+
   prefix: '!',                 // Command prefix ("!" for !train, !example)
   twitchReconnect: true,       // Automatically reconnect to Twitch on disconnect
   folderCommands: 'commands',  // Directory name where commands are stored
   folderOverlay: 'overlay',    // Directory name where overlay files are stored
   cooldownGlobal: 5000,        // Global cooldown if a command doesn't specify its own
 
-  // Built-in default commands configuration
   defaultCommands: {
+
+    // !commands
     commands: {
       enabled: true,
       cooldown: 0,
       alias: ['command'],
-      showAliases: false // Show aliases in !commands output: "!example [!demo]" vs "!example"
+      showAliases: false       // Show aliases: "!example [!demo]" vs "!example"
     },
+
+    // !kill
     kill: {
       enabled: true,
       cooldown: 0,
