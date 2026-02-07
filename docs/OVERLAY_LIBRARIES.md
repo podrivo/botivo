@@ -1,6 +1,36 @@
-# Overlay libraries (Splitting & Fitty)
+# Overlay libraries (Anime.js, Splitting & Fitty)
 
-The overlay uses **Splitting.js** and **Fitty** for text effects and fitting. This doc lists their default options and how Botivo uses them.
+The overlay uses **Anime.js**, **Splitting.js**, and **Fitty** for animations, text effects, and fitting. This doc lists their default options and how Botivo uses them.
+
+## Anime.js
+
+Anime.js is a lightweight JavaScript animation library. It animates DOM elements (and more) with a simple API. The overlay loads the UMD bundle from [overlay/js/plugins/anime.min.js](overlay/js/plugins/anime.min.js) and exposes `window.anime`.
+
+### Main API
+
+Use **`anime.animate(target, options)`** to run an animation. `target` can be a single element, a NodeList, or a selector string. The function returns an animation object with methods such as `.play()`, `.pause()`, `.restart()`, `.resume()`, and **`.reset()`** (stops the animation and reverts to the starting state).
+
+### Common options
+
+| Option       | Description |
+|--------------|-------------|
+| `duration`   | Duration in milliseconds |
+| `ease`       | Easing (e.g. `'linear'`, `'outExpo'`) |
+| `opacity`    | Value or `[from, to]` array |
+| `translateX`, `translateY` | Transform values |
+| `marginTop`, etc. | CSS properties (camelCase) |
+| `autoplay`   | `true` (default) or `false`; if `false`, call `.restart()` and `.resume()` to start |
+| `onComplete` | Callback when the animation finishes |
+
+### How Botivo uses it
+
+Command overlay scripts (e.g. [commands/example/overlay.js](commands/example/overlay.js), [commands/train/overlay.js](commands/train/overlay.js)) call `anime.animate(element, { ... })` to animate elements. The main overlay ([overlay/js/main.js](overlay/js/main.js)) **wraps** `anime.animate` so that every created animation is pushed to `window.__animeKillRestartList`. When the **!kill** event is received, the overlay iterates that list, calls `.reset()` on each animation, then uses `anime.cleanInlineStyles(anim)` so elements don’t keep inline opacity/transform/margin. It also removes common Anime.js inline properties (`opacity`, `margin-top`, `transform`) from all nodes in the commands container. So any animation started via `anime.animate` is automatically stopped and cleaned up on !kill.
+
+### Reference
+
+[Anime.js](https://animejs.com/)
+
+---
 
 ## Splitting.js
 
