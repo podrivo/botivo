@@ -5,7 +5,7 @@ Botivo combines a Twitch chatbot with a powerful OBS overlay, enabling custom co
 
 How it works
 ---
-Botivo listens to your Twitch chat, and when a command is typed it can both reply in chat and/or emmit evento to the overlay — a webpage loaded via Browser Source in OBS Studio — to play an animation, video or sound.
+Botivo listens to your Twitch chat, and when a command is typed it can both reply in chat and/or emmit events to the overlay — a webpage loaded via Browser Source in OBS Studio — to play an animation, video or sound.
 
 Add infinite commands by just adding new folders and files. There are examples included to help you get started. Make sure to check how commands works, and customize everything you need.
 
@@ -331,6 +331,11 @@ export const CONFIG = {
   }
 }
 ```
+
+
+Contributors
+---
+[CreepyCrappyShow](https://www.twitch.tv/creepycrappyshow), [clonk_4_ever](https://www.twitch.tv/clonk_4_ever) and [beekerr_](https://www.twitch.tv/beekerr_)
 
 
 License
