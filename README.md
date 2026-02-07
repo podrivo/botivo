@@ -64,28 +64,25 @@ Commands ready-to-use
 ---
 Botivo ships with 2 built-in commands and 15 custom commands. These are just small examples of possible things you can create.
 
-| Built-in |   | Alias |
-|---------|-------------|---------|
-| `!commands` | Lists available commands in chat | `!command` |
-| `!kill` | Stop all overlay activity | `!stop`, `!killall` |
-
-| Custom |  | Alias |
-|---------|-------------|---------|
-| `!hello` | Chat-only example | |
-| `!example` | Example command | |
-| `!train` | Kappa emote train animation from right to left | |
-| `!tts` | Text-to-speech (see [TTS](#tts-text-to-speech)) | |
-| `!shape` | Control an element's shape, position, and color | |
-| `!brb` | Broadcaster "be right back" toggle | `!back` |
-| `!youtube` | YouTube playback control | `!yt`, `!music`, `!video` |
-| `!nice` | Overlay animation + sound | |
-| `!wow` | Overlay animation + random sound | |
-| `!error` | Overlay animation + sound | |
-| `!discord` | Sends Discord server invite link | |
-| `!love` | Responds with love message | `!heart` |
-| `!lurk` | Shows lurking message with overlay | `!lurking` |
-| `!so` | Shoutout to another Twitch channel | `!shoutout` |
-| `!socials` | Displays social media links | `!links`, `!social` |
+| Name |   | Alias |  |
+|---------|-------------|---------|---------|
+| `!commands` | Lists available commands in chat | `!command` | Built-in |
+| `!kill` | Stop all overlay activity | `!stop`, `!killall` | Built-in |
+| `!hello` | Chat-only example | | Custom |
+| `!example` | Example command | | Custom |
+| `!train` | Kappa emote train animation from right to left | | Custom |
+| `!tts` | Text-to-speech (see [TTS](#tts-text-to-speech)) | | Custom |
+| `!shape` | Control an element's shape, position, and color | | Custom |
+| `!brb` | Broadcaster "be right back" toggle | `!back` | Custom |
+| `!youtube` | YouTube playback control | `!yt`, `!music`, `!video` | Custom |
+| `!nice` | Overlay animation + sound | | Custom |
+| `!wow` | Overlay animation + random sound | | Custom |
+| `!error` | Overlay animation + sound | | Custom |
+| `!discord` | Sends Discord server invite link | | Custom |
+| `!love` | Responds with love message | `!heart` | Custom |
+| `!lurk` | Shows lurking message with overlay | `!lurking` | Custom |
+| `!so` | Shoutout to another Twitch channel | `!shoutout` | Custom |
+| `!socials` | Displays social media links | `!links`, `!social` | Custom |
 
 
 Command configuration
