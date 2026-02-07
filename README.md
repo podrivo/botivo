@@ -3,11 +3,9 @@
 Botivo combines a Twitch chatbot with a powerful OBS overlay, enabling custom commands and fully customizable overlays built with HTML, CSS, and JavaScript. Built-in libraries makes creating animations simple and fast.
 
 
-How it works
----
-Botivo listens to your Twitch chat, and when a command is typed it can both reply in chat and/or emmit events to the overlay — a webpage loaded via Browser Source in OBS Studio — to play an animation, video or sound.
+The application listens to your Twitch chat, and when a command is typed it can both reply in chat and/or emmit events to the overlay — a webpage loaded via Browser Source in OBS Studio — to play an animation, video or sound.
 
-Add infinite commands by just adding new folders and files. There are examples included to help you get started. Make sure to check how commands works, and customize everything you need.
+Add infinite commands by just adding new folders and files. There are examples included to help you get started. Check how commands works, and customize everything you need.
 
 
 Usage
@@ -20,7 +18,7 @@ cd botivo
 npm install
 ```
 
-After installing, start the application and follow instructions. Setup will set Twitch's username, channel and authorizations in `.env` file.
+After installing, start the application and follow instructions. Setup will set Twitch's username, channel and authorizations in a `.env` file.
 ```shell
 npm start
 ```
@@ -40,20 +38,16 @@ You should see logs on your terminal:
 
 Add the overlay URL in your OBS. Go to your Twitch channel chat page and send a `!train` message. You should see a simple Kappa emote train animation from right to left.
 
-For setup steps, see [OBS setup](docs/OBS_SETUP.md).
-
 
 How it technically works
 ---
 Botivo is initiated in `start.js`. It connects to Twitch IRC using [tmi.js](https://tmijs.com/), via an [Express](https://expressjs.com/) server.
 
-Botivo automatically discovers and loads commands from the `/commands` directory. When a command is triggered in chat, the `command.js` emits an event via [Socket.IO](https://socket.io/) to overlay, then `overlay.js` grabs the event and triggers the DOM manipulation.
+It automatically discovers and loads commands from the `/commands` directory. When a command is triggered in chat, the `command.js` emits an event via [Socket.IO](https://socket.io/) to overlay, then `overlay.js` grabs the event and triggers the DOM manipulation.
 
-Use any JavaScript library and CSS to create animations and HTML5 to play audios and videos. Built-in libraries [Anime.js](https://animejs.com/), [Splitting.js](https://splitting.js.org/) and [Fitty](https://rikschennink.github.io/fitty/) for animations and text effects.
+Use any JavaScript library and CSS to create animations and HTML5 to play audios and videos. It comes with built-in libraries — [Anime.js](https://animejs.com/), [Splitting.js](https://splitting.js.org/) and [Fitty](https://rikschennink.github.io/fitty/) — for animations and text effects.
 
 To use your overlay as a `Browser Source` in [OBS Studio](https://obsproject.com/), you need to keep the bot running in your computer and set the overlay URL that is included in your terminal log, usually `http://localhost:8080`.
-
-See [docs/OVERLAY_LIBRARIES.md](docs/OVERLAY_LIBRARIES.md) for default options and how they're used.
 
 
 What it can't do
@@ -82,27 +76,27 @@ assets/     // HTML, CSS, JS, images, audio, etc.; injected into the overlay (op
 ### Built-in commands
 | Name | Description | Alias |
 |---------|-------------|---------|
-| `!commands` | Lists available commands in chat (app built-in). | `!command` |
-| `!kill` | Stop all overlay activity (app built-in; see [Kill](#kill)). | `!stop`, `!killall` |
+| `!commands` | Lists available commands in chat | `!command` |
+| `!kill` | Stop all overlay activity | `!stop`, `!killall` |
 
 ### Example commands
 | Name | Description | Alias |
 |---------|-------------|---------|
-| `!hello` | Chat-only example (replies "Hello, @username!"). | — |
-| `!example` | Example command. | — |
-| `!train` | Example command (train animation). | — |
-| `!tts` | Text-to-speech (see [TTS](#tts-text-to-speech)). | — |
-| `!shape` | Control overlay shape, position, and color. | — |
-| `!brb` | Broadcaster "be right back" toggle. | `!back` |
-| `!youtube` | YouTube playback control. | `!yt`, `!music`, `!video` |
-| `!nice` | "Nice!" overlay + sound. | — |
-| `!wow` | "Wooow!" overlay + random sound. | — |
-| `!error` | Test/demo: overlay-only (no chat reply); shows error overlay and plays error sound. | — |
-| `!discord` | Sends Discord server invite link. | — |
-| `!love` | Responds with love message. | `!heart` |
-| `!lurk` | Shows lurking message with overlay. | `!lurking` |
-| `!so` | Shoutout to another Twitch channel (moderator-only). | `!shoutout` |
-| `!socials` | Displays social media links. | `!links`, `!social` |
+| `!hello` | Chat-only example | |
+| `!example` | Example command | |
+| `!train` | Kappa emote train animation from right to left | |
+| `!tts` | Text-to-speech (see [TTS](#tts-text-to-speech)) | |
+| `!shape` | Control an element's shape, position, and color | |
+| `!brb` | Broadcaster "be right back" toggle | `!back` |
+| `!youtube` | YouTube playback control | `!yt`, `!music`, `!video` |
+| `!nice` | Overlay animation + sound | |
+| `!wow` | Overlay animation + random sound | |
+| `!error` | Overlay animation + sound | |
+| `!discord` | Sends Discord server invite link | |
+| `!love` | Responds with love message | `!heart` |
+| `!lurk` | Shows lurking message with overlay | `!lurking` |
+| `!so` | Shoutout to another Twitch channel | `!shoutout` |
+| `!socials` | Displays social media links | `!links`, `!social` |
 
 ### Command files
 `command.js` — **Sends Twitch chat messages via [tmi.js](https://tmijs.com/)**
